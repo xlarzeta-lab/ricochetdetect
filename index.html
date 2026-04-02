@@ -3,145 +3,247 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>RICOCHET LIVE ADVANCED • BO7 / Warzone</title>
+  <title>RICOCHET LIVE v2.0 • BO7 / Warzone UPGRADED</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
     body { font-family: 'Inter', system-ui, sans-serif; }
-    .live-dot { animation: pulse 1.5s infinite; }
-    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
-    .flash { animation: flash 0.6s ease-in-out 3; }
+    .live-dot { animation: pulse 1.2s infinite; }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.2; } }
+    .flash { animation: flash 400ms ease-in-out 4; }
     @keyframes flash { 0%, 100% { background-color: #00ff9d; } 50% { background-color: transparent; } }
+    .log-entry { animation: logFade 0.3s ease-in; }
   </style>
+  <link rel="manifest" href="data:application/manifest+json,{
+    &quot;name&quot;:&quot;RICOCHET LIVE v2&quot;,
+    &quot;short_name&quot;:&quot;RICOCHET&quot;,
+    &quot;start_url&quot;:&quot;.&quot;,
+    &quot;display&quot;:&quot;standalone&quot;,
+    &quot;background_color&quot;:&quot;#09090b&quot;,
+    &quot;theme_color&quot;:&quot;#00ff9d&quot;,
+    &quot;icons&quot;:[{&quot;src&quot;:&quot;https://www.callofduty.com/favicon.ico&quot;,&quot;sizes&quot;:&quot;192x192&quot;,&quot;type&quot;:&quot;image/x-icon&quot;}]
+  }">
 </head>
 <body class="bg-zinc-950 text-white min-h-screen">
-  <div class="max-w-5xl mx-auto p-6">
+  <div class="max-w-6xl mx-auto p-6">
+    <!-- HEADER -->
     <div class="flex items-center justify-between mb-8">
-      <div class="flex items-center gap-3">
-        <div class="w-12 h-12 bg-[#00ff9d] rounded-2xl flex items-center justify-center text-black font-bold text-3xl rotate-12">R</div>
+      <div class="flex items-center gap-4">
+        <div class="w-14 h-14 bg-[#00ff9d] rounded-3xl flex items-center justify-center text-black font-black text-4xl rotate-12 shadow-xl">R</div>
         <div>
-          <h1 class="text-5xl font-bold tracking-tighter">RICOCHET LIVE</h1>
-          <p class="text-[#00ff9d] text-sm -mt-1">ADVANCED • SEASON 03 MONITOR</p>
+          <h1 class="text-5xl font-black tracking-[-2px]">RICOCHET LIVE</h1>
+          <p class="text-[#00ff9d] text-lg font-medium -mt-1">v2.0 UPGRADED • Season 03</p>
         </div>
       </div>
-      <div class="flex items-center gap-4">
-        <div class="flex items-center gap-2">
+      <div class="flex items-center gap-6">
+        <div class="flex items-center gap-2 bg-zinc-900 px-4 h-9 rounded-2xl border border-zinc-700">
           <div class="w-3 h-3 bg-green-400 rounded-full live-dot"></div>
-          <span id="status" class="font-medium text-green-400">MONITORING LIVE</span>
+          <span id="status" class="font-semibold text-green-400">MONITORING LIVE</span>
         </div>
-        <button onclick="toggleSound()" id="soundBtn"
-          class="px-4 py-1.5 bg-zinc-800 hover:bg-zinc-700 rounded-xl text-xs font-medium flex items-center gap-1 transition">
-          🔊
-        </button>
+        
+        <div class="flex items-center gap-2">
+          <button onclick="toggleSound()" id="soundBtn" class="px-5 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-2xl text-lg transition flex items-center gap-2">
+            🔊
+          </button>
+          <button onclick="testSound()" class="px-4 py-2 text-xs bg-zinc-800 hover:bg-zinc-700 rounded-2xl transition">TEST</button>
+        </div>
+
+        <div onclick="showSettings()" class="cursor-pointer flex items-center justify-center w-9 h-9 bg-zinc-800 hover:bg-zinc-700 rounded-2xl text-xl">⚙️</div>
       </div>
     </div>
 
-    <div class="bg-zinc-900 border border-zinc-800 rounded-3xl p-8 shadow-2xl">
-      <!-- Latest -->
-      <div class="mb-8">
-        <div class="flex justify-between items-baseline mb-4">
-          <h2 class="text-2xl font-bold flex items-center gap-2"><span class="text-[#00ff9d]">●</span> LATEST SECURITY UPDATE</h2>
-          <span id="last-checked" class="text-xs text-zinc-400">Waiting for first check...</span>
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+      <!-- MAIN CARD -->
+      <div class="lg:col-span-7 bg-zinc-900 border border-zinc-800 rounded-3xl p-8 shadow-2xl">
+        <div class="flex justify-between mb-6">
+          <h2 class="text-3xl font-bold flex items-center gap-3"><span class="text-[#00ff9d] text-4xl">●</span> LATEST SECURITY PATCH</h2>
+          <div class="text-right">
+            <span id="last-checked" class="text-xs text-zinc-400">Last checked just now</span>
+            <div id="check-count" class="text-[10px] text-zinc-500 font-mono mt-1">Check #0</div>
+          </div>
         </div>
-        <div id="patch-card" class="bg-zinc-800 border border-zinc-700 rounded-3xl p-7 transition-all">
-          <p id="no-patch" class="text-zinc-400 italic">No new RICOCHET / security updates yet...</p>
-          <div id="patch-content" class="hidden">
-            <a id="patch-title-link" href="#" target="_blank" class="block text-3xl font-bold hover:text-[#00ff9d] transition-colors"></a>
-            <p id="patch-date" class="text-sm text-zinc-400 mt-2"></p>
-            <p id="patch-excerpt" class="mt-4 text-zinc-300"></p>
+        
+        <div id="patch-card" class="bg-zinc-800 border border-zinc-700 rounded-3xl p-8 transition-all min-h-[220px] flex items-center">
+          <div id="no-patch" class="w-full text-center">
+            <p class="text-zinc-400 italic text-xl">No new RICOCHET / anti-cheat updates yet...</p>
+            <p class="text-xs text-zinc-500 mt-4">Season 03 launched today • Monitor is active 24/7</p>
+          </div>
+          <div id="patch-content" class="hidden w-full">
+            <a id="patch-title-link" href="#" target="_blank" class="block text-3xl leading-tight font-bold hover:text-[#00ff9d] transition-colors"></a>
+            <div class="flex gap-3 text-xs mt-3">
+              <span id="patch-source" class="px-3 py-1 bg-[#00ff9d]/10 text-[#00ff9d] rounded-2xl"></span>
+              <span id="patch-date" class="text-zinc-400"></span>
+            </div>
+            <p id="patch-excerpt" class="mt-6 text-zinc-300 leading-relaxed"></p>
           </div>
         </div>
       </div>
 
-      <!-- History -->
-      <div class="mb-8">
-        <div class="flex justify-between items-center mb-4">
-          <h3 class="uppercase text-xs tracking-widest text-zinc-500">Detection History</h3>
-          <button onclick="clearHistory()" class="text-xs text-red-400 hover:text-red-300">Clear All</button>
+      <!-- SIDEBAR -->
+      <div class="lg:col-span-5 space-y-6">
+        <!-- Sources -->
+        <div class="bg-zinc-900 border border-zinc-800 rounded-3xl p-6">
+          <h3 class="uppercase text-xs tracking-widest mb-4">Monitoring 3 Sources</h3>
+          <div class="space-y-3 text-sm">
+            <div class="flex justify-between items-center"><span class="flex items-center gap-2"><span class="text-green-400">●</span> Blog</span><span class="text-zinc-400 text-xs">callofduty.com/blog</span></div>
+            <div class="flex justify-between items-center"><span class="flex items-center gap-2"><span class="text-green-400">●</span> Patch Notes</span><span class="text-zinc-400 text-xs">callofduty.com/patchnotes</span></div>
+            <div class="flex justify-between items-center"><span class="flex items-center gap-2"><span class="text-green-400">●</span> Season 03 Hub</span><span class="text-zinc-400 text-xs">Real-time Season 03 page</span></div>
+          </div>
         </div>
-        <ul id="history-list" class="space-y-3 max-h-80 overflow-auto"></ul>
-      </div>
 
-      <!-- Live Log -->
-      <div>
-        <h3 class="uppercase text-xs tracking-widest text-zinc-500 mb-3">Live Check Log</h3>
-        <div id="check-log" class="bg-black/50 border border-zinc-700 rounded-2xl p-4 font-mono text-xs text-zinc-400 h-52 overflow-y-auto"></div>
+        <!-- Quick Actions -->
+        <div class="bg-zinc-900 border border-zinc-800 rounded-3xl p-6 flex flex-wrap gap-3">
+          <button onclick="manualCheck()" class="flex-1 bg-[#00ff9d] text-black font-bold py-4 rounded-3xl hover:scale-105 transition">CHECK ALL NOW</button>
+          <button onclick="downloadHistory()" class="flex-1 bg-zinc-800 hover:bg-zinc-700 font-medium py-4 rounded-3xl transition">Export History</button>
+          <button onclick="clearHistory()" class="flex-1 bg-zinc-800 hover:bg-red-900/30 text-red-400 font-medium py-4 rounded-3xl transition">Clear History</button>
+        </div>
       </div>
     </div>
 
-    <div class="text-center text-[10px] text-zinc-500 mt-8 flex items-center justify-center gap-6">
-      <p>Polls every 30 seconds • Both Blog + Patch Notes</p>
-      <button onclick="manualCheck()" class="px-5 py-2 bg-[#00ff9d] hover:bg-emerald-400 text-black font-semibold rounded-2xl text-sm transition">CHECK NOW</button>
+    <!-- HISTORY -->
+    <div class="mt-8">
+      <div class="flex justify-between items-center mb-4 px-1">
+        <h3 class="uppercase text-xs tracking-widest text-zinc-500">Detection History</h3>
+        <span id="history-count" class="text-xs text-zinc-400">0 detections</span>
+      </div>
+      <ul id="history-list" class="grid grid-cols-1 md:grid-cols-2 gap-4"></ul>
+    </div>
+
+    <!-- LIVE LOG -->
+    <div class="mt-10">
+      <div class="flex justify-between text-xs tracking-widest text-zinc-500 mb-3 px-1">
+        <h3>LIVE ACTIVITY LOG</h3>
+        <button onclick="clearLog()" class="hover:text-zinc-300">Clear Log</button>
+      </div>
+      <div id="check-log" class="bg-black/70 border border-zinc-700 font-mono text-xs p-5 rounded-3xl h-72 overflow-y-auto leading-relaxed"></div>
+    </div>
+
+    <div class="text-center text-[10px] text-zinc-500 mt-12">
+      Pure HTML/CSS/JS • Polls every 25 seconds • Works while tab is open • Installable as app
+    </div>
+  </div>
+
+  <!-- SETTINGS MODAL -->
+  <div onclick="if(event.target.id==='settingsModal')hideSettings()" id="settingsModal" class="hidden fixed inset-0 bg-black/80 flex items-center justify-center z-50">
+    <div onclick="event.stopImmediatePropagation()" class="bg-zinc-900 rounded-3xl p-8 max-w-md w-full mx-4">
+      <h2 class="text-2xl font-bold mb-6">Advanced Settings</h2>
+      
+      <div class="space-y-6">
+        <div>
+          <label class="block text-xs uppercase mb-2">Custom Keywords (comma separated)</label>
+          <input id="customKeywords" type="text" value="ricochet,anti-cheat,security,progress report" 
+                 class="w-full bg-zinc-800 border border-zinc-700 rounded-2xl px-4 py-3 text-sm">
+        </div>
+        
+        <div class="flex items-center justify-between">
+          <span>Auto-open link on detection</span>
+          <label class="relative inline-flex items-center cursor-pointer">
+            <input id="autoOpenToggle" type="checkbox" checked class="sr-only peer">
+            <div class="w-11 h-6 bg-zinc-700 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-[#00ff9d] rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#00ff9d]"></div>
+          </label>
+        </div>
+        
+        <div class="flex items-center justify-between">
+          <span>Desktop notifications</span>
+          <label class="relative inline-flex items-center cursor-pointer">
+            <input id="notifyToggle" type="checkbox" checked class="sr-only peer">
+            <div class="w-11 h-6 bg-zinc-700 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-[#00ff9d] rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#00ff9d]"></div>
+          </label>
+        </div>
+      </div>
+      
+      <div class="mt-8 flex gap-4">
+        <button onclick="hideSettings()" class="flex-1 py-4 rounded-3xl border border-zinc-700">Close</button>
+        <button onclick="saveSettings();hideSettings()" class="flex-1 py-4 bg-[#00ff9d] text-black font-bold rounded-3xl">Save &amp; Restart Monitor</button>
+      </div>
     </div>
   </div>
 
   <script>
+    // ====================== UPGRADED v2.0 SETTINGS ======================
+    let settings = JSON.parse(localStorage.getItem('ricochetSettings')) || {
+      customKeywords: ['ricochet', 'anti-cheat', 'anti cheat', 'security', 'progress report', 'ban wave'],
+      autoOpen: true,
+      notifications: true,
+      pollInterval: 25000
+    };
+
     const PROXIES = [
       'https://corsproxy.io/?',
       'https://proxy.corsfix.com/?',
-      'https://api.codetabs.com/v1/proxy?quest=',
-      'https://cors-anywhere.herokuapp.com/' // extra fallback (sometimes works)
+      'https://api.codetabs.com/v1/proxy?quest='
     ];
+
     const SOURCES = [
-      { name: 'Blog', url: 'https://www.callofduty.com/blog' },
-      { name: 'Patch Notes', url: 'https://www.callofduty.com/patchnotes' }
+      { name: 'Blog', url: 'https://www.callofduty.com/blog', type: 'html' },
+      { name: 'Patch Notes', url: 'https://www.callofduty.com/patchnotes', type: 'html' },
+      { name: 'Season 03 Hub', url: 'https://www.callofduty.com/blog/blackops7', type: 'html' }
     ];
-    const KEYWORDS = ['ricochet', 'anti-cheat', 'anti cheat', 'security', 'progress report'];
 
     let lastSeenTitle = localStorage.getItem('lastSeenPatch') || '';
     let history = JSON.parse(localStorage.getItem('patchHistory')) || [];
     let soundEnabled = true;
     let checkCount = 0;
+    let audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
-    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-
+    // ====================== HELPER FUNCTIONS ======================
     function playAlertSound() {
       if (!soundEnabled) return;
-      const oscillator = audioCtx.createOscillator();
-      const gainNode = audioCtx.createGain();
-      oscillator.connect(gainNode);
-      gainNode.connect(audioCtx.destination);
-      oscillator.frequency.setValueAtTime(800, audioCtx.currentTime);
-      gainNode.gain.value = 0.4;
-      oscillator.start();
-      setTimeout(() => { oscillator.stop(); }, 180);
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.frequency.setValueAtTime(720, audioCtx.currentTime);
+      gain.gain.value = 0.5;
+      osc.connect(gain).connect(audioCtx.destination);
+      osc.start();
+      setTimeout(() => osc.stop(), 80);
       setTimeout(() => {
-        const o2 = audioCtx.createOscillator();
-        o2.frequency.setValueAtTime(1200, audioCtx.currentTime);
-        o2.connect(gainNode);
-        gainNode.gain.value = 0.3;
-        o2.start();
-        setTimeout(() => o2.stop(), 120);
-      }, 200);
+        const osc2 = audioCtx.createOscillator();
+        osc2.frequency.setValueAtTime(1100, audioCtx.currentTime);
+        osc2.connect(gain).connect(audioCtx.destination);
+        osc2.start();
+        setTimeout(() => osc2.stop(), 140);
+      }, 90);
     }
 
-    function addToLog(message) {
+    function testSound() {
+      playAlertSound();
+    }
+
+    function addToLog(message, type = 'info') {
       const log = document.getElementById('check-log');
-      const time = new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit', second:'2-digit'});
+      const time = new Date().toLocaleTimeString('en-US', {hour12:false, hour:'2-digit', minute:'2-digit', second:'2-digit'});
+      const color = type === 'success' ? 'text-[#00ff9d]' : type === 'error' ? 'text-red-400' : 'text-zinc-400';
       const entry = document.createElement('div');
-      entry.textContent = `[${time}] ${message}`;
+      entry.className = `log-entry flex justify-between ${color}`;
+      entry.innerHTML = `<span>[${time}] ${message}</span>`;
       log.prepend(entry);
-      if (log.children.length > 12) log.lastChild.remove();
+      if (log.children.length > 15) log.lastChild.remove();
     }
 
     function renderHistory() {
       const list = document.getElementById('history-list');
-      list.innerHTML = history.map(item => `
-        <li class="flex justify-between items-center bg-zinc-900 border border-zinc-800 px-5 py-4 rounded-3xl">
-          <a href="${item.link}" target="_blank" class="font-medium hover:text-[#00ff9d]">${item.title}</a>
-          <span class="text-xs text-zinc-500">${item.source} • ${item.date}</span>
+      list.innerHTML = history.map((item, i) => `
+        <li onclick="window.open('${item.link}','_blank')" class="cursor-pointer bg-zinc-900 border border-zinc-800 hover:border-[#00ff9d]/30 p-5 rounded-3xl flex justify-between items-start gap-4 transition">
+          <div class="flex-1">
+            <div class="flex items-center gap-2 text-xs mb-1">
+              <span class="px-2.5 py-px bg-[#00ff9d]/10 text-[#00ff9d] rounded-full">${item.source}</span>
+              <span class="text-zinc-500">${item.date}</span>
+            </div>
+            <p class="font-semibold leading-tight">${item.title}</p>
+          </div>
         </li>
       `).join('');
+      document.getElementById('history-count').textContent = `${history.length} detections`;
     }
 
     async function fetchWithProxy(url) {
       for (const proxy of PROXIES) {
         try {
-          const res = await fetch(proxy + encodeURIComponent(url), { headers: { 'Accept': 'text/html' } });
+          const res = await fetch(proxy + encodeURIComponent(url), { headers: { Accept: 'text/html' } });
           if (res.ok) return await res.text();
         } catch (e) {}
       }
-      throw new Error('Proxy failed');
+      throw new Error('All proxies failed');
     }
 
     async function checkSource(source) {
@@ -149,35 +251,39 @@
       const parser = new DOMParser();
       const doc = parser.parseFromString(html, 'text/html');
 
-      const links = Array.from(doc.querySelectorAll('a[href^="/blog/"], a[href^="/patchnotes/"], a[href*="/blog/"], a[href*="/patchnotes/"]'));
-      let match = null;
+      const selector = source.name === 'Patch Notes' 
+        ? 'a[href*="/patchnotes/"], a[href^="/patchnotes/"]' 
+        : 'a[href^="/blog/"], a[href*="/blog/"]';
 
+      const links = Array.from(doc.querySelectorAll(selector));
+      
       for (const link of links) {
         const title = (link.textContent || '').trim();
         if (!title) continue;
+        
         const lower = title.toLowerCase();
-        if (KEYWORDS.some(kw => lower.includes(kw))) {
-          match = {
+        if (settings.customKeywords.some(kw => lower.includes(kw.toLowerCase()))) {
+          return {
             title: title,
             link: 'https://www.callofduty.com' + (link.getAttribute('href') || ''),
-            date: 'Detected live',
-            excerpt: `${source.name} — RICOCHET / security update`,
+            date: 'Detected live • ' + new Date().toLocaleDateString(),
+            excerpt: `${source.name} — Security / RICOCHET update detected`,
             source: source.name
           };
-          break;
         }
       }
-      return match;
+      return null;
     }
 
     async function checkForPatches() {
       const statusEl = document.getElementById('status');
-      statusEl.textContent = 'CHECKING...';
+      statusEl.textContent = 'SCANNING...';
       statusEl.classList.add('text-amber-400');
-      statusEl.classList.remove('text-green-400', 'text-red-400');
+      statusEl.classList.remove('text-green-400');
 
       checkCount++;
-      addToLog(`Check #${checkCount} started`);
+      document.getElementById('check-count').textContent = `Check #${checkCount}`;
+      addToLog(`Starting check #${checkCount} across 3 sources`);
 
       let newPatch = null;
 
@@ -186,10 +292,11 @@
           const result = await checkSource(source);
           if (result && result.title !== lastSeenTitle) {
             newPatch = result;
+            addToLog(`✅ MATCH FOUND in ${source.name}`, 'success');
             break;
           }
         } catch (e) {
-          addToLog(`❌ ${source.name} failed`);
+          addToLog(`⚠️ ${source.name} unreachable`, 'error');
         }
       }
 
@@ -206,32 +313,31 @@
         content.classList.remove('hidden');
         document.getElementById('patch-title-link').textContent = newPatch.title;
         document.getElementById('patch-title-link').href = newPatch.link;
+        document.getElementById('patch-source').textContent = newPatch.source;
         document.getElementById('patch-date').textContent = newPatch.date;
         document.getElementById('patch-excerpt').textContent = newPatch.excerpt;
 
-        // History
+        // Save to history
         history.unshift(newPatch);
-        if (history.length > 8) history.pop();
+        if (history.length > 12) history.pop();
         localStorage.setItem('patchHistory', JSON.stringify(history));
         renderHistory();
 
-        // Alerts
+        // ALERTS
         playAlertSound();
-        if ("Notification" in window && Notification.permission === "granted") {
-          new Notification("🟢 RICOCHET UPDATE DETECTED!", {
-            body: newPatch.title,
-            icon: "https://www.callofduty.com/favicon.ico"
-          });
+        if (settings.notifications && "Notification" in window && Notification.permission === "granted") {
+          new Notification("🟢 RICOCHET UPDATE DETECTED!", { body: newPatch.title, icon: "https://www.callofduty.com/favicon.ico" });
         }
+        if (settings.autoOpen) window.open(newPatch.link, '_blank');
 
-        // Flash animation
+        // Visual flash
         const card = document.getElementById('patch-card');
         card.classList.add('flash');
-        setTimeout(() => card.classList.remove('flash'), 2000);
+        setTimeout(() => card.classList.remove('flash'), 1800);
 
-        addToLog(`✅ NEW PATCH FOUND: ${newPatch.source}`);
+        addToLog(`🚨 NEW RICOCHET PATCH LIVE — ${newPatch.source}`, 'success');
       } else {
-        addToLog('No new security updates');
+        addToLog('No new security updates found');
       }
 
       statusEl.textContent = 'MONITORING LIVE';
@@ -247,27 +353,70 @@
       document.getElementById('soundBtn').textContent = soundEnabled ? '🔊' : '🔇';
     }
 
+    function saveSettings() {
+      const input = document.getElementById('customKeywords').value;
+      settings.customKeywords = input.split(',').map(k => k.trim()).filter(Boolean);
+      settings.autoOpen = document.getElementById('autoOpenToggle').checked;
+      settings.notifications = document.getElementById('notifyToggle').checked;
+      localStorage.setItem('ricochetSettings', JSON.stringify(settings));
+      addToLog('✅ Settings saved — restarting monitor');
+      setTimeout(() => location.reload(), 800);
+    }
+
+    function showSettings() {
+      document.getElementById('customKeywords').value = settings.customKeywords.join(', ');
+      document.getElementById('autoOpenToggle').checked = settings.autoOpen;
+      document.getElementById('notifyToggle').checked = settings.notifications;
+      document.getElementById('settingsModal').classList.remove('hidden');
+      document.getElementById('settingsModal').classList.add('flex');
+    }
+
+    function hideSettings() {
+      document.getElementById('settingsModal').classList.add('hidden');
+      document.getElementById('settingsModal').classList.remove('flex');
+    }
+
     function clearHistory() {
-      if (confirm('Clear all detection history?')) {
+      if (confirm('Clear ALL detection history?')) {
         history = [];
         localStorage.setItem('patchHistory', JSON.stringify(history));
         renderHistory();
+        addToLog('History cleared');
       }
     }
 
-    // Init
+    function downloadHistory() {
+      if (history.length === 0) return alert('No history to export yet');
+      const data = JSON.stringify(history, null, 2);
+      const blob = new Blob([data], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `ricochet-history-${new Date().toISOString().slice(0,10)}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+      addToLog('✅ History exported as JSON');
+    }
+
+    function clearLog() {
+      document.getElementById('check-log').innerHTML = '';
+      addToLog('Log cleared');
+    }
+
+    // ====================== START THE MONITOR ======================
     window.onload = () => {
       renderHistory();
-      checkForPatches(); // first check
-
-      // Auto request notifications
+      
+      // Request notification permission
       if ("Notification" in window && Notification.permission === "default") {
         Notification.requestPermission();
       }
 
-      setInterval(checkForPatches, 30000); // every 30 seconds
+      checkForPatches();                    // immediate first scan
+      setInterval(checkForPatches, settings.pollInterval);
 
-      console.log('%c🚀 RICOCHET LIVE ADVANCED MONITOR STARTED — Dual sources + sound alerts', 'color:#00ff9d; font-size:14px; font-weight:bold');
+      console.log('%c🚀 RICOCHET LIVE v2.0 UPGRADED STARTED — 3 sources + custom keywords + PWA ready', 'color:#00ff9d; font-size:15px; font-weight:900');
+      addToLog('Monitor v2.0 fully loaded — watching for anti-cheat updates');
     };
   </script>
 </body>
