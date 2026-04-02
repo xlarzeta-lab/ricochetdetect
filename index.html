@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>RICOCHET LIVE v2.2 • BO7 / Warzone</title>
+  <title>RICOCHET LIVE v2.3 • BO7 / Warzone</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
@@ -21,7 +21,7 @@
         <div class="w-14 h-14 bg-[#00ff9d] rounded-3xl flex items-center justify-center text-black font-black text-4xl rotate-12 shadow-xl">R</div>
         <div>
           <h1 class="text-5xl font-black tracking-[-2px]">RICOCHET LIVE</h1>
-          <p class="text-[#00ff9d] text-lg font-medium -mt-1">v2.2 • 10-min checks + X live search</p>
+          <p class="text-[#00ff9d] text-lg font-medium -mt-1">v2.3 • 10-min checks • 4 official sources</p>
         </div>
       </div>
       <div class="flex items-center gap-6">
@@ -37,16 +37,17 @@
       </div>
     </div>
 
-    <!-- COUNTDOWN TIMER -->
+    <!-- COUNTDOWN -->
     <div class="bg-zinc-900 border border-zinc-700 rounded-3xl p-4 mb-6 flex items-center justify-between">
       <div class="flex items-center gap-3">
-        <span class="text-xs uppercase tracking-widest text-zinc-400">Next full check in</span>
+        <span class="text-xs uppercase tracking-widest text-zinc-400">Next automatic check in</span>
         <span id="countdown" class="font-mono text-3xl font-bold text-[#00ff9d]">10:00</span>
       </div>
-      <button onclick="manualCheck()" class="bg-[#00ff9d] text-black px-6 py-2 rounded-2xl font-bold hover:scale-105 transition">CHECK NOW</button>
+      <button onclick="manualCheck()" class="bg-[#00ff9d] text-black px-6 py-2 rounded-2xl font-bold hover:scale-105 transition">CHECK ALL NOW</button>
     </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+      <!-- MAIN PATCH CARD -->
       <div class="lg:col-span-7 bg-zinc-900 border border-zinc-800 rounded-3xl p-8 shadow-2xl">
         <div class="flex justify-between mb-6">
           <h2 class="text-3xl font-bold flex items-center gap-3"><span class="text-[#00ff9d] text-4xl">●</span> LATEST SECURITY PATCH</h2>
@@ -57,7 +58,8 @@
         </div>
         <div id="patch-card" class="bg-zinc-800 border border-zinc-700 rounded-3xl p-8 transition-all min-h-[220px] flex items-center">
           <div id="no-patch" class="w-full text-center">
-            <p class="text-zinc-400 italic text-xl">No new RICOCHET updates yet...</p>
+            <p class="text-zinc-400 italic text-xl">No new RICOCHET / anti-cheat updates detected yet...</p>
+            <p class="text-xs text-zinc-500 mt-3">Season 03 launched April 2, 2026 • Monitor is actively scanning</p>
           </div>
           <div id="patch-content" class="hidden w-full">
             <a id="patch-title-link" href="#" target="_blank" class="block text-3xl leading-tight font-bold hover:text-[#00ff9d]"></a>
@@ -70,19 +72,35 @@
         </div>
       </div>
 
+      <!-- SIDEBAR INFO -->
       <div class="lg:col-span-5 space-y-6">
+        <!-- Sources -->
         <div class="bg-zinc-900 border border-zinc-800 rounded-3xl p-6">
-          <h3 class="uppercase text-xs tracking-widest mb-4">Monitoring 4 Sources</h3>
+          <h3 class="uppercase text-xs tracking-widest mb-4">4 Official Sources Being Scanned</h3>
           <div class="space-y-3 text-sm">
             <div class="flex justify-between"><span class="flex items-center gap-2"><span class="text-green-400">●</span> Blog</span><span class="text-zinc-400 text-xs">callofduty.com/blog</span></div>
             <div class="flex justify-between"><span class="flex items-center gap-2"><span class="text-green-400">●</span> Patch Notes</span><span class="text-zinc-400 text-xs">callofduty.com/patchnotes</span></div>
             <div class="flex justify-between"><span class="flex items-center gap-2"><span class="text-green-400">●</span> Season 03 Hub</span><span class="text-zinc-400 text-xs">callofduty.com/blog/blackops7</span></div>
-            <div class="flex justify-between items-center bg-emerald-950/50 border border-emerald-400/30 rounded-2xl px-4 py-2">
-              <span class="flex items-center gap-2"><span class="text-[#00ff9d]">𝕏</span> X/Twitter</span>
-              <span class="text-xs text-zinc-400">Manual live search only</span>
-              <button onclick="openXSearch()" class="text-xs bg-[#00ff9d] text-black px-4 py-1 rounded-2xl font-medium hover:scale-105 transition">OPEN LIVE X SEARCH</button>
-            </div>
+            <div class="flex justify-between"><span class="flex items-center gap-2"><span class="text-green-400">●</span> RICOCHET Hub</span><span class="text-zinc-400 text-xs">callofduty.com/warzone/ricochet</span></div>
           </div>
+        </div>
+
+        <!-- More Info Card (replaces X) -->
+        <div class="bg-zinc-900 border border-zinc-800 rounded-3xl p-6">
+          <h3 class="uppercase text-xs tracking-widest mb-4">📌 More About This Monitor</h3>
+          <div class="text-xs leading-relaxed text-zinc-300 space-y-4">
+            <p><strong>What it does:</strong> Every 10 minutes it visits the 4 official Call of Duty pages and looks for any new post containing keywords like “RICOCHET”, “anti-cheat”, “security patch”, “progress report”, or “ban wave”.</p>
+            <p><strong>What it cannot catch:</strong> Completely silent backend anti-cheat changes (Activision rarely announces those). Only public blog/patch announcements are detected.</p>
+            <p><strong>Current Season:</strong> Season 03 (launched today, April 2, 2026). No dedicated RICOCHET Season 03 post has appeared yet — this monitor will light up the second one does.</p>
+            <p class="pt-2 border-t border-zinc-700 text-[#00ff9d] text-[10px]">Pro tip: Keep this tab open in the background. You’ll get a loud sound + browser notification the moment a new update drops.</p>
+          </div>
+        </div>
+
+        <!-- Quick Links -->
+        <div class="bg-zinc-900 border border-zinc-800 rounded-3xl p-6 flex flex-wrap gap-3 text-sm">
+          <a href="https://www.callofduty.com/blog" target="_blank" class="flex-1 bg-zinc-800 hover:bg-zinc-700 text-center py-3 rounded-2xl transition">📄 Official Blog</a>
+          <a href="https://www.callofduty.com/patchnotes" target="_blank" class="flex-1 bg-zinc-800 hover:bg-zinc-700 text-center py-3 rounded-2xl transition">📋 Patch Notes</a>
+          <a href="https://www.callofduty.com/warzone/ricochet" target="_blank" class="flex-1 bg-zinc-800 hover:bg-zinc-700 text-center py-3 rounded-2xl transition">🛡️ RICOCHET Hub</a>
         </div>
       </div>
     </div>
@@ -99,18 +117,18 @@
     <!-- LIVE LOG -->
     <div class="mt-10">
       <div class="flex justify-between text-xs tracking-widest text-zinc-500 mb-3 px-1">
-        <h3>LIVE ACTIVITY LOG — you will see every step</h3>
+        <h3>LIVE ACTIVITY LOG — every step is visible</h3>
         <button onclick="clearLog()" class="hover:text-zinc-300">Clear Log</button>
       </div>
       <div id="check-log" class="bg-black/70 border border-zinc-700 font-mono text-xs p-5 rounded-3xl h-72 overflow-y-auto leading-relaxed"></div>
     </div>
 
     <div class="text-center text-[10px] text-zinc-500 mt-12">
-      Checks every 10 minutes • CoD sites = fully automatic • X = live button only
+      Pure HTML/CSS/JS • 100% client-side • Checks every 10 minutes • Only public official pages
     </div>
   </div>
 
-  <!-- SETTINGS MODAL (unchanged) -->
+  <!-- SETTINGS MODAL -->
   <div onclick="if(event.target.id==='settingsModal')hideSettings()" id="settingsModal" class="hidden fixed inset-0 bg-black/80 flex items-center justify-center z-50">
     <div onclick="event.stopImmediatePropagation()" class="bg-zinc-900 rounded-3xl p-8 max-w-md w-full mx-4">
       <h2 class="text-2xl font-bold mb-6">Advanced Settings</h2>
@@ -136,7 +154,7 @@
       </div>
       <div class="mt-8 flex gap-4">
         <button onclick="hideSettings()" class="flex-1 py-4 rounded-3xl border border-zinc-700">Close</button>
-        <button onclick="saveSettings();hideSettings()" class="flex-1 py-4 bg-[#00ff9d] text-black font-bold rounded-3xl">Save & Restart</button>
+        <button onclick="saveSettings();hideSettings()" class="flex-1 py-4 bg-[#00ff9d] text-black font-bold rounded-3xl">Save &amp; Restart</button>
       </div>
     </div>
   </div>
@@ -153,7 +171,8 @@
     const SOURCES = [
       { name: 'Blog', url: 'https://www.callofduty.com/blog' },
       { name: 'Patch Notes', url: 'https://www.callofduty.com/patchnotes' },
-      { name: 'Season 03 Hub', url: 'https://www.callofduty.com/blog/blackops7' }
+      { name: 'Season 03 Hub', url: 'https://www.callofduty.com/blog/blackops7' },
+      { name: 'RICOCHET Hub', url: 'https://www.callofduty.com/warzone/ricochet' }
     ];
 
     let lastSeenTitle = localStorage.getItem('lastSeenPatch') || '';
@@ -163,7 +182,7 @@
     let audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     let countdownInterval;
 
-    function playAlertSound() { /* same as before */ 
+    function playAlertSound() {
       if (!soundEnabled) return;
       const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
       osc.frequency.setValueAtTime(720, audioCtx.currentTime); gain.gain.value = 0.5;
@@ -190,7 +209,7 @@
       if (log.children.length > 20) log.lastChild.remove();
     }
 
-    function renderHistory() { /* same as before */ 
+    function renderHistory() {
       const list = document.getElementById('history-list');
       list.innerHTML = history.map(item => `
         <li onclick="window.open('${item.link}','_blank')" class="cursor-pointer bg-zinc-900 border border-zinc-800 hover:border-[#00ff9d]/30 p-5 rounded-3xl flex justify-between items-start gap-4 transition">
@@ -206,7 +225,7 @@
       document.getElementById('history-count').textContent = `${history.length} detections`;
     }
 
-    async function fetchWithProxy(url) { /* same */ 
+    async function fetchWithProxy(url) {
       for (const proxy of PROXIES) {
         try {
           const res = await fetch(proxy + encodeURIComponent(url), { headers: { Accept: 'text/html' } });
@@ -221,7 +240,7 @@
       const html = await fetchWithProxy(source.url);
       const parser = new DOMParser();
       const doc = parser.parseFromString(html, 'text/html');
-      const links = Array.from(doc.querySelectorAll('a[href^="/blog/"], a[href*="/blog/"], a[href^="/patchnotes/"], a[href*="/patchnotes/"]'));
+      const links = Array.from(doc.querySelectorAll('a[href^="/blog/"], a[href*="/blog/"], a[href^="/patchnotes/"], a[href*="/patchnotes/"], a[href*="/ricochet"]'));
       
       for (const link of links) {
         const title = (link.textContent || '').trim();
@@ -229,7 +248,13 @@
         const lower = title.toLowerCase();
         if (settings.customKeywords.some(kw => lower.includes(kw.toLowerCase()))) {
           addToLog(`✅ MATCH FOUND in ${source.name}`, 'success');
-          return { title, link: 'https://www.callofduty.com' + (link.getAttribute('href') || ''), date: 'Detected live', excerpt: `${source.name} update`, source: source.name };
+          return {
+            title: title,
+            link: 'https://www.callofduty.com' + (link.getAttribute('href') || ''),
+            date: 'Detected live • ' + new Date().toLocaleDateString(),
+            excerpt: `${source.name} — RICOCHET / security update`,
+            source: source.name
+          };
         }
       }
       addToLog(`No match in ${source.name}`);
@@ -244,7 +269,7 @@
 
       checkCount++;
       document.getElementById('check-count').textContent = `Check #${checkCount}`;
-      addToLog(`=== STARTING FULL CHECK #${checkCount} ===`);
+      addToLog(`=== STARTING FULL CHECK #${checkCount} (4 sources) ===`);
 
       let newPatch = null;
       for (const source of SOURCES) {
@@ -265,6 +290,7 @@
       if (newPatch) {
         lastSeenTitle = newPatch.title;
         localStorage.setItem('lastSeenPatch', lastSeenTitle);
+
         document.getElementById('no-patch').classList.add('hidden');
         const content = document.getElementById('patch-content');
         content.classList.remove('hidden');
@@ -300,7 +326,7 @@
     }
 
     function startCountdown() {
-      let timeLeft = 600; // 10 minutes in seconds
+      let timeLeft = 600;
       clearInterval(countdownInterval);
       countdownInterval = setInterval(() => {
         timeLeft--;
@@ -318,13 +344,7 @@
       document.getElementById('soundBtn').textContent = soundEnabled ? '🔊' : '🔇';
     }
 
-    function openXSearch() {
-      const searchUrl = 'https://x.com/search?q=ricochet%20OR%20%22anti-cheat%22%20OR%20%22security%20patch%22%20OR%20%22progress%20report%22%20(from%3ACODUpdates%20OR%20from%3ACallofDuty%20OR%20from%3ATreyarch)&src=typed_query';
-      window.open(searchUrl, '_blank');
-      addToLog('🔍 Opened live X/Twitter search (real-time)');
-    }
-
-    function saveSettings() { /* same as before */ 
+    function saveSettings() {
       const input = document.getElementById('customKeywords').value;
       settings.customKeywords = input.split(',').map(k => k.trim()).filter(Boolean);
       settings.autoOpen = document.getElementById('autoOpenToggle').checked;
@@ -334,7 +354,7 @@
       setTimeout(() => location.reload(), 600);
     }
 
-    function showSettings() { /* same */ 
+    function showSettings() {
       document.getElementById('customKeywords').value = settings.customKeywords.join(', ');
       document.getElementById('autoOpenToggle').checked = settings.autoOpen;
       document.getElementById('notifyToggle').checked = settings.notifications;
@@ -342,7 +362,7 @@
       document.getElementById('settingsModal').classList.add('flex');
     }
 
-    function hideSettings() { /* same */ 
+    function hideSettings() {
       document.getElementById('settingsModal').classList.add('hidden');
       document.getElementById('settingsModal').classList.remove('flex');
     }
@@ -356,12 +376,12 @@
       renderHistory();
       if ("Notification" in window && Notification.permission === "default") Notification.requestPermission();
 
-      checkForPatches();           // immediate check
-      setInterval(checkForPatches, settings.pollInterval); // every 10 min
-      startCountdown();            // start countdown immediately
+      checkForPatches();
+      setInterval(checkForPatches, settings.pollInterval);
+      startCountdown();
 
-      console.log('%c🚀 RICOCHET LIVE v2.2 STARTED — full visibility + 10-min checks', 'color:#00ff9d; font-size:15px; font-weight:900');
-      addToLog('Monitor ready — you will now see every step of each check');
+      console.log('%c🚀 RICOCHET LIVE v2.3 STARTED — X/Twitter removed • RICOCHET Hub added • More info panel', 'color:#00ff9d; font-size:15px; font-weight:900');
+      addToLog('v2.3 loaded — now monitoring 4 official pages with full visibility');
     };
   </script>
 </body>
