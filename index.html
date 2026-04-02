@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>RICOCHET LIVE v2.3 • BO7 / Warzone</title>
+  <title>RICOCHET LIVE v2.4 • BO7 / Warzone</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
@@ -12,6 +12,8 @@
     @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.2; } }
     .flash { animation: flash 400ms ease-in-out 4; }
     @keyframes flash { 0%, 100% { background-color: #00ff9d; } 50% { background-color: transparent; } }
+    .silent-flash { animation: flash 400ms ease-in-out 4; }
+    @keyframes silent-flash { 0%, 100% { background-color: #fbbf24; } 50% { background-color: transparent; } }
   </style>
 </head>
 <body class="bg-zinc-950 text-white min-h-screen">
@@ -21,7 +23,7 @@
         <div class="w-14 h-14 bg-[#00ff9d] rounded-3xl flex items-center justify-center text-black font-black text-4xl rotate-12 shadow-xl">R</div>
         <div>
           <h1 class="text-5xl font-black tracking-[-2px]">RICOCHET LIVE</h1>
-          <p class="text-[#00ff9d] text-lg font-medium -mt-1">v2.3 • 10-min checks • 4 official sources</p>
+          <p class="text-[#00ff9d] text-lg font-medium -mt-1">v2.4 • 5 sources + Silent Patch Detection</p>
         </div>
       </div>
       <div class="flex items-center gap-6">
@@ -50,7 +52,7 @@
       <!-- MAIN PATCH CARD -->
       <div class="lg:col-span-7 bg-zinc-900 border border-zinc-800 rounded-3xl p-8 shadow-2xl">
         <div class="flex justify-between mb-6">
-          <h2 class="text-3xl font-bold flex items-center gap-3"><span class="text-[#00ff9d] text-4xl">●</span> LATEST SECURITY PATCH</h2>
+          <h2 class="text-3xl font-bold flex items-center gap-3"><span class="text-[#00ff9d] text-4xl">●</span> LATEST DETECTION</h2>
           <div class="text-right">
             <span id="last-checked" class="text-xs text-zinc-400">Last checked just now</span>
             <div id="check-count" class="text-[10px] text-zinc-500 font-mono mt-1">Check #0</div>
@@ -58,8 +60,7 @@
         </div>
         <div id="patch-card" class="bg-zinc-800 border border-zinc-700 rounded-3xl p-8 transition-all min-h-[220px] flex items-center">
           <div id="no-patch" class="w-full text-center">
-            <p class="text-zinc-400 italic text-xl">No new RICOCHET / anti-cheat updates detected yet...</p>
-            <p class="text-xs text-zinc-500 mt-3">Season 03 launched April 2, 2026 • Monitor is actively scanning</p>
+            <p class="text-zinc-400 italic text-xl">No new RICOCHET or silent patches detected yet...</p>
           </div>
           <div id="patch-content" class="hidden w-full">
             <a id="patch-title-link" href="#" target="_blank" class="block text-3xl leading-tight font-bold hover:text-[#00ff9d]"></a>
@@ -72,35 +73,28 @@
         </div>
       </div>
 
-      <!-- SIDEBAR INFO -->
+      <!-- SIDEBAR -->
       <div class="lg:col-span-5 space-y-6">
-        <!-- Sources -->
         <div class="bg-zinc-900 border border-zinc-800 rounded-3xl p-6">
-          <h3 class="uppercase text-xs tracking-widest mb-4">4 Official Sources Being Scanned</h3>
+          <h3 class="uppercase text-xs tracking-widest mb-4">5 Official Sources Being Scanned</h3>
           <div class="space-y-3 text-sm">
             <div class="flex justify-between"><span class="flex items-center gap-2"><span class="text-green-400">●</span> Blog</span><span class="text-zinc-400 text-xs">callofduty.com/blog</span></div>
             <div class="flex justify-between"><span class="flex items-center gap-2"><span class="text-green-400">●</span> Patch Notes</span><span class="text-zinc-400 text-xs">callofduty.com/patchnotes</span></div>
             <div class="flex justify-between"><span class="flex items-center gap-2"><span class="text-green-400">●</span> Season 03 Hub</span><span class="text-zinc-400 text-xs">callofduty.com/blog/blackops7</span></div>
             <div class="flex justify-between"><span class="flex items-center gap-2"><span class="text-green-400">●</span> RICOCHET Hub</span><span class="text-zinc-400 text-xs">callofduty.com/warzone/ricochet</span></div>
+            <div class="flex justify-between"><span class="flex items-center gap-2"><span class="text-amber-400">●</span> SteamDB Builds</span><span class="text-zinc-400 text-xs">steamdb.info/app/1938090/history/</span></div>
           </div>
         </div>
 
-        <!-- More Info Card (replaces X) -->
+        <!-- Info Panel -->
         <div class="bg-zinc-900 border border-zinc-800 rounded-3xl p-6">
-          <h3 class="uppercase text-xs tracking-widest mb-4">📌 More About This Monitor</h3>
+          <h3 class="uppercase text-xs tracking-widest mb-4">📌 How Silent Patch Detection Works</h3>
           <div class="text-xs leading-relaxed text-zinc-300 space-y-4">
-            <p><strong>What it does:</strong> Every 10 minutes it visits the 4 official Call of Duty pages and looks for any new post containing keywords like “RICOCHET”, “anti-cheat”, “security patch”, “progress report”, or “ban wave”.</p>
-            <p><strong>What it cannot catch:</strong> Completely silent backend anti-cheat changes (Activision rarely announces those). Only public blog/patch announcements are detected.</p>
-            <p><strong>Current Season:</strong> Season 03 (launched today, April 2, 2026). No dedicated RICOCHET Season 03 post has appeared yet — this monitor will light up the second one does.</p>
-            <p class="pt-2 border-t border-zinc-700 text-[#00ff9d] text-[10px]">Pro tip: Keep this tab open in the background. You’ll get a loud sound + browser notification the moment a new update drops.</p>
+            <p><strong>Announced patches</strong> → detected on the 4 Call of Duty pages (keywords like RICOCHET, anti-cheat, security, progress report).</p>
+            <p><strong>Silent patches</strong> → detected via <strong>SteamDB</strong>. Every new client build uploaded by Activision appears instantly. Small or frequent builds often mean quiet anti-cheat / security fixes.</p>
+            <p class="text-amber-400">When a new build appears you will see a <strong>“Possible Silent Patch”</strong> alert. This is the closest we can get without running the game.</p>
+            <p class="pt-2 border-t border-zinc-700 text-[#00ff9d] text-[10px]">Keep this tab open. You’ll get sound + notification the moment anything new is detected — announced or silent.</p>
           </div>
-        </div>
-
-        <!-- Quick Links -->
-        <div class="bg-zinc-900 border border-zinc-800 rounded-3xl p-6 flex flex-wrap gap-3 text-sm">
-          <a href="https://www.callofduty.com/blog" target="_blank" class="flex-1 bg-zinc-800 hover:bg-zinc-700 text-center py-3 rounded-2xl transition">📄 Official Blog</a>
-          <a href="https://www.callofduty.com/patchnotes" target="_blank" class="flex-1 bg-zinc-800 hover:bg-zinc-700 text-center py-3 rounded-2xl transition">📋 Patch Notes</a>
-          <a href="https://www.callofduty.com/warzone/ricochet" target="_blank" class="flex-1 bg-zinc-800 hover:bg-zinc-700 text-center py-3 rounded-2xl transition">🛡️ RICOCHET Hub</a>
         </div>
       </div>
     </div>
@@ -117,14 +111,14 @@
     <!-- LIVE LOG -->
     <div class="mt-10">
       <div class="flex justify-between text-xs tracking-widest text-zinc-500 mb-3 px-1">
-        <h3>LIVE ACTIVITY LOG — every step is visible</h3>
+        <h3>LIVE ACTIVITY LOG — every step visible</h3>
         <button onclick="clearLog()" class="hover:text-zinc-300">Clear Log</button>
       </div>
       <div id="check-log" class="bg-black/70 border border-zinc-700 font-mono text-xs p-5 rounded-3xl h-72 overflow-y-auto leading-relaxed"></div>
     </div>
 
     <div class="text-center text-[10px] text-zinc-500 mt-12">
-      Pure HTML/CSS/JS • 100% client-side • Checks every 10 minutes • Only public official pages
+      Pure HTML/CSS/JS • Checks every 10 minutes • Announced + Silent Patch detection via SteamDB
     </div>
   </div>
 
@@ -172,10 +166,12 @@
       { name: 'Blog', url: 'https://www.callofduty.com/blog' },
       { name: 'Patch Notes', url: 'https://www.callofduty.com/patchnotes' },
       { name: 'Season 03 Hub', url: 'https://www.callofduty.com/blog/blackops7' },
-      { name: 'RICOCHET Hub', url: 'https://www.callofduty.com/warzone/ricochet' }
+      { name: 'RICOCHET Hub', url: 'https://www.callofduty.com/warzone/ricochet' },
+      { name: 'SteamDB Builds', url: 'https://steamdb.info/app/1938090/history/' }
     ];
 
     let lastSeenTitle = localStorage.getItem('lastSeenPatch') || '';
+    let lastSeenBuild = localStorage.getItem('lastSeenBuild') || '0';
     let history = JSON.parse(localStorage.getItem('patchHistory')) || [];
     let soundEnabled = true;
     let checkCount = 0;
@@ -201,7 +197,7 @@
     function addToLog(message, type = 'info') {
       const log = document.getElementById('check-log');
       const time = new Date().toLocaleTimeString('en-US', {hour12:false, hour:'2-digit', minute:'2-digit', second:'2-digit'});
-      const color = type === 'success' ? 'text-[#00ff9d]' : type === 'error' ? 'text-red-400' : 'text-zinc-400';
+      const color = type === 'success' ? 'text-[#00ff9d]' : type === 'error' ? 'text-red-400' : type === 'silent' ? 'text-amber-400' : 'text-zinc-400';
       const entry = document.createElement('div');
       entry.className = `flex justify-between ${color}`;
       entry.innerHTML = `<span>[${time}] ${message}</span>`;
@@ -215,7 +211,7 @@
         <li onclick="window.open('${item.link}','_blank')" class="cursor-pointer bg-zinc-900 border border-zinc-800 hover:border-[#00ff9d]/30 p-5 rounded-3xl flex justify-between items-start gap-4 transition">
           <div class="flex-1">
             <div class="flex items-center gap-2 text-xs mb-1">
-              <span class="px-2.5 py-px bg-[#00ff9d]/10 text-[#00ff9d] rounded-full">${item.source}</span>
+              <span class="px-2.5 py-px ${item.silent ? 'bg-amber-400/10 text-amber-400' : 'bg-[#00ff9d]/10 text-[#00ff9d]'} rounded-full">${item.source}</span>
               <span class="text-zinc-500">${item.date}</span>
             </div>
             <p class="font-semibold leading-tight">${item.title}</p>
@@ -237,11 +233,45 @@
 
     async function checkSource(source) {
       addToLog(`Fetching ${source.name}...`);
+
       const html = await fetchWithProxy(source.url);
       const parser = new DOMParser();
       const doc = parser.parseFromString(html, 'text/html');
+
+      if (source.name === 'SteamDB Builds') {
+        // Look for the most recent build row
+        const rows = Array.from(doc.querySelectorAll('tr'));
+        let latestBuild = null;
+        for (const row of rows) {
+          const cells = row.querySelectorAll('td');
+          if (cells.length > 2) {
+            const buildText = cells[1] ? cells[1].textContent.trim() : '';
+            const timeText = cells[2] ? cells[2].textContent.trim() : '';
+            if (buildText && timeText) {
+              latestBuild = { id: buildText, time: timeText };
+              break; // first row = newest
+            }
+          }
+        }
+        if (latestBuild && latestBuild.id !== lastSeenBuild) {
+          lastSeenBuild = latestBuild.id;
+          localStorage.setItem('lastSeenBuild', lastSeenBuild);
+          addToLog(`✅ NEW BUILD on SteamDB — Possible Silent Patch`, 'silent');
+          return {
+            title: `Possible Silent Patch — New Build ${latestBuild.id}`,
+            link: source.url,
+            date: latestBuild.time,
+            excerpt: 'SteamDB detected a new client build (often = quiet anti-cheat update)',
+            source: 'SteamDB Builds',
+            silent: true
+          };
+        }
+        addToLog(`No new build on SteamDB`);
+        return null;
+      }
+
+      // Normal blog/patch pages
       const links = Array.from(doc.querySelectorAll('a[href^="/blog/"], a[href*="/blog/"], a[href^="/patchnotes/"], a[href*="/patchnotes/"], a[href*="/ricochet"]'));
-      
       for (const link of links) {
         const title = (link.textContent || '').trim();
         if (!title) continue;
@@ -253,7 +283,8 @@
             link: 'https://www.callofduty.com' + (link.getAttribute('href') || ''),
             date: 'Detected live • ' + new Date().toLocaleDateString(),
             excerpt: `${source.name} — RICOCHET / security update`,
-            source: source.name
+            source: source.name,
+            silent: false
           };
         }
       }
@@ -269,7 +300,7 @@
 
       checkCount++;
       document.getElementById('check-count').textContent = `Check #${checkCount}`;
-      addToLog(`=== STARTING FULL CHECK #${checkCount} (4 sources) ===`);
+      addToLog(`=== STARTING FULL CHECK #${checkCount} (5 sources) ===`);
 
       let newPatch = null;
       for (const source of SOURCES) {
@@ -300,6 +331,15 @@
         document.getElementById('patch-date').textContent = newPatch.date;
         document.getElementById('patch-excerpt').textContent = newPatch.excerpt;
 
+        // Special flash for silent patches
+        const card = document.getElementById('patch-card');
+        if (newPatch.silent) {
+          card.classList.add('silent-flash');
+        } else {
+          card.classList.add('flash');
+        }
+        setTimeout(() => card.classList.remove('flash', 'silent-flash'), 1800);
+
         history.unshift(newPatch);
         if (history.length > 12) history.pop();
         localStorage.setItem('patchHistory', JSON.stringify(history));
@@ -307,17 +347,13 @@
 
         playAlertSound();
         if (settings.notifications && "Notification" in window && Notification.permission === "granted") {
-          new Notification("🟢 RICOCHET UPDATE!", { body: newPatch.title });
+          new Notification(newPatch.silent ? "🟡 POSSIBLE SILENT PATCH" : "🟢 RICOCHET UPDATE!", { body: newPatch.title });
         }
         if (settings.autoOpen) window.open(newPatch.link, '_blank');
 
-        const card = document.getElementById('patch-card');
-        card.classList.add('flash');
-        setTimeout(() => card.classList.remove('flash'), 1800);
-
-        addToLog(`🚨 NEW PATCH DETECTED — ${newPatch.source}`, 'success');
+        addToLog(newPatch.silent ? `🟡 POSSIBLE SILENT PATCH — ${newPatch.source}` : `🚨 NEW PATCH — ${newPatch.source}`, newPatch.silent ? 'silent' : 'success');
       } else {
-        addToLog('No new RICOCHET / security updates found');
+        addToLog('No new updates found');
       }
 
       statusEl.textContent = 'MONITORING LIVE';
@@ -380,8 +416,8 @@
       setInterval(checkForPatches, settings.pollInterval);
       startCountdown();
 
-      console.log('%c🚀 RICOCHET LIVE v2.3 STARTED — X/Twitter removed • RICOCHET Hub added • More info panel', 'color:#00ff9d; font-size:15px; font-weight:900');
-      addToLog('v2.3 loaded — now monitoring 4 official pages with full visibility');
+      console.log('%c🚀 RICOCHET LIVE v2.4 STARTED — Silent Patch Detection via SteamDB added', 'color:#00ff9d; font-size:15px; font-weight:900');
+      addToLog('v2.4 loaded — now watching 5 sources including SteamDB for silent patches');
     };
   </script>
 </body>
