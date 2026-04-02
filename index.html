@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RICOCHET LIVE • BO7 / Warzone Security Monitor</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+    body { font-family: 'Inter', system-ui, sans-serif; }
+    .live-dot { animation: pulse 2s infinite; }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+  </style>
+</head>
+<body class="bg-zinc-950 text-white min-h-screen">
+  <div class="max-w-4xl mx-auto p-6">
+    <div class="flex items-center justify-between mb-8">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 bg-[#00ff9d] rounded-full flex items-center justify-center text-black font-bold text-2xl">R</div>
+        <h1 class="text-4xl font-bold tracking-tight">RICOCHET LIVE</h1>
+      </div>
+      <div class="flex items-center gap-2 text-sm">
+        <div class="w-3 h-3 bg-green-400 rounded-full live-dot"></div>
+        <span id="status" class="font-medium text-green-400">MONITORING LIVE • Season 03</span>
+      </div>
+    </div>
+
+    <div class="bg-zinc-900 border border-zinc-800 rounded-3xl p-8 shadow-2xl">
+      <div id="latest-patch" class="mb-8">
+        <div class="flex items-center justify-between mb-3">
+          <h2 class="text-xl font-semibold flex items-center gap-2">
+            <span class="text-[#00ff9d]">●</span>
+            LATEST SECURITY PATCH
+          </h2>
+          <span id="last-checked" class="text-xs text-zinc-500">Last checked just now</span>
+        </div>
+        
+        <div id="patch-card" class="bg-zinc-800 border border-zinc-700 rounded-2xl p-6 transition-all">
+          <p id="no-patch" class="text-zinc-400 italic">Waiting for first RICOCHET / security update...</p>
+          <div id="patch-content" class="hidden">
+            <a id="patch-title-link" href="#" target="_blank" class="block text-2xl font-bold hover:text-[#00ff9d] transition-colors"></a>
+            <p id="patch-date" class="text-sm text-zinc-400 mt-1"></p>
+            <p id="patch-excerpt" class="text-zinc-300 mt-4 line-clamp-3"></p>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <h3 class="uppercase text-xs tracking-widest text-zinc-500 mb-4">Previous Detections</h3>
+        <ul id="history-list" class="space-y-3 text-sm"></ul>
+      </div>
+    </div>
+
+    <div class="text-center text-xs text-zinc-500 mt-8 flex items-center justify-center gap-4">
+      <p>Polls every 60s • Tab must stay open</p>
+      <button onclick="manualCheck()" class="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-xl text-[#00ff9d] text-xs font-medium transition-colors">
+        CHECK NOW
+      </button>
+    </div>
+  </div>
+
+  <script>
+    const PROXIES = [
+      'https://corsproxy.io/?',           // Primary (fastest)
+      'https://proxy.corsfix.com/?',      // New reliable fallback
+      'https://api.codetabs.com/v1/proxy?quest='
+    ];
+    const BLOG_URL = 'https://www.callofduty.com/blog';
+    const KEYWORDS = ['ricochet', 'anti-cheat', 'anti cheat', 'security', 'progress report'];
+
+    let lastSeenTitle = localStorage.getItem('lastSeenPatch') || '';
+    let history = JSON.parse(localStorage.getItem('patchHistory')) || [];
+
+    function renderHistory() {
+      const list = document.getElementById('history-list');
+      list.innerHTML = history.map(item => `
+        <li class="flex justify-between items-center bg-zinc-900 border border-zinc-800 px-4 py-3 rounded-2xl">
+          <a href="${item.link}" target="_blank" class="font-medium hover:text-[#00ff9d]">${item.title}</a>
+          <span class="text-xs text-zinc-500">${item.date}</span>
+        </li>
+      `).join('');
+    }
+
+    async function fetchWithProxy(url) {
+      for (const proxy of PROXIES) {
+        try {
+          const fullUrl = proxy + encodeURIComponent(url);
+          const res = await fetch(fullUrl, { headers: { 'Accept': 'text/html' } });
+          if (res.ok) return await res.text();
+        } catch (e) {}
+      }
+      throw new Error('All proxies failed');
+    }
+
+    async function checkForPatches() {
+      const statusEl = document.getElementById('status');
+      statusEl.textContent = 'CHECKING...';
+      statusEl.classList.add('text-amber-400');
+      statusEl.classList.remove('text-green-400', 'text-red-400');
+
+      try {
+        const html = await fetchWithProxy(BLOG_URL);
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, 'text/html');
+
+        const links = Array.from(doc.querySelectorAll('a[href^="/blog/"], a[href*="/blog/"]'));
+        let latestMatch = null;
+
+        for (const link of links) {
+          const title = (link.textContent || '').trim();
+          if (!title) continue;
+          const lower = title.toLowerCase();
+          if (KEYWORDS.some(kw => lower.includes(kw))) {
+            latestMatch = {
+              title: title,
+              link: 'https://www.callofduty.com' + (link.getAttribute('href') || ''),
+              date: 'Detected live',
+              excerpt: 'RICOCHET or security-related update found on official blog'
+            };
+            break;
+          }
+        }
+
+        const now = new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+        document.getElementById('last-checked').textContent = `Last checked ${now}`;
+
+        if (latestMatch && latestMatch.title !== lastSeenTitle) {
+          lastSeenTitle = latestMatch.title;
+          localStorage.setItem('lastSeenPatch', lastSeenTitle);
+
+          document.getElementById('no-patch').classList.add('hidden');
+          const content = document.getElementById('patch-content');
+          content.classList.remove('hidden');
+          document.getElementById('patch-title-link').textContent = latestMatch.title;
+          document.getElementById('patch-title-link').href = latestMatch.link;
+          document.getElementById('patch-date').textContent = latestMatch.date;
+          document.getElementById('patch-excerpt').textContent = latestMatch.excerpt;
+
+          history.unshift(latestMatch);
+          if (history.length > 5) history.pop();
+          localStorage.setItem('patchHistory', JSON.stringify(history));
+          renderHistory();
+
+          if ("Notification" in window && Notification.permission === "granted") {
+            new Notification("🟢 RICOCHET UPDATE!", { body: latestMatch.title });
+          }
+
+          const card = document.getElementById('patch-card');
+          card.classList.add('ring-4', 'ring-[#00ff9d]');
+          setTimeout(() => card.classList.remove('ring-4', 'ring-[#00ff9d]'), 2500);
+        }
+
+        statusEl.textContent = 'MONITORING LIVE • Season 03';
+        statusEl.classList.add('text-green-400');
+
+      } catch (e) {
+        console.error("Fetch error:", e);
+        statusEl.textContent = 'TEMPORARY ERROR — will retry';
+        statusEl.classList.add('text-red-400');
+      }
+    }
+
+    function manualCheck() {
+      checkForPatches();
+    }
+
+    window.onload = () => {
+      renderHistory();
+      checkForPatches();
+      setInterval(checkForPatches, 60000);
+      console.log('%c✅ RICOCHET LIVE monitor started (new proxies)', 'color:#00ff9d; font-size:13px');
+    };
+  </script>
+</body>
+</html>
