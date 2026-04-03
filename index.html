@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>RICOCHET LIVE v2.5 • BO7 / Warzone</title>
+  <title>RICOCHET LIVE v2.5.1 • BO7 / Warzone</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
@@ -28,7 +28,7 @@
         <div class="w-12 h-12 sm:w-14 sm:h-14 bg-[#00ff9d] rounded-3xl flex items-center justify-center text-black font-black text-4xl rotate-12 shadow-xl">R</div>
         <div>
           <h1 class="text-4xl sm:text-5xl font-black tracking-[-2px]">RICOCHET LIVE</h1>
-          <p class="text-[#00ff9d] text-base sm:text-lg font-medium -mt-1">v2.5 • Silent Patch Detection FIXED</p>
+          <p class="text-[#00ff9d] text-base sm:text-lg font-medium -mt-1">v2.5.1 • Silent Patch History FIXED</p>
         </div>
       </div>
       <div class="flex items-center gap-3 sm:gap-6 w-full sm:w-auto">
@@ -54,7 +54,7 @@
     </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-      <!-- MAIN DETECTION CARD -->
+      <!-- MAIN CARD -->
       <div class="lg:col-span-7 bg-zinc-900 border border-zinc-800 rounded-3xl p-6 sm:p-8 shadow-2xl">
         <div class="flex justify-between mb-6">
           <h2 class="text-2xl sm:text-3xl font-bold flex items-center gap-3"><span class="text-[#00ff9d] text-4xl">●</span> LATEST DETECTION</h2>
@@ -66,7 +66,6 @@
         <div id="patch-card" class="bg-zinc-800 border border-zinc-700 rounded-3xl p-6 sm:p-8 transition-all min-h-[200px] flex items-center">
           <div id="no-patch" class="w-full text-center">
             <p class="text-zinc-400 italic text-lg sm:text-xl">No new announced or silent patches yet...</p>
-            <p class="text-xs text-zinc-500 mt-3">Season 03 • April 2, 2026</p>
           </div>
           <div id="patch-content" class="hidden w-full">
             <a id="patch-title-link" href="#" target="_blank" class="block text-2xl sm:text-3xl leading-tight font-bold hover:text-[#00ff9d]"></a>
@@ -93,41 +92,30 @@
           </div>
         </div>
 
-        <!-- Expanded Info Panel -->
-        <div class="bg-zinc-900 border border-zinc-800 rounded-3xl p-6 text-xs">
-          <h3 class="uppercase tracking-widest mb-4">📌 How This Monitor Works</h3>
-          <div class="space-y-4 text-zinc-300">
-            <div class="flex gap-3">
-              <span class="text-green-400 font-bold">1.</span>
-              <p>Every 10 minutes it scans 4 official Call of Duty pages for announced RICOCHET / security posts using your custom keywords.</p>
-            </div>
-            <div class="flex gap-3">
-              <span class="text-amber-400 font-bold">2.</span>
-              <p><strong>Silent Patch Detection</strong> — SteamDB is now fixed and reliable. It watches for new client builds. A new build = possible quiet anti-cheat fix.</p>
-            </div>
-            <div class="pt-3 border-t border-zinc-700 text-[10px] text-zinc-400">
-              • First SteamDB check only records the baseline (no alert)<br>
-              • Only future new builds trigger yellow silent alerts<br>
-              • Pure client-side — nothing is sent anywhere<br>
-              • Works on mobile + desktop
-            </div>
+        <!-- STEAMDB STATUS (always visible) -->
+        <div id="steamdb-status-card" class="bg-zinc-900 border border-amber-400/30 rounded-3xl p-6">
+          <h3 class="uppercase text-xs tracking-widest mb-2 flex items-center gap-2"><span class="text-amber-400">●</span> STEAMDB STATUS (Silent Patches)</h3>
+          <div id="steamdb-info" class="text-sm">
+            <p class="text-zinc-400">Loading current build...</p>
           </div>
         </div>
 
-        <!-- Quick Links -->
-        <div class="flex flex-wrap gap-2 text-xs">
-          <a href="https://www.callofduty.com/blog" target="_blank" class="flex-1 text-center bg-zinc-800 hover:bg-zinc-700 py-3 rounded-2xl">Blog</a>
-          <a href="https://www.callofduty.com/patchnotes" target="_blank" class="flex-1 text-center bg-zinc-800 hover:bg-zinc-700 py-3 rounded-2xl">Patch Notes</a>
-          <a href="https://www.callofduty.com/warzone/ricochet" target="_blank" class="flex-1 text-center bg-zinc-800 hover:bg-zinc-700 py-3 rounded-2xl">RICOCHET Hub</a>
-          <a href="https://steamdb.info/app/1938090/history/" target="_blank" class="flex-1 text-center bg-amber-900/30 hover:bg-amber-900/50 py-3 rounded-2xl text-amber-400">SteamDB Builds</a>
+        <!-- Info Panel -->
+        <div class="bg-zinc-900 border border-zinc-800 rounded-3xl p-6 text-xs">
+          <h3 class="uppercase tracking-widest mb-4">📌 Silent Patch History</h3>
+          <div class="space-y-3 text-zinc-300">
+            <p>• Silent patches appear in the history list below with a <span class="text-amber-400">yellow badge</span>.</p>
+            <p>• The SteamDB card above always shows the latest known build (even if nothing new).</p>
+            <p>• First check records the baseline. Only future new builds trigger alerts + history entries.</p>
+          </div>
         </div>
       </div>
     </div>
 
-    <!-- HISTORY SECTION -->
+    <!-- HISTORY -->
     <div class="mt-8">
       <div class="flex justify-between items-center mb-4 px-1">
-        <h3 class="uppercase text-xs tracking-widest text-zinc-500">DETECTION HISTORY</h3>
+        <h3 class="uppercase text-xs tracking-widest text-zinc-500">DETECTION HISTORY (announced + silent)</h3>
         <span id="history-count" class="text-xs text-zinc-400">0 total detections</span>
       </div>
       <ul id="history-list" class="grid grid-cols-1 sm:grid-cols-2 gap-4"></ul>
@@ -136,18 +124,18 @@
     <!-- LIVE LOG -->
     <div class="mt-10">
       <div class="flex justify-between text-xs tracking-widest text-zinc-500 mb-3 px-1">
-        <h3>LIVE ACTIVITY LOG — every fetch is visible</h3>
+        <h3>LIVE ACTIVITY LOG — every step visible</h3>
         <button onclick="clearLog()" class="hover:text-zinc-300">Clear Log</button>
       </div>
       <div id="check-log" class="bg-black/70 border border-zinc-700 font-mono text-xs p-5 rounded-3xl h-72 overflow-y-auto leading-relaxed"></div>
     </div>
 
     <div class="text-center text-[10px] text-zinc-500 mt-12">
-      100% client-side • Mobile + Desktop optimized • Silent patches now correctly detected via SteamDB
+      100% client-side • Mobile + Desktop • SteamDB silent detection now fully visible
     </div>
   </div>
 
-  <!-- SETTINGS MODAL -->
+  <!-- SETTINGS MODAL (same) -->
   <div onclick="if(event.target.id==='settingsModal')hideSettings()" id="settingsModal" class="hidden fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
     <div onclick="event.stopImmediatePropagation()" class="bg-zinc-900 rounded-3xl p-6 sm:p-8 max-w-md w-full mx-auto">
       <h2 class="text-2xl font-bold mb-6">Advanced Settings</h2>
@@ -173,12 +161,13 @@
       </div>
       <div class="mt-8 flex gap-4">
         <button onclick="hideSettings()" class="flex-1 py-4 rounded-3xl border border-zinc-700 text-sm">Close</button>
-        <button onclick="saveSettings();hideSettings()" class="flex-1 py-4 bg-[#00ff9d] text-black font-bold rounded-3xl text-sm">Save &amp; Restart Monitor</button>
+        <button onclick="saveSettings();hideSettings()" class="flex-1 py-4 bg-[#00ff9d] text-black font-bold rounded-3xl text-sm">Save &amp; Restart</button>
       </div>
     </div>
   </div>
 
   <script>
+    // (Full script with SteamDB status card + improved history)
     let settings = JSON.parse(localStorage.getItem('ricochetSettings')) || {
       customKeywords: ['ricochet', 'anti-cheat', 'anti cheat', 'security', 'progress report', 'ban wave'],
       autoOpen: true,
@@ -203,7 +192,7 @@
     let audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     let countdownInterval;
 
-    function playAlertSound() {
+    function playAlertSound() { /* same as previous */ 
       if (!soundEnabled) return;
       const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
       osc.frequency.setValueAtTime(720, audioCtx.currentTime); gain.gain.value = 0.5;
@@ -246,7 +235,22 @@
       document.getElementById('history-count').textContent = `${history.length} total detections`;
     }
 
-    async function fetchWithProxy(url) {
+    function updateSteamDBStatus(buildId, time) {
+      const card = document.getElementById('steamdb-info');
+      if (buildId && buildId !== '0') {
+        card.innerHTML = `
+          <div class="flex justify-between items-center">
+            <span class="font-mono text-amber-400">Build ${buildId}</span>
+            <span class="text-xs text-zinc-400">${time || 'recent'}</span>
+          </div>
+          <p class="text-[10px] text-zinc-500 mt-1">Last recorded on SteamDB • New build = silent patch</p>
+        `;
+      } else {
+        card.innerHTML = `<p class="text-zinc-400">No build recorded yet</p>`;
+      }
+    }
+
+    async function fetchWithProxy(url) { /* same as before */ 
       for (const proxy of PROXIES) {
         try {
           const res = await fetch(proxy + encodeURIComponent(url), { headers: { Accept: 'text/html' } });
@@ -258,44 +262,41 @@
 
     async function checkSource(source) {
       addToLog(`Fetching ${source.name}...`);
-
       const html = await fetchWithProxy(source.url);
       const parser = new DOMParser();
       const doc = parser.parseFromString(html, 'text/html');
 
       if (source.name === 'SteamDB Builds') {
-        const rows = Array.from(doc.querySelectorAll('table tbody tr, tr'));
+        const rows = Array.from(doc.querySelectorAll('tr'));
         let latestBuild = null;
-
         for (const row of rows) {
           const tds = row.querySelectorAll('td');
           if (tds.length >= 3) {
             const buildText = tds[1] ? tds[1].textContent.trim() : '';
             const timeText = tds[2] ? tds[2].textContent.trim() : '';
-            if (buildText && /^\d{7,}$/.test(buildText)) {
-              latestBuild = { id: buildText, time: timeText || 'recent' };
+            if (/^\d{7,}$/.test(buildText)) {
+              latestBuild = { id: buildText, time: timeText };
               break;
             }
           }
         }
-
         if (latestBuild) {
+          updateSteamDBStatus(latestBuild.id, latestBuild.time);
           if (lastSeenBuild === '0') {
-            // First-ever check — just record baseline, no alert
             lastSeenBuild = latestBuild.id;
             localStorage.setItem('lastSeenBuild', lastSeenBuild);
-            addToLog(`Initial SteamDB baseline recorded (build ${latestBuild.id})`);
+            addToLog(`SteamDB baseline recorded: Build ${latestBuild.id}`);
             return null;
           }
           if (latestBuild.id !== lastSeenBuild) {
             lastSeenBuild = latestBuild.id;
             localStorage.setItem('lastSeenBuild', lastSeenBuild);
-            addToLog(`✅ NEW BUILD on SteamDB — Possible Silent Patch`, 'silent');
+            addToLog(`✅ NEW BUILD — Possible Silent Patch`, 'silent');
             return {
               title: `Possible Silent Patch — New Build ${latestBuild.id}`,
               link: source.url,
               date: latestBuild.time,
-              excerpt: 'SteamDB detected a new client build (often = quiet anti-cheat / security update)',
+              excerpt: 'SteamDB detected a new client build (often = quiet anti-cheat update)',
               source: 'SteamDB Builds',
               silent: true
             };
@@ -303,11 +304,11 @@
           addToLog(`No new build on SteamDB`);
           return null;
         }
-        addToLog(`SteamDB parse failed — no build row found`);
+        addToLog(`SteamDB parse failed`);
         return null;
       }
 
-      // Normal pages
+      // Normal pages (same as before)
       const links = Array.from(doc.querySelectorAll('a[href^="/blog/"], a[href*="/blog/"], a[href^="/patchnotes/"], a[href*="/patchnotes/"], a[href*="/ricochet"]'));
       for (const link of links) {
         const title = (link.textContent || '').trim();
@@ -330,6 +331,7 @@
     }
 
     async function checkForPatches() {
+      // (same logic as v2.5 but calls updateSteamDBStatus on every SteamDB check)
       const statusEl = document.getElementById('status');
       statusEl.textContent = 'SCANNING...';
       statusEl.classList.add('text-amber-400');
@@ -337,7 +339,7 @@
 
       checkCount++;
       document.getElementById('check-count').textContent = `Check #${checkCount}`;
-      addToLog(`=== STARTING FULL CHECK #${checkCount} (5 sources) ===`);
+      addToLog(`=== STARTING FULL CHECK #${checkCount} ===`);
 
       let newPatch = null;
       for (const source of SOURCES) {
@@ -394,7 +396,7 @@
       startCountdown();
     }
 
-    function startCountdown() {
+    function startCountdown() { /* same */ 
       let timeLeft = 600;
       clearInterval(countdownInterval);
       countdownInterval = setInterval(() => {
@@ -413,7 +415,7 @@
       document.getElementById('soundBtn').textContent = soundEnabled ? '🔊' : '🔇';
     }
 
-    function saveSettings() {
+    function saveSettings() { /* same */ 
       const input = document.getElementById('customKeywords').value;
       settings.customKeywords = input.split(',').map(k => k.trim()).filter(Boolean);
       settings.autoOpen = document.getElementById('autoOpenToggle').checked;
@@ -423,7 +425,7 @@
       setTimeout(() => location.reload(), 600);
     }
 
-    function showSettings() {
+    function showSettings() { /* same */ 
       document.getElementById('customKeywords').value = settings.customKeywords.join(', ');
       document.getElementById('autoOpenToggle').checked = settings.autoOpen;
       document.getElementById('notifyToggle').checked = settings.notifications;
@@ -431,7 +433,7 @@
       document.getElementById('settingsModal').classList.add('flex');
     }
 
-    function hideSettings() {
+    function hideSettings() { /* same */ 
       document.getElementById('settingsModal').classList.add('hidden');
       document.getElementById('settingsModal').classList.remove('flex');
     }
@@ -445,12 +447,22 @@
       renderHistory();
       if ("Notification" in window && Notification.permission === "default") Notification.requestPermission();
 
+      // Show last known SteamDB build immediately
+      if (lastSeenBuild !== '0') {
+        document.getElementById('steamdb-info').innerHTML = `
+          <div class="flex justify-between items-center">
+            <span class="font-mono text-amber-400">Build ${lastSeenBuild}</span>
+            <span class="text-xs text-zinc-400">Last recorded</span>
+          </div>
+        `;
+      }
+
       checkForPatches();
       setInterval(checkForPatches, settings.pollInterval);
       startCountdown();
 
-      console.log('%c🚀 RICOCHET LIVE v2.5 STARTED — SteamDB silent detection FIXED • Mobile optimized • More UI info', 'color:#00ff9d; font-size:15px; font-weight:900');
-      addToLog('v2.5 ready — SteamDB now correctly records baseline on first check');
+      console.log('%c🚀 RICOCHET LIVE v2.5.1 STARTED — Silent patch history + always-visible SteamDB status', 'color:#00ff9d; font-size:15px; font-weight:900');
+      addToLog('v2.5.1 ready — SteamDB status now always visible');
     };
   </script>
 </body>
