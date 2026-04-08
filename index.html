@@ -2,194 +2,331 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>New Ro Scooter Dasher App</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     
+    <title>New Ro Dash</title>
+    
+    <link rel="manifest" href='data:application/manifest+json,{"name":"New Ro Scooter Dasher","short_name":"NewRo Dash","display":"standalone","background_color":"#000000","theme_color":"#ff3366"}'>
+    
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="NewRo Dash">
+
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 
     <style>
-        /* CSS Variables for Dark Mode Palette */
         :root {
-            --bg-color: #121212;
-            --card-bg: #1e1e1e;
-            --text-main: #f5f5f5;
-            --text-muted: #a0a0a0;
-            --accent: #ff3366;
-            --input-bg: #2c2c2c;
-            --input-border: #444;
+            /* Deeper Darks for OLED Black Experience */
+            --bg-deep: #000000;
+            --glass-bg: rgba(18, 18, 18, 0.7);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            
+            /* Richer, More Saturated Accent Palette */
+            --accent-start: #ff2a6d;
+            --accent-end: #ff5f6d;
+            
+            /* Modern Warning Dyes */
+            --dye-warn: #ffd700;
+            --dye-rain: #3399ff;
+            
+            /* Text Levels */
+            --text-main: #ffffff;
+            --text-muted: #888888;
+            --text-dye: #ff4d4d;
+            
+            /* Bento Grid Spacing */
+            --bento-gap: 12px;
+            --panel-padding: 24px;
         }
 
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        body, html {
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", sans-serif;
             margin: 0;
             padding: 0;
-            background-color: var(--bg-color);
+            height: 100vh;
+            width: 100vw;
+            background-color: var(--bg-deep);
+            overflow: hidden;
+            /* Support for modern iPhone gesture bars */
+            padding-bottom: env(safe-area-inset-bottom);
+            box-sizing: border-box;
             color: var(--text-main);
-            /* Flexbox makes the body take up the exact height of the phone screen */
-            display: flex;
-            flex-direction: column;
-            height: 100vh; 
-            overflow: hidden; /* Prevents bouncy page scrolling */
         }
 
-        h2 {
-            text-align: center;
-            color: var(--accent);
-            margin: 15px 0 10px 0;
-            font-size: 22px;
-            letter-spacing: 0.5px;
+        #map {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
         }
 
+        /* Floating Top Bar (Minimalist Pill) */
+        .top-bar {
+            position: absolute;
+            top: calc(10px + env(safe-area-inset-top));
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 10;
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            padding: 8px 18px;
+            border-radius: 40px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+            pointer-events: none;
+        }
+
+        .top-bar h2 {
+            margin: 0;
+            font-size: 16px;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--accent-start), var(--accent-end));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        /* Floating Bento-Box Style Dashboard */
         .dashboard {
-            background: var(--card-bg);
-            padding: 20px;
-            border-radius: 16px;
-            box-shadow: 0 8px 16px rgba(0,0,0,0.5);
-            margin: 0 15px 15px 15px;
-            display: flex;
-            flex-direction: column;
-            gap: 15px; /* Spaces out elements evenly */
+            position: absolute;
+            bottom: calc(15px + env(safe-area-inset-bottom));
+            left: 15px;
+            right: 15px;
+            z-index: 10;
+            background: var(--glass-bg);
+            backdrop-filter: blur(25px) saturate(180%);
+            -webkit-backdrop-filter: blur(25px) saturate(180%);
+            border: 1px solid var(--glass-border);
+            padding: var(--panel-padding);
+            border-radius: 32px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: var(--bento-gap);
         }
 
-        /* Groups inputs side-by-side to save vertical space on small screens */
+        /* Status Grid Section (Rain & Topography) */
+        .status-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: var(--bento-gap);
+        }
+
+        .status-cell {
+            display: none; /* Hidden unless active */
+            background: rgba(0,0,0,0.3);
+            border: 1px solid transparent;
+            border-radius: 16px;
+            padding: 12px;
+            font-size: 13px;
+            font-weight: 600;
+            text-align: center;
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            transition: all 0.3s ease;
+        }
+
+        #weather-banner.active {
+            display: block;
+            border-color: rgba(51, 153, 255, 0.2);
+            color: var(--dye-rain);
+            box-shadow: 0 0 10px rgba(51, 153, 255, 0.1);
+        }
+
+        #warning-banner.active {
+            display: block;
+            border-color: rgba(255, 171, 0, 0.2);
+            color: var(--dye-warn);
+            box-shadow: 0 0 10px rgba(255, 171, 0, 0.1);
+        }
+
+        /* Input Grid Section */
+        .input-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: var(--bento-gap);
+        }
+
         .input-row {
-            display: flex;
-            gap: 15px; 
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: var(--bento-gap);
         }
 
         .input-group {
-            flex: 1;
             display: flex;
             flex-direction: column;
         }
 
         label {
-            font-size: 11px;
+            font-size: 10px;
             text-transform: uppercase;
-            letter-spacing: 0.8px;
+            letter-spacing: 1.5px;
             color: var(--text-muted);
             margin-bottom: 6px;
-            font-weight: 700;
+            font-weight: 800;
+            padding-left: 2px;
         }
 
         input {
             width: 100%;
-            padding: 14px; /* Larger tap target */
-            background-color: var(--input-bg);
-            border: 1px solid var(--input-border);
+            padding: 18px;
+            background-color: rgba(0,0,0,0.5);
+            border: 1px solid transparent;
             color: var(--text-main);
-            border-radius: 10px;
+            border-radius: 18px;
             box-sizing: border-box;
-            font-size: 16px; /* 16px prevents iOS from automatically zooming in */
+            font-size: 16px;
+            font-weight: 700;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         input:focus {
             outline: none;
-            border-color: var(--accent);
+            border-color: rgba(255, 42, 109, 0.3);
+            box-shadow: 0 0 15px rgba(255, 42, 109, 0.15);
+            background-color: rgba(0,0,0,0.7);
         }
 
+        /* Premium Gradient Button */
         button {
             width: 100%;
-            padding: 16px; /* Massive, easy-to-hit button */
-            background-color: var(--accent);
+            padding: 20px;
+            background: linear-gradient(135deg, var(--accent-start), var(--accent-end));
             color: white;
             border: none;
-            border-radius: 10px;
+            border-radius: 20px;
             font-size: 18px;
             font-weight: 800;
             cursor: pointer;
-            transition: transform 0.1s, background-color 0.2s;
+            transition: transform 0.1s ease, box-shadow 0.2s;
+            box-shadow: 0 6px 20px rgba(255, 42, 109, 0.3);
+            margin-top: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         button:active {
-            background-color: #e62e5c;
-            transform: scale(0.98); /* Satisfying click animation */
+            transform: scale(0.96) translateY(2px);
+            box-shadow: 0 3px 10px rgba(255, 42, 109, 0.2);
         }
 
-        /* Map takes up all remaining space at the bottom */
-        #map {
-            flex-grow: 1;
-            width: 100%;
-            border-top-left-radius: 24px;
-            border-top-right-radius: 24px;
-            z-index: 1;
-        }
-
-        #warning-banner {
-            display: none;
-            background-color: rgba(255, 193, 7, 0.1);
-            color: #ffc107;
-            padding: 12px;
-            border: 1px solid rgba(255, 193, 7, 0.3);
-            border-radius: 10px;
-            font-weight: 500;
-            font-size: 14px;
-            text-align: center;
+        /* Leaflet Overrides for modern look */
+        .leaflet-container {
+            background-color: var(--bg-deep) !important;
         }
     </style>
 </head>
 <body>
 
-    <h2>New Ro Dasher</h2>
+    <div id="map"></div>
+
+    <div class="top-bar">
+        <h2>NewRo Dash</h2>
+    </div>
 
     <div class="dashboard">
-        <div class="input-row">
-            <div class="input-group">
-                <label for="maxRange">Max Range (mi)</label>
-                <input type="number" id="maxRange" value="30">
-            </div>
-
-            <div class="input-group">
-                <label for="batteryPct">Battery (%)</label>
-                <input type="number" id="batteryPct" value="50">
-            </div>
+        
+        <div class="status-grid">
+            <div id="weather-banner" class="status-cell"></div>
+            <div id="warning-banner" class="status-cell"></div>
         </div>
+        
+        <div class="input-grid">
+            <div class="input-row">
+                <div class="input-group">
+                    <label for="maxRange">Max Range (mi)</label>
+                    <input type="number" id="maxRange" value="30">
+                </div>
 
-        <div class="input-group">
-            <label for="routeElevation">Elevation Gain (ft)</label>
-            <input type="number" id="routeElevation" value="80">
+                <div class="input-group">
+                    <label for="batteryPct">Battery (%)</label>
+                    <input type="number" id="batteryPct" value="50">
+                </div>
+            </div>
+
+            <div class="input-group">
+                <label for="routeElevation">Elevation Gain (ft)</label>
+                <input type="number" id="routeElevation" value="80">
+            </div>
         </div>
 
         <button onclick="calculateAndDraw()">Calculate Safe Radius</button>
 
-        <div id="warning-banner"></div>
     </div>
-
-    <div id="map"></div>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
     <script>
-        const newRoLocation = [40.9115, -73.7824];
+        const newRoLocation = [40.9115, -73.7824]; 
         
-        // Removed zoom control for a cleaner mobile interface
-        const map = L.map('map', {
-            zoomControl: false 
+        window.addEventListener('DOMContentLoaded', (event) => {
+            const savedRange = localStorage.getItem('scooterMaxRange');
+            if (savedRange) {
+                document.getElementById('maxRange').value = savedRange;
+            }
+            checkWeather();
+        });
+
+        // Initialize Map (OLED Optimized)
+        const map = L.map('map', { 
+            zoomControl: false,
+            attributionControl: false 
         }).setView(newRoLocation, 12);
 
-        // 🔥 THE MAGIC FIX FOR DARK MODE MAPS + LOCAL FILES 🔥
-        // Using Carto's "Dark Matter" map tiles instead of OpenStreetMap
         L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-            maxZoom: 19,
-            attribution: '&copy; OpenStreetMap contributors &copy; CARTO'
+            maxZoom: 19
         }).addTo(map);
 
-        L.marker(newRoLocation).addTo(map)
-            .bindPopup("<b>You are here</b><br>New Rochelle Station").openPopup();
+        // Modernized Custom Marker (White with pulsing red halo)
+        const customMarker = L.circleMarker(newRoLocation, {
+            radius: 8,
+            fillColor: "#ffffff",
+            color: "#ff2a6d",
+            weight: 3,
+            opacity: 1,
+            fillOpacity: 1
+        }).addTo(map);
 
         let currentCircle = null;
 
+        async function checkWeather() {
+            try {
+                const url = 'https://api.open-meteo.com/v1/forecast?latitude=40.9115&longitude=-73.7824&hourly=precipitation_probability&forecast_hours=5';
+                const response = await fetch(url);
+                const data = await response.json();
+                
+                const rainProbabilities = data.hourly.precipitation_probability;
+                const maxRainChance = Math.max(...rainProbabilities);
+                const weatherBanner = document.getElementById('weather-banner');
+
+                if (maxRainChance > 30) {
+                    weatherBanner.innerHTML = `🌧️ ${maxRainChance}% Rain Chance`;
+                    weatherBanner.classList.add('active');
+                }
+            } catch (error) {
+                console.log("Offline or weather API failed.", error);
+            }
+        }
+
         function calculateAndDraw() {
-            const maxRange = parseFloat(document.getElementById('maxRange').value);
+            const maxRangeInput = document.getElementById('maxRange').value;
+            const maxRange = parseFloat(maxRangeInput);
             const batteryPct = parseFloat(document.getElementById('batteryPct').value);
             const elevationGain = parseFloat(document.getElementById('routeElevation').value);
 
+            localStorage.setItem('scooterMaxRange', maxRangeInput);
+
             const warningBanner = document.getElementById('warning-banner');
             if (elevationGain > 150) {
-                warningBanner.innerHTML = "⚠️ Steep inclines! Expect faster battery drain.";
-                warningBanner.style.display = "block";
+                warningBanner.innerHTML = "⚠️ Steep Inclines!";
+                warningBanner.classList.add('active');
             } else {
-                warningBanner.style.display = "none";
+                warningBanner.classList.remove('active');
             }
 
             const remainingRangeMiles = maxRange * (batteryPct / 100);
@@ -200,16 +337,18 @@
                 map.removeLayer(currentCircle);
             }
 
-            // Updated circle colors to pop against the dark map
+            // Refined Circle Drawing (Thicker, richer edge)
             currentCircle = L.circle(newRoLocation, {
-                color: '#ff3366', 
-                weight: 2,
-                fillColor: '#ff3366', 
-                fillOpacity: 0.15,
+                color: '#ff2a6d', 
+                weight: 3,
+                fillColor: '#ff2a6d', 
+                fillOpacity: 0.08,
                 radius: safeRadiusMeters
             }).addTo(map);
 
-            map.fitBounds(currentCircle.getBounds());
+            map.fitBounds(currentCircle.getBounds(), {
+                paddingBottomRight: [0, 380] // Account for slightly taller dashboard grid
+            });
         }
 
         window.onload = calculateAndDraw;
