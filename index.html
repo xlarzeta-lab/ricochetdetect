@@ -16,25 +16,20 @@
 
     <style>
         :root {
-            /* Deeper Darks for OLED Black Experience */
-            --bg-deep: #000000;
-            --glass-bg: rgba(18, 18, 18, 0.7);
+            var(--bg-deep): #000000;
+            --glass-bg: rgba(18, 18, 18, 0.75);
             --glass-border: rgba(255, 255, 255, 0.08);
             
-            /* Richer, More Saturated Accent Palette */
             --accent-start: #ff2a6d;
             --accent-end: #ff5f6d;
             
-            /* Modern Warning Dyes */
             --dye-warn: #ffd700;
             --dye-rain: #3399ff;
+            --dye-physics: #00e5ff; /* Frosty blue for cold/wind */
             
-            /* Text Levels */
             --text-main: #ffffff;
             --text-muted: #888888;
-            --text-dye: #ff4d4d;
             
-            /* Bento Grid Spacing */
             --bento-gap: 12px;
             --panel-padding: 24px;
         }
@@ -45,9 +40,8 @@
             padding: 0;
             height: 100vh;
             width: 100vw;
-            background-color: var(--bg-deep);
+            background-color: #000;
             overflow: hidden;
-            /* Support for modern iPhone gesture bars */
             padding-bottom: env(safe-area-inset-bottom);
             box-sizing: border-box;
             color: var(--text-main);
@@ -62,7 +56,6 @@
             z-index: 1;
         }
 
-        /* Floating Top Bar (Minimalist Pill) */
         .top-bar {
             position: absolute;
             top: calc(10px + env(safe-area-inset-top));
@@ -90,7 +83,6 @@
             text-transform: uppercase;
         }
 
-        /* Floating Bento-Box Style Dashboard */
         .dashboard {
             position: absolute;
             bottom: calc(15px + env(safe-area-inset-bottom));
@@ -109,21 +101,22 @@
             gap: var(--bento-gap);
         }
 
-        /* Status Grid Section (Rain & Topography) */
+        /* Switched to flex to easily wrap multiple active banners */
         .status-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
+            display: flex;
+            flex-wrap: wrap;
             gap: var(--bento-gap);
         }
 
         .status-cell {
-            display: none; /* Hidden unless active */
-            background: rgba(0,0,0,0.3);
+            display: none; 
+            flex: 1 1 calc(50% - var(--bento-gap)); /* Grow to fill space */
+            background: rgba(0,0,0,0.4);
             border: 1px solid transparent;
             border-radius: 16px;
             padding: 12px;
-            font-size: 13px;
-            font-weight: 600;
+            font-size: 12px;
+            font-weight: 700;
             text-align: center;
             backdrop-filter: blur(5px);
             -webkit-backdrop-filter: blur(5px);
@@ -132,19 +125,26 @@
 
         #weather-banner.active {
             display: block;
-            border-color: rgba(51, 153, 255, 0.2);
+            border-color: rgba(51, 153, 255, 0.25);
             color: var(--dye-rain);
-            box-shadow: 0 0 10px rgba(51, 153, 255, 0.1);
+            box-shadow: 0 0 12px rgba(51, 153, 255, 0.1);
         }
 
         #warning-banner.active {
             display: block;
-            border-color: rgba(255, 171, 0, 0.2);
+            border-color: rgba(255, 171, 0, 0.25);
             color: var(--dye-warn);
-            box-shadow: 0 0 10px rgba(255, 171, 0, 0.1);
+            box-shadow: 0 0 12px rgba(255, 171, 0, 0.1);
         }
 
-        /* Input Grid Section */
+        #physics-banner.active {
+            display: block;
+            border-color: rgba(0, 229, 255, 0.25);
+            color: var(--dye-physics);
+            box-shadow: 0 0 12px rgba(0, 229, 255, 0.1);
+            flex-basis: 100%; /* Make this banner span full width if active */
+        }
+
         .input-grid {
             display: grid;
             grid-template-columns: 1fr;
@@ -192,7 +192,6 @@
             background-color: rgba(0,0,0,0.7);
         }
 
-        /* Premium Gradient Button */
         button {
             width: 100%;
             padding: 20px;
@@ -215,9 +214,8 @@
             box-shadow: 0 3px 10px rgba(255, 42, 109, 0.2);
         }
 
-        /* Leaflet Overrides for modern look */
         .leaflet-container {
-            background-color: var(--bg-deep) !important;
+            background-color: #000 !important;
         }
     </style>
 </head>
@@ -234,6 +232,7 @@
         <div class="status-grid">
             <div id="weather-banner" class="status-cell"></div>
             <div id="warning-banner" class="status-cell"></div>
+            <div id="physics-banner" class="status-cell"></div>
         </div>
         
         <div class="input-grid">
@@ -264,6 +263,11 @@
     <script>
         const newRoLocation = [40.9115, -73.7824]; 
         
+        // Global variables to store live weather data
+        let liveTemp = null;
+        let liveWind = null;
+        let weatherLoaded = false;
+
         window.addEventListener('DOMContentLoaded', (event) => {
             const savedRange = localStorage.getItem('scooterMaxRange');
             if (savedRange) {
@@ -272,7 +276,6 @@
             checkWeather();
         });
 
-        // Initialize Map (OLED Optimized)
         const map = L.map('map', { 
             zoomControl: false,
             attributionControl: false 
@@ -282,7 +285,6 @@
             maxZoom: 19
         }).addTo(map);
 
-        // Modernized Custom Marker (White with pulsing red halo)
         const customMarker = L.circleMarker(newRoLocation, {
             radius: 8,
             fillColor: "#ffffff",
@@ -296,10 +298,17 @@
 
         async function checkWeather() {
             try {
-                const url = 'https://api.open-meteo.com/v1/forecast?latitude=40.9115&longitude=-73.7824&hourly=precipitation_probability&forecast_hours=5';
+                // Upgraded API URL to pull current temperature and wind speed in Fahrenheit/MPH
+                const url = 'https://api.open-meteo.com/v1/forecast?latitude=40.9115&longitude=-73.7824&current=temperature_2m,wind_speed_10m&hourly=precipitation_probability&temperature_unit=fahrenheit&wind_speed_unit=mph&forecast_hours=5';
                 const response = await fetch(url);
                 const data = await response.json();
                 
+                // Store live weather globally for the math function to use
+                liveTemp = data.current.temperature_2m;
+                liveWind = data.current.wind_speed_10m;
+                weatherLoaded = true;
+
+                // Rain Check
                 const rainProbabilities = data.hourly.precipitation_probability;
                 const maxRainChance = Math.max(...rainProbabilities);
                 const weatherBanner = document.getElementById('weather-banner');
@@ -308,6 +317,10 @@
                     weatherBanner.innerHTML = `🌧️ ${maxRainChance}% Rain Chance`;
                     weatherBanner.classList.add('active');
                 }
+
+                // Automatically trigger a map draw now that weather is loaded
+                calculateAndDraw();
+
             } catch (error) {
                 console.log("Offline or weather API failed.", error);
             }
@@ -321,6 +334,7 @@
 
             localStorage.setItem('scooterMaxRange', maxRangeInput);
 
+            // 1. Topography Warning
             const warningBanner = document.getElementById('warning-banner');
             if (elevationGain > 150) {
                 warningBanner.innerHTML = "⚠️ Steep Inclines!";
@@ -329,15 +343,55 @@
                 warningBanner.classList.remove('active');
             }
 
-            const remainingRangeMiles = maxRange * (batteryPct / 100);
-            const safeRadiusMiles = remainingRangeMiles / 2;
+            // 2. Advanced Physics Penalties
+            let tempPenalty = 1.0;
+            let windPenalty = 1.0;
+            let penaltyReasons = [];
+
+            if (weatherLoaded) {
+                // Temperature penalties
+                if (liveTemp <= 32) {
+                    tempPenalty = 0.75; // 25% loss below freezing
+                    penaltyReasons.push(`Cold (${Math.round(liveTemp)}°F)`);
+                } else if (liveTemp <= 45) {
+                    tempPenalty = 0.85; // 15% loss when chilly
+                    penaltyReasons.push(`Chilly (${Math.round(liveTemp)}°F)`);
+                }
+
+                // Wind penalties
+                if (liveWind >= 20) {
+                    windPenalty = 0.80; // 20% loss in high winds
+                    penaltyReasons.push(`High Wind (${Math.round(liveWind)}mph)`);
+                } else if (liveWind >= 12) {
+                    windPenalty = 0.90; // 10% loss when breezy
+                    penaltyReasons.push(`Breezy (${Math.round(liveWind)}mph)`);
+                }
+            }
+
+            // 3. Final Math
+            const physicsBanner = document.getElementById('physics-banner');
+            
+            if (penaltyReasons.length > 0) {
+                // Calculate total percent lost to display in the UI
+                const totalPercentLost = Math.round((1 - (tempPenalty * windPenalty)) * 100);
+                physicsBanner.innerHTML = `❄️ -${totalPercentLost}% Range: ${penaltyReasons.join(' & ')}`;
+                physicsBanner.classList.add('active');
+            } else {
+                physicsBanner.classList.remove('active');
+            }
+
+            // Apply modifiers to base range
+            const baseRemainingMiles = maxRange * (batteryPct / 100);
+            const actualRemainingMiles = baseRemainingMiles * tempPenalty * windPenalty;
+            
+            const safeRadiusMiles = actualRemainingMiles / 2;
             const safeRadiusMeters = safeRadiusMiles * 1609.34;
 
+            // 4. Draw Map
             if (currentCircle) {
                 map.removeLayer(currentCircle);
             }
 
-            // Refined Circle Drawing (Thicker, richer edge)
             currentCircle = L.circle(newRoLocation, {
                 color: '#ff2a6d', 
                 weight: 3,
@@ -346,8 +400,9 @@
                 radius: safeRadiusMeters
             }).addTo(map);
 
+            // Shift padding based on how many banners are showing
             map.fitBounds(currentCircle.getBounds(), {
-                paddingBottomRight: [0, 380] // Account for slightly taller dashboard grid
+                paddingBottomRight: [0, 420] 
             });
         }
 
