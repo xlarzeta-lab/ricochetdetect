@@ -1,186 +1,218 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>New Ro Scooter Dasher App</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>New Ro Scooter Dasher App</title>
+    
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        /* CSS Variables for Dark Mode Palette */
+        :root {
+            --bg-color: #121212;
+            --card-bg: #1e1e1e;
+            --text-main: #f5f5f5;
+            --text-muted: #a0a0a0;
+            --accent: #ff3366;
+            --input-bg: #2c2c2c;
+            --input-border: #444;
+        }
 
-<style>
-body {
-	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-	margin: 0;
-	padding: 15px;
-	background-color: #f4f4f9;
-	color: #333;
-}
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            /* Flexbox makes the body take up the exact height of the phone screen */
+            display: flex;
+            flex-direction: column;
+            height: 100vh; 
+            overflow: hidden; /* Prevents bouncy page scrolling */
+        }
 
-h2 {
-	text-align: center;
-	color: #ff3366; /* DoorDash red-ish */
-	margin-top: 0;
-}
+        h2 {
+            text-align: center;
+            color: var(--accent);
+            margin: 15px 0 10px 0;
+            font-size: 22px;
+            letter-spacing: 0.5px;
+        }
 
-.dashboard {
-	background: white;
-	padding: 20px;
-	border-radius: 12px;
-	box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-	margin-bottom: 20px;
-}
+        .dashboard {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 16px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.5);
+            margin: 0 15px 15px 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px; /* Spaces out elements evenly */
+        }
 
-.input-group {
-	margin-bottom: 15px;
-}
+        /* Groups inputs side-by-side to save vertical space on small screens */
+        .input-row {
+            display: flex;
+            gap: 15px; 
+        }
 
-label {
-	display: block;
-	font-weight: bold;
-	margin-bottom: 5px;
-}
+        .input-group {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
 
-input {
-	width: 100%;
-	padding: 10px;
-	border: 1px solid #ccc;
-	border-radius: 6px;
-	box-sizing: border-box; /* Ensures padding doesn't affect 100% width */
-	font-size: 16px;
-}
+        label {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+            font-weight: 700;
+        }
 
-button {
-	width: 100%;
-	padding: 12px;
-	background-color: #ff3366;
-	color: white;
-	border: none;
-	border-radius: 6px;
-	font-size: 18px;
-	font-weight: bold;
-	cursor: pointer;
-	margin-top: 10px;
-}
+        input {
+            width: 100%;
+            padding: 14px; /* Larger tap target */
+            background-color: var(--input-bg);
+            border: 1px solid var(--input-border);
+            color: var(--text-main);
+            border-radius: 10px;
+            box-sizing: border-box;
+            font-size: 16px; /* 16px prevents iOS from automatically zooming in */
+        }
 
-button:active {
-	background-color: #e62e5c;
-}
+        input:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
 
-/* The Map Container */
-#map {
-height: 400px;
-width: 100%;
-border-radius: 12px;
-box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-z-index: 1; /* Keeps it behind dropdowns if added later */
-}
+        button {
+            width: 100%;
+            padding: 16px; /* Massive, easy-to-hit button */
+            background-color: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: 800;
+            cursor: pointer;
+            transition: transform 0.1s, background-color 0.2s;
+        }
 
-/* The Warning Banner */
-#warning-banner {
-display: none; /* Hidden by default */
-background-color: #fff3cd;
-color: #856404;
-padding: 15px;
-border-left: 6px solid #ffeeba;
-border-radius: 6px;
-margin-top: 15px;
-font-weight: bold;
-font-size: 14px;
-}
-</style>
+        button:active {
+            background-color: #e62e5c;
+            transform: scale(0.98); /* Satisfying click animation */
+        }
+
+        /* Map takes up all remaining space at the bottom */
+        #map {
+            flex-grow: 1;
+            width: 100%;
+            border-top-left-radius: 24px;
+            border-top-right-radius: 24px;
+            z-index: 1;
+        }
+
+        #warning-banner {
+            display: none;
+            background-color: rgba(255, 193, 7, 0.1);
+            color: #ffc107;
+            padding: 12px;
+            border: 1px solid rgba(255, 193, 7, 0.3);
+            border-radius: 10px;
+            font-weight: 500;
+            font-size: 14px;
+            text-align: center;
+        }
+    </style>
 </head>
 <body>
 
-<h2>Scooter Range & Routing</h2>
+    <h2>New Ro Dasher</h2>
 
-<div class="dashboard">
-<div class="input-group">
-<label for="maxRange">Scooter Max Range (Miles)</label>
-<input type="number" id="maxRange" placeholder="e.g., 30" value="30">
-</div>
+    <div class="dashboard">
+        <div class="input-row">
+            <div class="input-group">
+                <label for="maxRange">Max Range (mi)</label>
+                <input type="number" id="maxRange" value="30">
+            </div>
 
-<div class="input-group">
-<label for="batteryPct">Current Battery (%)</label>
-<input type="number" id="batteryPct" placeholder="e.g., 50" value="50">
-</div>
+            <div class="input-group">
+                <label for="batteryPct">Battery (%)</label>
+                <input type="number" id="batteryPct" value="50">
+            </div>
+        </div>
 
-<div class="input-group">
-<label for="routeElevation">Route Elevation Gain (Feet)</label>
-<input type="number" id="routeElevation" placeholder="e.g., 80" value="80">
-</div>
+        <div class="input-group">
+            <label for="routeElevation">Elevation Gain (ft)</label>
+            <input type="number" id="routeElevation" value="80">
+        </div>
 
-<button onclick="calculateAndDraw()">Calculate Safe Radius</button>
+        <button onclick="calculateAndDraw()">Calculate Safe Radius</button>
 
-<div id="warning-banner"></div>
-</div>
+        <div id="warning-banner"></div>
+    </div>
 
-<div id="map"></div>
+    <div id="map"></div>
 
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-<script>
-// 1. Initialize the Map centered on downtown New Rochelle
-const newRoLocation = [40.9115, -73.7824];
-const map = L.map('map').setView(newRoLocation, 12);
+    <script>
+        const newRoLocation = [40.9115, -73.7824];
+        
+        // Removed zoom control for a cleaner mobile interface
+        const map = L.map('map', {
+            zoomControl: false 
+        }).setView(newRoLocation, 12);
 
-// 2. Add the free OpenStreetMap tiles (the visual map layer)
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-	maxZoom: 19,
-	attribution: '© OpenStreetMap'
-}).addTo(map);
+        // 🔥 THE MAGIC FIX FOR DARK MODE MAPS + LOCAL FILES 🔥
+        // Using Carto's "Dark Matter" map tiles instead of OpenStreetMap
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+            maxZoom: 19,
+            attribution: '&copy; OpenStreetMap contributors &copy; CARTO'
+        }).addTo(map);
 
-// 3. Put a marker where the Dasher is
-L.marker(newRoLocation).addTo(map)
-.bindPopup("<b>You are here</b><br>New Rochelle Station").openPopup();
+        L.marker(newRoLocation).addTo(map)
+            .bindPopup("<b>You are here</b><br>New Rochelle Station").openPopup();
 
-// Variable to store the circle so we can delete the old one when recalculating
-let currentCircle = null;
+        let currentCircle = null;
 
-// 4. The Core Logic Function
-function calculateAndDraw() {
-	// Get inputs from the HTML form
-	const maxRange = parseFloat(document.getElementById('maxRange').value);
-	const batteryPct = parseFloat(document.getElementById('batteryPct').value);
-	const elevationGain = parseFloat(document.getElementById('routeElevation').value);
-	
-	// Handle Topography Warning
-	const warningBanner = document.getElementById('warning-banner');
-	if (elevationGain > 150) {
-		warningBanner.innerHTML = "⚠️ Warning: Steep inclines ahead! Expect faster battery drain. Consider lowering your safe radius.";
-		warningBanner.style.display = "block";
-	} else {
-		warningBanner.style.display = "none";
-	}
-	
-	// Handle the Math
-	// Calculate remaining range based on battery %
-	const remainingRangeMiles = maxRange * (batteryPct / 100);
-	
-	// Safe radius is half the remaining range (need to get back!)
-	const safeRadiusMiles = remainingRangeMiles / 2;
-	
-	// Convert miles to meters for Leaflet
-	const safeRadiusMeters = safeRadiusMiles * 1609.34;
-	
-	// Remove the old circle if it exists
-	if (currentCircle) {
-		map.removeLayer(currentCircle);
-	}
-	
-	// Draw the new circle
-	currentCircle = L.circle(newRoLocation, {
-		color: '#28a745', // Green border
-		fillColor: '#28a745', // Green fill
-		fillOpacity: 0.2, // Make it see-through
-		radius: safeRadiusMeters
-	}).addTo(map);
-	
-	// Auto-zoom the map so the whole circle fits on the screen
-	map.fitBounds(currentCircle.getBounds());
-}
+        function calculateAndDraw() {
+            const maxRange = parseFloat(document.getElementById('maxRange').value);
+            const batteryPct = parseFloat(document.getElementById('batteryPct').value);
+            const elevationGain = parseFloat(document.getElementById('routeElevation').value);
 
-// Run the calculation once automatically when the page loads
-window.onload = calculateAndDraw;
-</script>
+            const warningBanner = document.getElementById('warning-banner');
+            if (elevationGain > 150) {
+                warningBanner.innerHTML = "⚠️ Steep inclines! Expect faster battery drain.";
+                warningBanner.style.display = "block";
+            } else {
+                warningBanner.style.display = "none";
+            }
+
+            const remainingRangeMiles = maxRange * (batteryPct / 100);
+            const safeRadiusMiles = remainingRangeMiles / 2;
+            const safeRadiusMeters = safeRadiusMiles * 1609.34;
+
+            if (currentCircle) {
+                map.removeLayer(currentCircle);
+            }
+
+            // Updated circle colors to pop against the dark map
+            currentCircle = L.circle(newRoLocation, {
+                color: '#ff3366', 
+                weight: 2,
+                fillColor: '#ff3366', 
+                fillOpacity: 0.15,
+                radius: safeRadiusMeters
+            }).addTo(map);
+
+            map.fitBounds(currentCircle.getBounds());
+        }
+
+        window.onload = calculateAndDraw;
+    </script>
 </body>
 </html>
