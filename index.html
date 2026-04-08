@@ -1,469 +1,186 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>RICOCHET LIVE v2.5.1 • BO7 / Warzone</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
-    body { font-family: 'Inter', system-ui, sans-serif; }
-    .live-dot { animation: pulse 1.2s infinite; }
-    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.2; } }
-    .flash { animation: flash 400ms ease-in-out 4; }
-    @keyframes flash { 0%, 100% { background-color: #00ff9d; } 50% { background-color: transparent; } }
-    .silent-flash { animation: silent-flash 400ms ease-in-out 4; }
-    @keyframes silent-flash { 0%, 100% { background-color: #fbbf24; } 50% { background-color: transparent; } }
-    .mobile-safe { padding: 1rem; }
-    @media (max-width: 640px) {
-      .mobile-safe { padding: 0.75rem; }
-      h1 { font-size: 2.25rem; }
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>New Ro Scooter Dasher App</title>
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+<style>
+body {
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+	margin: 0;
+	padding: 15px;
+	background-color: #f4f4f9;
+	color: #333;
+}
+
+h2 {
+	text-align: center;
+	color: #ff3366; /* DoorDash red-ish */
+	margin-top: 0;
+}
+
+.dashboard {
+	background: white;
+	padding: 20px;
+	border-radius: 12px;
+	box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+	margin-bottom: 20px;
+}
+
+.input-group {
+	margin-bottom: 15px;
+}
+
+label {
+	display: block;
+	font-weight: bold;
+	margin-bottom: 5px;
+}
+
+input {
+	width: 100%;
+	padding: 10px;
+	border: 1px solid #ccc;
+	border-radius: 6px;
+	box-sizing: border-box; /* Ensures padding doesn't affect 100% width */
+	font-size: 16px;
+}
+
+button {
+	width: 100%;
+	padding: 12px;
+	background-color: #ff3366;
+	color: white;
+	border: none;
+	border-radius: 6px;
+	font-size: 18px;
+	font-weight: bold;
+	cursor: pointer;
+	margin-top: 10px;
+}
+
+button:active {
+	background-color: #e62e5c;
+}
+
+/* The Map Container */
+#map {
+height: 400px;
+width: 100%;
+border-radius: 12px;
+box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+z-index: 1; /* Keeps it behind dropdowns if added later */
+}
+
+/* The Warning Banner */
+#warning-banner {
+display: none; /* Hidden by default */
+background-color: #fff3cd;
+color: #856404;
+padding: 15px;
+border-left: 6px solid #ffeeba;
+border-radius: 6px;
+margin-top: 15px;
+font-weight: bold;
+font-size: 14px;
+}
+</style>
 </head>
-<body class="bg-zinc-950 text-white min-h-screen">
-  <div class="max-w-6xl mx-auto mobile-safe">
-    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
-      <div class="flex items-center gap-4">
-        <div class="w-12 h-12 sm:w-14 sm:h-14 bg-[#00ff9d] rounded-3xl flex items-center justify-center text-black font-black text-4xl rotate-12 shadow-xl">R</div>
-        <div>
-          <h1 class="text-4xl sm:text-5xl font-black tracking-[-2px]">RICOCHET LIVE</h1>
-          <p class="text-[#00ff9d] text-base sm:text-lg font-medium -mt-1">v2.5.1 • Silent Patch History FIXED</p>
-        </div>
-      </div>
-      <div class="flex items-center gap-3 sm:gap-6 w-full sm:w-auto">
-        <div class="flex items-center gap-2 bg-zinc-900 px-4 h-9 rounded-2xl border border-zinc-700 flex-1 sm:flex-none">
-          <div class="w-3 h-3 bg-green-400 rounded-full live-dot"></div>
-          <span id="status" class="font-semibold text-green-400">MONITORING LIVE</span>
-        </div>
-        <div class="flex items-center gap-2">
-          <button onclick="toggleSound()" id="soundBtn" class="px-5 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-2xl text-lg transition flex items-center gap-2">🔊</button>
-          <button onclick="testSound()" class="px-4 py-2 text-xs bg-zinc-800 hover:bg-zinc-700 rounded-2xl transition">TEST</button>
-        </div>
-        <div onclick="showSettings()" class="cursor-pointer flex items-center justify-center w-9 h-9 bg-zinc-800 hover:bg-zinc-700 rounded-2xl text-xl">⚙️</div>
-      </div>
-    </div>
+<body>
 
-    <!-- COUNTDOWN -->
-    <div class="bg-zinc-900 border border-zinc-700 rounded-3xl p-4 mb-6 flex flex-col sm:flex-row items-center justify-between gap-4">
-      <div class="flex items-center gap-3">
-        <span class="text-xs uppercase tracking-widest text-zinc-400">Next check in</span>
-        <span id="countdown" class="font-mono text-3xl font-bold text-[#00ff9d]">10:00</span>
-      </div>
-      <button onclick="manualCheck()" class="w-full sm:w-auto bg-[#00ff9d] text-black px-8 py-3 rounded-3xl font-bold hover:scale-105 transition text-sm sm:text-base">CHECK ALL NOW</button>
-    </div>
+<h2>Scooter Range & Routing</h2>
 
-    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-      <!-- MAIN CARD -->
-      <div class="lg:col-span-7 bg-zinc-900 border border-zinc-800 rounded-3xl p-6 sm:p-8 shadow-2xl">
-        <div class="flex justify-between mb-6">
-          <h2 class="text-2xl sm:text-3xl font-bold flex items-center gap-3"><span class="text-[#00ff9d] text-4xl">●</span> LATEST DETECTION</h2>
-          <div class="text-right">
-            <span id="last-checked" class="text-xs text-zinc-400">Last checked just now</span>
-            <div id="check-count" class="text-[10px] text-zinc-500 font-mono mt-1">Check #0</div>
-          </div>
-        </div>
-        <div id="patch-card" class="bg-zinc-800 border border-zinc-700 rounded-3xl p-6 sm:p-8 transition-all min-h-[200px] flex items-center">
-          <div id="no-patch" class="w-full text-center">
-            <p class="text-zinc-400 italic text-lg sm:text-xl">No new announced or silent patches yet...</p>
-          </div>
-          <div id="patch-content" class="hidden w-full">
-            <a id="patch-title-link" href="#" target="_blank" class="block text-2xl sm:text-3xl leading-tight font-bold hover:text-[#00ff9d]"></a>
-            <div class="flex flex-wrap gap-3 text-xs mt-3">
-              <span id="patch-source" class="px-3 py-1 bg-[#00ff9d]/10 text-[#00ff9d] rounded-2xl"></span>
-              <span id="patch-date" class="text-zinc-400"></span>
-            </div>
-            <p id="patch-excerpt" class="mt-5 text-zinc-300 text-sm sm:text-base"></p>
-          </div>
-        </div>
-      </div>
+<div class="dashboard">
+<div class="input-group">
+<label for="maxRange">Scooter Max Range (Miles)</label>
+<input type="number" id="maxRange" placeholder="e.g., 30" value="30">
+</div>
 
-      <!-- SIDEBAR -->
-      <div class="lg:col-span-5 space-y-6">
-        <!-- Sources -->
-        <div class="bg-zinc-900 border border-zinc-800 rounded-3xl p-6">
-          <h3 class="uppercase text-xs tracking-widest mb-4">5 Sources • Real-time</h3>
-          <div class="space-y-3 text-sm">
-            <div class="flex justify-between items-center"><span class="flex items-center gap-2"><span class="text-green-400">●</span> Blog</span><span class="text-zinc-400 text-xs">callofduty.com/blog</span></div>
-            <div class="flex justify-between items-center"><span class="flex items-center gap-2"><span class="text-green-400">●</span> Patch Notes</span><span class="text-zinc-400 text-xs">callofduty.com/patchnotes</span></div>
-            <div class="flex justify-between items-center"><span class="flex items-center gap-2"><span class="text-green-400">●</span> Season 03 Hub</span><span class="text-zinc-400 text-xs">callofduty.com/blog/blackops7</span></div>
-            <div class="flex justify-between items-center"><span class="flex items-center gap-2"><span class="text-green-400">●</span> RICOCHET Hub</span><span class="text-zinc-400 text-xs">callofduty.com/warzone/ricochet</span></div>
-            <div class="flex justify-between items-center"><span class="flex items-center gap-2"><span class="text-amber-400">●</span> SteamDB Builds</span><span class="text-zinc-400 text-xs">steamdb.info/app/1938090/history/</span></div>
-          </div>
-        </div>
+<div class="input-group">
+<label for="batteryPct">Current Battery (%)</label>
+<input type="number" id="batteryPct" placeholder="e.g., 50" value="50">
+</div>
 
-        <!-- STEAMDB STATUS (always visible) -->
-        <div id="steamdb-status-card" class="bg-zinc-900 border border-amber-400/30 rounded-3xl p-6">
-          <h3 class="uppercase text-xs tracking-widest mb-2 flex items-center gap-2"><span class="text-amber-400">●</span> STEAMDB STATUS (Silent Patches)</h3>
-          <div id="steamdb-info" class="text-sm">
-            <p class="text-zinc-400">Loading current build...</p>
-          </div>
-        </div>
+<div class="input-group">
+<label for="routeElevation">Route Elevation Gain (Feet)</label>
+<input type="number" id="routeElevation" placeholder="e.g., 80" value="80">
+</div>
 
-        <!-- Info Panel -->
-        <div class="bg-zinc-900 border border-zinc-800 rounded-3xl p-6 text-xs">
-          <h3 class="uppercase tracking-widest mb-4">📌 Silent Patch History</h3>
-          <div class="space-y-3 text-zinc-300">
-            <p>• Silent patches appear in the history list below with a <span class="text-amber-400">yellow badge</span>.</p>
-            <p>• The SteamDB card above always shows the latest known build (even if nothing new).</p>
-            <p>• First check records the baseline. Only future new builds trigger alerts + history entries.</p>
-          </div>
-        </div>
-      </div>
-    </div>
+<button onclick="calculateAndDraw()">Calculate Safe Radius</button>
 
-    <!-- HISTORY -->
-    <div class="mt-8">
-      <div class="flex justify-between items-center mb-4 px-1">
-        <h3 class="uppercase text-xs tracking-widest text-zinc-500">DETECTION HISTORY (announced + silent)</h3>
-        <span id="history-count" class="text-xs text-zinc-400">0 total detections</span>
-      </div>
-      <ul id="history-list" class="grid grid-cols-1 sm:grid-cols-2 gap-4"></ul>
-    </div>
+<div id="warning-banner"></div>
+</div>
 
-    <!-- LIVE LOG -->
-    <div class="mt-10">
-      <div class="flex justify-between text-xs tracking-widest text-zinc-500 mb-3 px-1">
-        <h3>LIVE ACTIVITY LOG — every step visible</h3>
-        <button onclick="clearLog()" class="hover:text-zinc-300">Clear Log</button>
-      </div>
-      <div id="check-log" class="bg-black/70 border border-zinc-700 font-mono text-xs p-5 rounded-3xl h-72 overflow-y-auto leading-relaxed"></div>
-    </div>
+<div id="map"></div>
 
-    <div class="text-center text-[10px] text-zinc-500 mt-12">
-      100% client-side • Mobile + Desktop • SteamDB silent detection now fully visible
-    </div>
-  </div>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-  <!-- SETTINGS MODAL (same) -->
-  <div onclick="if(event.target.id==='settingsModal')hideSettings()" id="settingsModal" class="hidden fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
-    <div onclick="event.stopImmediatePropagation()" class="bg-zinc-900 rounded-3xl p-6 sm:p-8 max-w-md w-full mx-auto">
-      <h2 class="text-2xl font-bold mb-6">Advanced Settings</h2>
-      <div class="space-y-6">
-        <div>
-          <label class="block text-xs uppercase mb-2">Custom Keywords (comma separated)</label>
-          <input id="customKeywords" type="text" value="ricochet,anti-cheat,anti cheat,security,progress report,ban wave" class="w-full bg-zinc-800 border border-zinc-700 rounded-2xl px-4 py-3 text-sm">
-        </div>
-        <div class="flex items-center justify-between">
-          <span>Auto-open link on detection</span>
-          <label class="relative inline-flex items-center cursor-pointer">
-            <input id="autoOpenToggle" type="checkbox" checked class="sr-only peer">
-            <div class="w-11 h-6 bg-zinc-700 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-[#00ff9d] rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#00ff9d]"></div>
-          </label>
-        </div>
-        <div class="flex items-center justify-between">
-          <span>Desktop notifications</span>
-          <label class="relative inline-flex items-center cursor-pointer">
-            <input id="notifyToggle" type="checkbox" checked class="sr-only peer">
-            <div class="w-11 h-6 bg-zinc-700 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-[#00ff9d] rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#00ff9d]"></div>
-          </label>
-        </div>
-      </div>
-      <div class="mt-8 flex gap-4">
-        <button onclick="hideSettings()" class="flex-1 py-4 rounded-3xl border border-zinc-700 text-sm">Close</button>
-        <button onclick="saveSettings();hideSettings()" class="flex-1 py-4 bg-[#00ff9d] text-black font-bold rounded-3xl text-sm">Save &amp; Restart</button>
-      </div>
-    </div>
-  </div>
+<script>
+// 1. Initialize the Map centered on downtown New Rochelle
+const newRoLocation = [40.9115, -73.7824];
+const map = L.map('map').setView(newRoLocation, 12);
 
-  <script>
-    // (Full script with SteamDB status card + improved history)
-    let settings = JSON.parse(localStorage.getItem('ricochetSettings')) || {
-      customKeywords: ['ricochet', 'anti-cheat', 'anti cheat', 'security', 'progress report', 'ban wave'],
-      autoOpen: true,
-      notifications: true,
-      pollInterval: 600000
-    };
+// 2. Add the free OpenStreetMap tiles (the visual map layer)
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+	maxZoom: 19,
+	attribution: '© OpenStreetMap'
+}).addTo(map);
 
-    const PROXIES = ['https://corsproxy.io/?', 'https://proxy.corsfix.com/?', 'https://api.codetabs.com/v1/proxy?quest='];
-    const SOURCES = [
-      { name: 'Blog', url: 'https://www.callofduty.com/blog' },
-      { name: 'Patch Notes', url: 'https://www.callofduty.com/patchnotes' },
-      { name: 'Season 03 Hub', url: 'https://www.callofduty.com/blog/blackops7' },
-      { name: 'RICOCHET Hub', url: 'https://www.callofduty.com/warzone/ricochet' },
-      { name: 'SteamDB Builds', url: 'https://steamdb.info/app/1938090/history/' }
-    ];
+// 3. Put a marker where the Dasher is
+L.marker(newRoLocation).addTo(map)
+.bindPopup("<b>You are here</b><br>New Rochelle Station").openPopup();
 
-    let lastSeenTitle = localStorage.getItem('lastSeenPatch') || '';
-    let lastSeenBuild = localStorage.getItem('lastSeenBuild') || '0';
-    let history = JSON.parse(localStorage.getItem('patchHistory')) || [];
-    let soundEnabled = true;
-    let checkCount = 0;
-    let audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    let countdownInterval;
+// Variable to store the circle so we can delete the old one when recalculating
+let currentCircle = null;
 
-    function playAlertSound() { /* same as previous */ 
-      if (!soundEnabled) return;
-      const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
-      osc.frequency.setValueAtTime(720, audioCtx.currentTime); gain.gain.value = 0.5;
-      osc.connect(gain).connect(audioCtx.destination); osc.start();
-      setTimeout(() => osc.stop(), 80);
-      setTimeout(() => {
-        const osc2 = audioCtx.createOscillator();
-        osc2.frequency.setValueAtTime(1100, audioCtx.currentTime);
-        osc2.connect(gain).connect(audioCtx.destination); osc2.start();
-        setTimeout(() => osc2.stop(), 140);
-      }, 90);
-    }
+// 4. The Core Logic Function
+function calculateAndDraw() {
+	// Get inputs from the HTML form
+	const maxRange = parseFloat(document.getElementById('maxRange').value);
+	const batteryPct = parseFloat(document.getElementById('batteryPct').value);
+	const elevationGain = parseFloat(document.getElementById('routeElevation').value);
+	
+	// Handle Topography Warning
+	const warningBanner = document.getElementById('warning-banner');
+	if (elevationGain > 150) {
+		warningBanner.innerHTML = "⚠️ Warning: Steep inclines ahead! Expect faster battery drain. Consider lowering your safe radius.";
+		warningBanner.style.display = "block";
+	} else {
+		warningBanner.style.display = "none";
+	}
+	
+	// Handle the Math
+	// Calculate remaining range based on battery %
+	const remainingRangeMiles = maxRange * (batteryPct / 100);
+	
+	// Safe radius is half the remaining range (need to get back!)
+	const safeRadiusMiles = remainingRangeMiles / 2;
+	
+	// Convert miles to meters for Leaflet
+	const safeRadiusMeters = safeRadiusMiles * 1609.34;
+	
+	// Remove the old circle if it exists
+	if (currentCircle) {
+		map.removeLayer(currentCircle);
+	}
+	
+	// Draw the new circle
+	currentCircle = L.circle(newRoLocation, {
+		color: '#28a745', // Green border
+		fillColor: '#28a745', // Green fill
+		fillOpacity: 0.2, // Make it see-through
+		radius: safeRadiusMeters
+	}).addTo(map);
+	
+	// Auto-zoom the map so the whole circle fits on the screen
+	map.fitBounds(currentCircle.getBounds());
+}
 
-    function testSound() { playAlertSound(); }
-
-    function addToLog(message, type = 'info') {
-      const log = document.getElementById('check-log');
-      const time = new Date().toLocaleTimeString('en-US', {hour12:false, hour:'2-digit', minute:'2-digit', second:'2-digit'});
-      const color = type === 'success' ? 'text-[#00ff9d]' : type === 'silent' ? 'text-amber-400' : type === 'error' ? 'text-red-400' : 'text-zinc-400';
-      const entry = document.createElement('div');
-      entry.className = `flex justify-between ${color}`;
-      entry.innerHTML = `<span>[${time}] ${message}</span>`;
-      log.prepend(entry);
-      if (log.children.length > 20) log.lastChild.remove();
-    }
-
-    function renderHistory() {
-      const list = document.getElementById('history-list');
-      list.innerHTML = history.map(item => `
-        <li onclick="window.open('${item.link}','_blank')" class="cursor-pointer bg-zinc-900 border border-zinc-800 hover:border-[#00ff9d]/30 p-5 rounded-3xl flex justify-between items-start gap-4 transition">
-          <div class="flex-1">
-            <div class="flex items-center gap-2 text-xs mb-1">
-              <span class="px-2.5 py-px ${item.silent ? 'bg-amber-400/10 text-amber-400' : 'bg-[#00ff9d]/10 text-[#00ff9d]'} rounded-full">${item.source}</span>
-              <span class="text-zinc-500">${item.date}</span>
-            </div>
-            <p class="font-semibold leading-tight text-sm">${item.title}</p>
-          </div>
-        </li>
-      `).join('');
-      document.getElementById('history-count').textContent = `${history.length} total detections`;
-    }
-
-    function updateSteamDBStatus(buildId, time) {
-      const card = document.getElementById('steamdb-info');
-      if (buildId && buildId !== '0') {
-        card.innerHTML = `
-          <div class="flex justify-between items-center">
-            <span class="font-mono text-amber-400">Build ${buildId}</span>
-            <span class="text-xs text-zinc-400">${time || 'recent'}</span>
-          </div>
-          <p class="text-[10px] text-zinc-500 mt-1">Last recorded on SteamDB • New build = silent patch</p>
-        `;
-      } else {
-        card.innerHTML = `<p class="text-zinc-400">No build recorded yet</p>`;
-      }
-    }
-
-    async function fetchWithProxy(url) { /* same as before */ 
-      for (const proxy of PROXIES) {
-        try {
-          const res = await fetch(proxy + encodeURIComponent(url), { headers: { Accept: 'text/html' } });
-          if (res.ok) return await res.text();
-        } catch (e) {}
-      }
-      throw new Error('All proxies failed');
-    }
-
-    async function checkSource(source) {
-      addToLog(`Fetching ${source.name}...`);
-      const html = await fetchWithProxy(source.url);
-      const parser = new DOMParser();
-      const doc = parser.parseFromString(html, 'text/html');
-
-      if (source.name === 'SteamDB Builds') {
-        const rows = Array.from(doc.querySelectorAll('tr'));
-        let latestBuild = null;
-        for (const row of rows) {
-          const tds = row.querySelectorAll('td');
-          if (tds.length >= 3) {
-            const buildText = tds[1] ? tds[1].textContent.trim() : '';
-            const timeText = tds[2] ? tds[2].textContent.trim() : '';
-            if (/^\d{7,}$/.test(buildText)) {
-              latestBuild = { id: buildText, time: timeText };
-              break;
-            }
-          }
-        }
-        if (latestBuild) {
-          updateSteamDBStatus(latestBuild.id, latestBuild.time);
-          if (lastSeenBuild === '0') {
-            lastSeenBuild = latestBuild.id;
-            localStorage.setItem('lastSeenBuild', lastSeenBuild);
-            addToLog(`SteamDB baseline recorded: Build ${latestBuild.id}`);
-            return null;
-          }
-          if (latestBuild.id !== lastSeenBuild) {
-            lastSeenBuild = latestBuild.id;
-            localStorage.setItem('lastSeenBuild', lastSeenBuild);
-            addToLog(`✅ NEW BUILD — Possible Silent Patch`, 'silent');
-            return {
-              title: `Possible Silent Patch — New Build ${latestBuild.id}`,
-              link: source.url,
-              date: latestBuild.time,
-              excerpt: 'SteamDB detected a new client build (often = quiet anti-cheat update)',
-              source: 'SteamDB Builds',
-              silent: true
-            };
-          }
-          addToLog(`No new build on SteamDB`);
-          return null;
-        }
-        addToLog(`SteamDB parse failed`);
-        return null;
-      }
-
-      // Normal pages (same as before)
-      const links = Array.from(doc.querySelectorAll('a[href^="/blog/"], a[href*="/blog/"], a[href^="/patchnotes/"], a[href*="/patchnotes/"], a[href*="/ricochet"]'));
-      for (const link of links) {
-        const title = (link.textContent || '').trim();
-        if (!title) continue;
-        const lower = title.toLowerCase();
-        if (settings.customKeywords.some(kw => lower.includes(kw.toLowerCase()))) {
-          addToLog(`✅ MATCH FOUND in ${source.name}`, 'success');
-          return {
-            title: title,
-            link: 'https://www.callofduty.com' + (link.getAttribute('href') || ''),
-            date: 'Detected live • ' + new Date().toLocaleDateString(),
-            excerpt: `${source.name} — RICOCHET / security update`,
-            source: source.name,
-            silent: false
-          };
-        }
-      }
-      addToLog(`No match in ${source.name}`);
-      return null;
-    }
-
-    async function checkForPatches() {
-      // (same logic as v2.5 but calls updateSteamDBStatus on every SteamDB check)
-      const statusEl = document.getElementById('status');
-      statusEl.textContent = 'SCANNING...';
-      statusEl.classList.add('text-amber-400');
-      statusEl.classList.remove('text-green-400');
-
-      checkCount++;
-      document.getElementById('check-count').textContent = `Check #${checkCount}`;
-      addToLog(`=== STARTING FULL CHECK #${checkCount} ===`);
-
-      let newPatch = null;
-      for (const source of SOURCES) {
-        try {
-          const result = await checkSource(source);
-          if (result && result.title !== lastSeenTitle) {
-            newPatch = result;
-            break;
-          }
-        } catch (e) {
-          addToLog(`⚠️ ${source.name} failed`, 'error');
-        }
-      }
-
-      const now = new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
-      document.getElementById('last-checked').innerHTML = `Last checked <span class="font-mono">${now}</span>`;
-
-      if (newPatch) {
-        lastSeenTitle = newPatch.title;
-        localStorage.setItem('lastSeenPatch', lastSeenTitle);
-
-        document.getElementById('no-patch').classList.add('hidden');
-        const content = document.getElementById('patch-content');
-        content.classList.remove('hidden');
-        document.getElementById('patch-title-link').textContent = newPatch.title;
-        document.getElementById('patch-title-link').href = newPatch.link;
-        document.getElementById('patch-source').textContent = newPatch.source;
-        document.getElementById('patch-date').textContent = newPatch.date;
-        document.getElementById('patch-excerpt').textContent = newPatch.excerpt;
-
-        const card = document.getElementById('patch-card');
-        if (newPatch.silent) card.classList.add('silent-flash');
-        else card.classList.add('flash');
-        setTimeout(() => card.classList.remove('flash', 'silent-flash'), 1800);
-
-        history.unshift(newPatch);
-        if (history.length > 15) history.pop();
-        localStorage.setItem('patchHistory', JSON.stringify(history));
-        renderHistory();
-
-        playAlertSound();
-        if (settings.notifications && "Notification" in window && Notification.permission === "granted") {
-          new Notification(newPatch.silent ? "🟡 POSSIBLE SILENT PATCH" : "🟢 RICOCHET UPDATE!", { body: newPatch.title });
-        }
-        if (settings.autoOpen) window.open(newPatch.link, '_blank');
-
-        addToLog(newPatch.silent ? `🟡 SILENT PATCH — ${newPatch.source}` : `🚨 NEW PATCH — ${newPatch.source}`, newPatch.silent ? 'silent' : 'success');
-      } else {
-        addToLog('No new updates found');
-      }
-
-      statusEl.textContent = 'MONITORING LIVE';
-      statusEl.classList.add('text-green-400');
-      startCountdown();
-    }
-
-    function startCountdown() { /* same */ 
-      let timeLeft = 600;
-      clearInterval(countdownInterval);
-      countdownInterval = setInterval(() => {
-        timeLeft--;
-        const minutes = Math.floor(timeLeft / 60);
-        const seconds = timeLeft % 60;
-        document.getElementById('countdown').textContent = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
-        if (timeLeft <= 0) clearInterval(countdownInterval);
-      }, 1000);
-    }
-
-    function manualCheck() { checkForPatches(); }
-
-    function toggleSound() {
-      soundEnabled = !soundEnabled;
-      document.getElementById('soundBtn').textContent = soundEnabled ? '🔊' : '🔇';
-    }
-
-    function saveSettings() { /* same */ 
-      const input = document.getElementById('customKeywords').value;
-      settings.customKeywords = input.split(',').map(k => k.trim()).filter(Boolean);
-      settings.autoOpen = document.getElementById('autoOpenToggle').checked;
-      settings.notifications = document.getElementById('notifyToggle').checked;
-      localStorage.setItem('ricochetSettings', JSON.stringify(settings));
-      addToLog('✅ Settings saved — restarting');
-      setTimeout(() => location.reload(), 600);
-    }
-
-    function showSettings() { /* same */ 
-      document.getElementById('customKeywords').value = settings.customKeywords.join(', ');
-      document.getElementById('autoOpenToggle').checked = settings.autoOpen;
-      document.getElementById('notifyToggle').checked = settings.notifications;
-      document.getElementById('settingsModal').classList.remove('hidden');
-      document.getElementById('settingsModal').classList.add('flex');
-    }
-
-    function hideSettings() { /* same */ 
-      document.getElementById('settingsModal').classList.add('hidden');
-      document.getElementById('settingsModal').classList.remove('flex');
-    }
-
-    function clearLog() {
-      document.getElementById('check-log').innerHTML = '';
-      addToLog('Log cleared');
-    }
-
-    window.onload = () => {
-      renderHistory();
-      if ("Notification" in window && Notification.permission === "default") Notification.requestPermission();
-
-      // Show last known SteamDB build immediately
-      if (lastSeenBuild !== '0') {
-        document.getElementById('steamdb-info').innerHTML = `
-          <div class="flex justify-between items-center">
-            <span class="font-mono text-amber-400">Build ${lastSeenBuild}</span>
-            <span class="text-xs text-zinc-400">Last recorded</span>
-          </div>
-        `;
-      }
-
-      checkForPatches();
-      setInterval(checkForPatches, settings.pollInterval);
-      startCountdown();
-
-      console.log('%c🚀 RICOCHET LIVE v2.5.1 STARTED — Silent patch history + always-visible SteamDB status', 'color:#00ff9d; font-size:15px; font-weight:900');
-      addToLog('v2.5.1 ready — SteamDB status now always visible');
-    };
-  </script>
+// Run the calculation once automatically when the page loads
+window.onload = calculateAndDraw;
+</script>
 </body>
 </html>
