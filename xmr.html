@@ -134,9 +134,9 @@
 
         /* Desktop Adjustments - TRULY FULL SCREEN */
         @media (min-width: 900px) {
-            body { overflow: hidden; } /* Prevent scrolling on large screens */
+            body { overflow: hidden; } 
             .app-wrapper { height: 100vh; padding: 20px; }
-            .dashboard { flex-direction: row; align-items: stretch; height: calc(100% - 70px); /* Leave room for footer */ margin-bottom: 0; }
+            .dashboard { flex-direction: row; align-items: stretch; height: calc(100% - 70px); margin-bottom: 0; }
             .left-col { flex: 1; display: flex; flex-direction: column; justify-content: space-between; height: 100%;}
             .right-col { flex: 1.2; display: flex; flex-direction: column; height: 100%; }
             .price-value { font-size: 4.5rem; }
@@ -224,7 +224,6 @@
     </div>
 
     <script>
-        // --- MATH UTILITIES ---
         function calcEMA(prices, period) {
             const k = 2 / (period + 1);
             let ema = [prices[0]];
@@ -297,12 +296,10 @@
             return Math.max(5, Math.min(95, probability)); 
         }
 
-        // --- STATE ---
         let histPrices = [];
         let histVolumes = [];
         let lastUpdate = new Date();
 
-        // --- APP LOGIC ---
         async function initApp() {
             try {
                 let res = await fetch('https://api.coingecko.com/api/v3/coins/monero/market_chart?vs_currency=usd&days=365&interval=daily');
@@ -314,7 +311,8 @@
                 document.getElementById('loaderText').innerText = "CALCULATING VECTORS...";
                 await fetchLivePrice();
 
-                document.getElementById('loader').style.display = 'flex';
+                // BUG FIX: Set loader to none
+                document.getElementById('loader').style.display = 'none';
                 document.getElementById('app').style.display = 'flex';
 
                 setInterval(fetchLivePrice, 60000); 
@@ -398,7 +396,6 @@
             }
         }
 
-        // --- CLIPBOARD UTILITY ---
         function copyAddress() {
             const address = document.getElementById('xmrAddress').innerText;
             navigator.clipboard.writeText(address).then(() => {
