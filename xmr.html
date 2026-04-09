@@ -39,8 +39,8 @@
             min-height: 100vh;
             display: flex;
             justify-content: center;
-            align-items: center;
-            padding: 20px;
+            align-items: flex-start; /* Better for mobile scrolling */
+            padding: 10px; /* Reduced for mobile */
             background-image: 
                 radial-gradient(circle at 50% 0%, rgba(255,102,0,0.08) 0%, transparent 50%),
                 linear-gradient(rgba(255, 255, 255, 0.015) 1px, transparent 1px),
@@ -48,72 +48,73 @@
             background-size: 100% 100%, 40px 40px, 40px 40px;
         }
 
+        /* --- MOBILE FIRST LAYOUT --- */
         .dashboard {
             display: flex;
             flex-direction: column;
-            gap: 20px;
+            gap: 15px; /* Tighter gap on mobile */
             width: 100%;
             max-width: 900px;
+            margin-top: 10px;
         }
-
-        @media (min-width: 768px) { .dashboard { flex-direction: row; align-items: stretch; } }
 
         .panel {
             background: var(--bg-glass);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
             border: 1px solid var(--border-glass);
-            border-radius: 24px;
-            padding: 30px;
+            border-radius: 20px; /* Slightly tighter curves on mobile */
+            padding: 20px; /* Less padding to save space */
             position: relative;
             overflow: hidden;
-            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255,255,255,0.05);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255,255,255,0.05);
         }
 
         /* --- Left Panel: Holographic Display --- */
-        .main-panel { flex: 1.2; display: flex; flex-direction: column; justify-content: space-between; }
+        .main-panel { display: flex; flex-direction: column; justify-content: space-between; }
         .main-panel::before {
             content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
             background: radial-gradient(circle, var(--xmr-dim) 0%, transparent 60%);
             z-index: -1; pointer-events: none;
         }
 
-        header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
 
         .brand {
-            display: flex; align-items: center; gap: 12px;
+            display: flex; align-items: center; gap: 10px;
             font-family: 'JetBrains Mono', monospace; font-weight: 800;
-            color: var(--xmr-base); text-transform: uppercase; font-size: 0.9rem;
+            color: var(--xmr-base); text-transform: uppercase; font-size: 0.85rem;
         }
 
         .logo-mark {
-            width: 28px; height: 28px; background: var(--xmr-base); border-radius: 50%;
+            width: 24px; height: 24px; background: var(--xmr-base); border-radius: 50%;
             display: flex; justify-content: center; align-items: center;
-            color: var(--bg-void); font-size: 16px; box-shadow: 0 0 15px var(--xmr-glow);
+            color: var(--bg-void); font-size: 14px; box-shadow: 0 0 15px var(--xmr-glow);
         }
 
         .live-pulse {
             display: flex; align-items: center; gap: 6px;
-            font-size: 0.75rem; color: var(--action-buy);
+            font-size: 0.7rem; color: var(--action-buy);
             text-transform: uppercase; letter-spacing: 2px; font-weight: bold;
         }
         
         .dot {
-            width: 8px; height: 8px; border-radius: 50%;
+            width: 6px; height: 6px; border-radius: 50%;
             background: var(--action-buy); box-shadow: 0 0 10px var(--action-buy);
             animation: blink 1.5s infinite;
         }
         @keyframes blink { 0%, 100% {opacity: 1;} 50% {opacity: 0.2;} }
 
-        .price-container { margin: 20px 0; }
-        .price-label { font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 10px; }
+        .price-container { margin: 15px 0; }
+        .price-label { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 5px; }
         
         .price-value {
-            font-family: 'JetBrains Mono', monospace; font-size: 4rem; font-weight: 800;
-            line-height: 1; letter-spacing: -2px; text-shadow: 0 0 30px rgba(255, 255, 255, 0.1);
+            font-family: 'JetBrains Mono', monospace; 
+            font-size: 3rem; /* Scaled for mobile */
+            font-weight: 800;
+            line-height: 1; letter-spacing: -1px; text-shadow: 0 0 30px rgba(255, 255, 255, 0.1);
         }
 
-        /* Price Flash Animation */
         .flash-update { animation: priceFlash 1s ease-out; }
         @keyframes priceFlash {
             0% { color: var(--action-buy); text-shadow: 0 0 40px var(--action-buy); transform: scale(1.02); }
@@ -126,50 +127,48 @@
         }
 
         /* Sparkline Chart */
-        .chart-container { width: 100%; height: 60px; margin: 10px 0 20px 0; position: relative; }
+        .chart-container { width: 100%; height: 50px; margin: 10px 0 15px 0; position: relative; }
         svg.sparkline { width: 100%; height: 100%; overflow: visible; }
         .spark-path { fill: none; stroke: var(--xmr-base); stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; filter: drop-shadow(0 5px 8px var(--xmr-glow)); }
 
         /* --- Beginner Verdict Box --- */
         .verdict-box {
-            margin-top: auto; padding: 25px 20px; border-radius: 16px;
+            margin-top: auto; padding: 20px 15px; border-radius: 14px;
             text-align: center; border: 1px solid transparent;
-            display: flex; flex-direction: column; gap: 10px;
+            display: flex; flex-direction: column; gap: 8px;
         }
 
-        .verdict-title { font-family: 'JetBrains Mono', monospace; font-weight: 800; font-size: 2.5rem; letter-spacing: 2px; }
-        .verdict-explanation { font-family: 'Inter', sans-serif; font-size: 0.9rem; line-height: 1.5; font-weight: 500; }
+        .verdict-title { font-family: 'JetBrains Mono', monospace; font-weight: 800; font-size: 2rem; letter-spacing: 2px; }
+        .verdict-explanation { font-family: 'Inter', sans-serif; font-size: 0.85rem; line-height: 1.4; font-weight: 500; }
 
-        /* Beginner Signals */
-        .sig-buy { 
-            background: rgba(0, 230, 118, 0.1); border-color: rgba(0, 230, 118, 0.3);
-            box-shadow: 0 0 30px rgba(0, 230, 118, 0.15);
-        }
+        .sig-buy { background: rgba(0, 230, 118, 0.1); border-color: rgba(0, 230, 118, 0.3); box-shadow: 0 0 30px rgba(0, 230, 118, 0.15); }
         .sig-buy .verdict-title { color: var(--action-buy); text-shadow: 0 0 15px rgba(0, 230, 118, 0.4); }
         .sig-buy .verdict-explanation { color: #b9f6ca; }
 
-        .sig-hold { 
-            background: rgba(255, 234, 0, 0.1); border-color: rgba(255, 234, 0, 0.3);
-        }
+        .sig-hold { background: rgba(255, 234, 0, 0.1); border-color: rgba(255, 234, 0, 0.3); }
         .sig-hold .verdict-title { color: var(--action-hold); }
         .sig-hold .verdict-explanation { color: #fff59d; }
 
-        .sig-wait { 
-            background: rgba(255, 23, 68, 0.1); border-color: rgba(255, 23, 68, 0.3);
-        }
+        .sig-wait { background: rgba(255, 23, 68, 0.1); border-color: rgba(255, 23, 68, 0.3); }
         .sig-wait .verdict-title { color: var(--action-wait); }
         .sig-wait .verdict-explanation { color: #ff8a80; }
 
-        /* --- Right Panel: Data Grid (Kept for advanced users, but smaller) --- */
-        .side-panel { flex: 0.8; display: grid; grid-template-columns: 1fr; gap: 10px; align-content: start; }
-        .side-title { font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px; text-align: center;}
+        /* --- Right Panel: Data Grid --- */
+        .side-title { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; text-align: center; grid-column: 1 / -1;}
+        
+        .side-panel { 
+            display: grid; 
+            grid-template-columns: 1fr 1fr; /* 2x2 grid on mobile saves vertical space */
+            gap: 10px; 
+            align-content: start; 
+        }
         
         .metric-card {
             background: rgba(0, 0, 0, 0.3); border: 1px solid rgba(255, 255, 255, 0.03);
-            border-radius: 12px; padding: 15px; display: flex; justify-content: space-between; align-items: center;
+            border-radius: 10px; padding: 12px; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;
         }
-        .metric-title { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; }
-        .metric-val { font-family: 'JetBrains Mono', monospace; font-size: 1.1rem; font-weight: 700; }
+        .metric-title { font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px;}
+        .metric-val { font-family: 'JetBrains Mono', monospace; font-size: 1rem; font-weight: 700; }
         
         .text-glow { color: var(--xmr-base); }
         .text-dim { color: var(--text-muted); }
@@ -179,10 +178,29 @@
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             background: var(--bg-void); display: flex; justify-content: center; align-items: center;
             z-index: 10; font-family: 'JetBrains Mono', monospace;
-            color: var(--xmr-base); font-size: 0.9rem; flex-direction: column; gap: 15px;
+            color: var(--xmr-base); font-size: 0.85rem; flex-direction: column; gap: 15px; text-align: center; padding: 20px;
         }
-        .spinner { width: 40px; height: 40px; border: 3px solid var(--text-dark); border-top-color: var(--xmr-base); border-radius: 50%; animation: spin 1s linear infinite; }
+        .spinner { width: 35px; height: 35px; border: 3px solid var(--text-dark); border-top-color: var(--xmr-base); border-radius: 50%; animation: spin 1s linear infinite; }
         @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* --- DESKTOP OVERRIDES --- */
+        @media (min-width: 768px) {
+            body { align-items: center; padding: 20px; }
+            .dashboard { flex-direction: row; align-items: stretch; gap: 20px; margin-top: 0; }
+            .panel { padding: 30px; border-radius: 24px; }
+            
+            .main-panel { flex: 1.2; }
+            .side-panel { flex: 0.8; grid-template-columns: 1fr; /* Stack vertically on desktop */ gap: 10px; }
+            
+            .price-value { font-size: 4rem; }
+            .verdict-title { font-size: 2.5rem; }
+            .verdict-explanation { font-size: 0.9rem; }
+            
+            .metric-card { flex-direction: row; justify-content: space-between; padding: 15px; text-align: left;}
+            .metric-title { font-size: 0.75rem; margin-bottom: 0;}
+            .metric-val { font-size: 1.1rem; }
+            .side-title { margin-bottom: 5px; }
+        }
     </style>
 </head>
 <body>
@@ -211,10 +229,10 @@
         </div>
 
         <div class="panel side-panel">
-            <div class="side-title">Under The Hood Stats</div>
+            <div class="side-title">Under The Hood</div>
             
             <div class="metric-card">
-                <div class="metric-title">Market Momentum (RSI)</div>
+                <div class="metric-title">Momentum (RSI)</div>
                 <div class="metric-val" id="rsiValue">--</div>
             </div>
             <div class="metric-card">
@@ -222,11 +240,11 @@
                 <div class="metric-val" id="macdValue">--</div>
             </div>
             <div class="metric-card">
-                <div class="metric-title">20-Day Average</div>
+                <div class="metric-title">20-Day Avg</div>
                 <div class="metric-val" id="ema20Value">--</div>
             </div>
             <div class="metric-card">
-                <div class="metric-title">50-Day Average</div>
+                <div class="metric-title">50-Day Avg</div>
                 <div class="metric-val" id="ema50Value">--</div>
             </div>
         </div>
@@ -238,7 +256,6 @@
     </div>
 
     <script>
-        // --- MATH UTILITIES ---
         function calculateEMA(prices, period) {
             const k = 2 / (period + 1);
             let emaArray = [prices[0]];
@@ -269,7 +286,6 @@
             return { histogram: macdLine[macdLine.length - 1] - signalLine[signalLine.length - 1] };
         }
 
-        // --- SPARKLINE GENERATOR ---
         function drawSparkline(prices) {
             const svgWidth = 400; const svgHeight = 60;
             const minPrice = Math.min(...prices); const maxPrice = Math.max(...prices);
@@ -287,30 +303,24 @@
             pathEl.setAttribute('d', pathString);
         }
 
-        // --- STATE & POLLING ---
         let historicalPrices = [];
         let lastUpdateTime = new Date();
 
-        // 1. Initial Heavy Data Fetch (Runs Once)
         async function bootSequence() {
             try {
                 const response = await fetch('https://api.coingecko.com/api/v3/coins/monero/market_chart?vs_currency=usd&days=90&interval=daily');
                 if (!response.ok) throw new Error('API Rate Limit');
                 const data = await response.json();
                 
-                // Store historical array, excluding the very last incomplete day to let the live ticker handle the current moment
                 historicalPrices = data.prices.slice(0, -1).map(p => p[1]); 
                 
-                // Immediately fetch live price to complete the dataset
                 await fetchLivePrice();
 
                 document.getElementById('loader').style.display = 'none';
                 document.getElementById('app').style.display = 'flex';
 
-                // Start the heartbeat: Check price every 30 seconds
-                setInterval(fetchLivePrice, 30000);
-                
-                // Update the timer text every second
+                // Changed from 30000ms (30s) to 60000ms (60s)
+                setInterval(fetchLivePrice, 60000); 
                 setInterval(updateTimerText, 1000);
 
             } catch (error) {
@@ -319,27 +329,20 @@
             }
         }
 
-        // 2. Lightweight Live Polling (Runs every 30s)
         async function fetchLivePrice() {
             try {
-                // Fetch just the simple current price, which is very fast and rate-limit friendly
                 const res = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=monero&vs_currencies=usd');
                 const data = await res.json();
                 const currentPrice = data.monero.usd;
 
-                // Animate the price UI
                 const priceEl = document.getElementById('currentPrice');
                 priceEl.innerText = `$${currentPrice.toFixed(2)}`;
                 
-                // Trigger CSS flash animation
                 priceEl.classList.remove('flash-update');
-                void priceEl.offsetWidth; // trigger reflow
+                void priceEl.offsetWidth; 
                 priceEl.classList.add('flash-update');
 
-                // Reset timer
                 lastUpdateTime = new Date();
-
-                // Run Analysis with the fresh price appended to our history
                 runAnalysis(currentPrice);
 
             } catch (error) {
@@ -353,9 +356,7 @@
             document.getElementById('updateTimer').innerText = `Updated: ${text}`;
         }
 
-        // 3. The Brain: Calculates math and translates for beginners
         function runAnalysis(livePrice) {
-            // Create a temporary array of history + right now
             const analysisArray = [...historicalPrices, livePrice];
             
             drawSparkline(analysisArray);
@@ -367,17 +368,15 @@
             const ema20 = ema20Array[ema20Array.length - 1];
             const ema50 = ema50Array[ema50Array.length - 1];
 
-            // UI for Advanced Stats
             document.getElementById('rsiValue').innerText = rsi.toFixed(1);
             document.getElementById('rsiValue').className = `metric-val ${rsi < 40 ? 'text-glow' : 'text-dim'}`;
             
-            document.getElementById('macdValue').innerText = macdData.histogram > 0 ? 'Positive ↑' : 'Negative ↓';
+            document.getElementById('macdValue').innerText = macdData.histogram > 0 ? 'Pos ↑' : 'Neg ↓';
             document.getElementById('macdValue').className = `metric-val ${macdData.histogram > 0 ? 'text-glow' : 'text-dim'}`;
             
-            document.getElementById('ema20Value').innerText = `$${ema20.toFixed(2)}`;
-            document.getElementById('ema50Value').innerText = `$${ema50.toFixed(2)}`;
+            document.getElementById('ema20Value').innerText = `$${ema20.toFixed(0)}`;
+            document.getElementById('ema50Value').innerText = `$${ema50.toFixed(0)}`;
 
-            // --- BEGINNER TRANSLATION LOGIC ---
             let score = 0; 
             if (rsi < 45) score += 2; else if (rsi > 65) score -= 2;
             if (macdData.histogram > 0) score += 1; else score -= 1;
@@ -388,19 +387,19 @@
             const vTitle = document.getElementById('verdictTitle');
             const vDesc = document.getElementById('verdictDesc');
 
-            verdictBox.className = 'verdict-box'; // Reset
+            verdictBox.className = 'verdict-box'; 
 
             if (score >= 2) {
                 vTitle.innerText = "BUY";
-                vDesc.innerText = "Monero is currently cheaper than its recent average, and market momentum is shifting upward. Historically, this is a strong entry point.";
+                vDesc.innerText = "Monero is cheaper than its recent average, and market momentum is shifting upward. Historically, this is a strong entry point.";
                 verdictBox.classList.add('sig-buy');
             } else if (score >= 0) {
                 vTitle.innerText = "HOLD";
-                vDesc.innerText = "The market is mixed. If you already own XMR, hold onto it. If you are looking to buy, you can buy a little, but the signal isn't incredibly strong yet.";
+                vDesc.innerText = "The market is mixed. If you already own XMR, hold onto it. If you are looking to buy, you can, but the signal isn't incredibly strong yet.";
                 verdictBox.classList.add('sig-hold');
             } else {
                 vTitle.innerText = "WAIT / SELL";
-                vDesc.innerText = "The price is running hot and currently dropping in momentum. Do not buy right now. Wait for the price to cool down before entering.";
+                vDesc.innerText = "The price is running hot and losing momentum. Do not buy right now. Wait for the price to cool down before entering.";
                 verdictBox.classList.add('sig-wait');
             }
         }
