@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quantum Terminal - P2P Matcher</title>
+<style>
+:root {
+	--monero-orange: #F26822;
+	--bg-dark: #0a0a0a;
+	--card-bg: rgba(255, 255, 255, 0.03);
+	--glass-border: rgba(242, 104, 34, 0.2);
+	--text-main: #ffffff;
+	--text-muted: #888888;
+}
+
+* {
+	box-sizing: border-box;
+	margin: 0;
+	padding: 0;
+	font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+	background-color: var(--bg-dark);
+	color: var(--text-main);
+	min-height: 100vh;
+	display: flex;
+	flex-direction: column;
+}
+
+header {
+	padding: 20px;
+	text-align: center;
+	border-bottom: 1px solid var(--glass-border);
+	background: rgba(0, 0, 0, 0.5);
+	backdrop-filter: blur(10px);
+	position: sticky;
+	top: 0;
+	z-index: 10;
+}
+
+header h1 {
+	color: var(--monero-orange);
+	font-size: 1.5rem;
+	text-transform: uppercase;
+	letter-spacing: 2px;
+}
+
+header p {
+	color: var(--text-muted);
+	font-size: 0.85rem;
+	margin-top: 5px;
+}
+
+/* 60-Second Visual Indicator */
+#timer-bar {
+height: 3px;
+background: var(--monero-orange);
+width: 100%;
+transition: width 1s linear;
+}
+
+main {
+	flex-grow: 1;
+	padding: 20px;
+	max-width: 800px;
+	margin: 0 auto;
+	width: 100%;
+}
+
+/* Bento Box Layout */
+#order-book {
+display: grid;
+grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+gap: 20px;
+}
+
+/* Glassmorphism Cards */
+.trade-card {
+	background: var(--card-bg);
+	border: 1px solid var(--glass-border);
+	border-radius: 15px;
+	padding: 20px;
+	backdrop-filter: blur(12px);
+	-webkit-backdrop-filter: blur(12px);
+	box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+	transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.trade-card:hover {
+	transform: translateY(-5px);
+	border-color: var(--monero-orange);
+}
+
+.card-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: 15px;
+	border-bottom: 1px solid rgba(255,255,255,0.1);
+	padding-bottom: 10px;
+}
+
+.badge {
+	background: rgba(242, 104, 34, 0.1);
+	color: var(--monero-orange);
+	padding: 4px 8px;
+	border-radius: 4px;
+	font-size: 0.75rem;
+	font-weight: bold;
+}
+
+.price-row {
+	font-size: 1.2rem;
+	font-weight: bold;
+	margin-bottom: 10px;
+}
+
+.details-row {
+	font-size: 0.9rem;
+	color: var(--text-muted);
+	margin-bottom: 15px;
+}
+
+.action-btn {
+	width: 100%;
+	background: transparent;
+	color: var(--monero-orange);
+	border: 1px solid var(--monero-orange);
+	padding: 10px;
+	border-radius: 8px;
+	cursor: pointer;
+	font-weight: bold;
+	transition: all 0.3s ease;
+}
+
+.action-btn:hover {
+	background: var(--monero-orange);
+	color: var(--bg-dark);
+}
+
+footer {
+	text-align: center;
+	padding: 20px;
+	border-top: 1px solid var(--glass-border);
+	font-size: 0.8rem;
+	background: rgba(0, 0, 0, 0.8);
+}
+
+footer span {
+	color: var(--monero-orange);
+	word-break: break-all;
+}
+</style>
+</head>
+<body>
+
+<header>
+<h1>Local XMR Terminal</h1>
+<p>Zero-Database Order Book • Whitelist Protected</p>
+</header>
+<div id="timer-bar"></div>
+
+<main>
+<div id="order-book">
+</div>
+</main>
+
+<footer>
+<p>Support this local network. XMR Donation Address:</p>
+<br>
+<span id="donation-address">888tNkZrPN6JsEgekjMnABU4TBzc2Dt29EPAvkRxbANsAnjyPbb3iQ1YBRk1UXcdRsiKc9CEv12V8U7nUjE5B5G1Fv7aEwq</span>
+</footer>
+
+<script>
+// ==========================================
+// CONFIGURATION & PROTOCOL RULES
+// ==========================================
+
+// 1. The Gatekeeper List
+// Only public keys in this array will render in your UI.
+const WHITELISTED_SELLERS = [
+	'npub1trusted_seller_alpha_example99',
+'npub1trusted_seller_beta_example42'
+];
+
+// 2. The Relay Tag (Your specific dark pool)
+const LOCAL_MARKET_TAG = '#XMR-Local-NR-Zone';
+
+// 3. Strict 60-second update limit to respect API/Relay limits
+const REFRESH_RATE_MS = 60000; 
+
+// ==========================================
+// DOM ELEMENTS
+// ==========================================
+const orderBookDiv = document.getElementById('order-book');
+const timerBar = document.getElementById('timer-bar');
+
+// ==========================================
+// CORE LOGIC
+// ==========================================
+
+// In a production environment, this function utilizes a WebSocket (wss://) 
+// to connect to Nostr relays. For testing the UI immediately, it simulates the relay JSON.
+async function fetchMarketData() {
+	return new Promise(resolve => {
+		setTimeout(() => {
+			resolve([
+				{
+					pubkey: 'npub1trusted_seller_alpha_example99',
+					type: 'SELL',
+					asset: 'XMR',
+					fiatPrice: '$142.50',
+					amount: '5.0',
+					location: 'New Rochelle - Downtown (In-Person)',
+					timestamp: Date.now()
+				},
+		   {
+			   // This seller is NOT in your whitelist array.
+			   // The app will silently discard this data.
+			   pubkey: 'npub1untrusted_random_scammer',
+			   type: 'SELL',
+			   asset: 'XMR',
+			   fiatPrice: '$10.00',
+			   amount: '100.0',
+			   location: 'Remote',
+			   timestamp: Date.now()
+		   },
+		   {
+			   pubkey: 'npub1trusted_seller_beta_example42',
+			   type: 'BUY',
+			   asset: 'XMR',
+			   fiatPrice: '$139.00',
+			   amount: '2.5',
+			   location: 'Scarsdale Border (In-Person)',
+					timestamp: Date.now()
+		   }
+			]);
+		}, 500); 
+	});
+}
+
+function renderOrders(orders) {
+	orderBookDiv.innerHTML = ''; 
+	
+	// THE FILTER: Here is where you control the market.
+	const filteredOrders = orders.filter(order => WHITELISTED_SELLERS.includes(order.pubkey));
+	
+	if (filteredOrders.length === 0) {
+		orderBookDiv.innerHTML = '<p style="text-align:center; color: #888;">No verified local orders available at this time.</p>';
+		return;
+	}
+	
+	// Inject the bento-box cards
+	filteredOrders.forEach(order => {
+		const card = document.createElement('div');
+		card.className = 'trade-card';
+	
+	const timeAgo = new Date(order.timestamp).toLocaleTimeString();
+	
+	card.innerHTML = `
+	<div class="card-header">
+	<span class="badge">${order.type} ${order.asset}</span>
+	<span style="font-size: 0.8rem; color: #888;">Verified Seller</span>
+	</div>
+	<div class="price-row">
+	${order.amount} ${order.asset} @ ${order.fiatPrice}
+	</div>
+	<div class="details-row">
+	📍 ${order.location}<br>
+	⏱ Last seen: ${timeAgo}
+	</div>
+	<button class="action-btn" onclick="initiateMultisig('${order.pubkey}', '${order.amount}')">
+	Initiate Trade
+	</button>
+	`;
+	
+	orderBookDiv.appendChild(card);
+	});
+}
+
+function initiateMultisig(sellerKey, amount) {
+	// Placeholder for the cryptographic transaction builder
+	alert('Initiating trustless multi-sig handshake with verified seller:\\n' + sellerKey + '\\n\\nSmart contract enforces 1% routing fee to host.');
+}
+
+// ==========================================
+// TIMER & REFRESH ENFORCEMENT
+// ==========================================
+let secondsPassed = 0;
+
+function updateTimerBar() {
+	secondsPassed++;
+	const percentage = (secondsPassed / (REFRESH_RATE_MS / 1000)) * 100;
+	timerBar.style.width = percentage + '%';
+	
+	if (secondsPassed >= (REFRESH_RATE_MS / 1000)) {
+		secondsPassed = 0;
+		timerBar.style.transition = 'none'; 
+		timerBar.style.width = '0%';
+		setTimeout(() => {
+			timerBar.style.transition = 'width 1s linear';
+		}, 50);
+	}
+}
+
+async function syncNetwork() {
+	console.log("Syncing with decentralized relays...");
+	const rawOrders = await fetchMarketData();
+	renderOrders(rawOrders);
+}
+
+// ==========================================
+// BOOT SEQUENCE
+// ==========================================
+function init() {
+	syncNetwork();
+	
+	// Strictly enforce the 60 second market update interval
+	setInterval(syncNetwork, REFRESH_RATE_MS);
+	setInterval(updateTimerBar, 1000);
+}
+
+window.onload = init;
+
+</script>
+</body>
+</html>
