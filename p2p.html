@@ -3,10 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Local XMR Matchmaker</title>
+    <title>Local XMR Matchmaker (JS-Free)</title>
     
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-
     <style>
         :root {
             --monero-orange: #F26822;
@@ -29,12 +27,11 @@
         header p { color: var(--text-muted); font-size: 0.85rem; margin-bottom: 15px; }
         
         .vendor-btn {
+            display: inline-block; text-decoration: none;
             background: rgba(242, 104, 34, 0.1); border: 1px solid var(--monero-orange); color: var(--monero-orange);
             padding: 8px 16px; border-radius: 20px; font-size: 0.8rem; font-weight: bold; cursor: pointer; transition: all 0.3s ease;
         }
         .vendor-btn:hover { background: var(--monero-orange); color: var(--bg-dark); }
-
-        #timer-bar { height: 3px; background: var(--monero-orange); width: 100%; transition: width 1s linear; }
 
         main { flex-grow: 1; padding: 20px; max-width: 800px; margin: 0 auto; width: 100%; }
 
@@ -43,9 +40,7 @@
         .trade-card {
             background: var(--card-bg); border: 1px solid var(--glass-border); border-radius: 15px;
             padding: 20px; backdrop-filter: blur(12px); box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
-            transition: transform 0.2s ease, border-color 0.2s ease;
         }
-        .trade-card:hover { transform: translateY(-5px); border-color: var(--monero-orange); }
         
         /* Profile UI Styles */
         .profile-section {
@@ -54,36 +49,39 @@
         }
         .avatar { width: 50px; height: 50px; border-radius: 50%; object-fit: cover; border: 2px solid var(--monero-orange); background: #222; }
         .profile-info { display: flex; flex-direction: column; overflow: hidden; width: 100%; }
-        .profile-name { font-weight: bold; font-size: 1.1rem; color: var(--text-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .profile-bio { font-size: 0.8rem; color: var(--text-muted); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; margin-top: 2px; }
+        .profile-name { font-weight: bold; font-size: 1.1rem; color: var(--text-main); }
+        .profile-bio { font-size: 0.8rem; color: var(--text-muted); margin-top: 2px; }
 
         .trade-tags { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
         .badge { background: rgba(242, 104, 34, 0.1); color: var(--monero-orange); padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; }
         .price-row { font-size: 1.2rem; font-weight: bold; margin-bottom: 10px; }
         .details-row { font-size: 0.9rem; color: var(--text-muted); margin-bottom: 15px; }
 
-        .action-btn {
-            width: 100%; background: transparent; color: var(--monero-orange); border: 1px solid var(--monero-orange);
-            padding: 10px; border-radius: 8px; cursor: pointer; font-weight: bold; transition: all 0.3s ease;
+        /* Pure HTML Reveal Mechanism */
+        details { width: 100%; }
+        summary {
+            display: block; width: 100%; background: transparent; color: var(--monero-orange); 
+            border: 1px solid var(--monero-orange); padding: 10px; border-radius: 8px; 
+            cursor: pointer; font-weight: bold; text-align: center; list-style: none; transition: all 0.3s ease;
         }
-        .action-btn:hover { background: var(--monero-orange); color: var(--bg-dark); }
+        summary::-webkit-details-marker { display: none; }
+        summary:hover { background: var(--monero-orange); color: var(--bg-dark); }
+        details[open] summary { background: var(--monero-orange); color: var(--bg-dark); margin-bottom: 15px; }
 
         .reveal-box {
-            display: none; margin-top: 15px; padding: 15px; border-radius: 8px;
-            background: rgba(0, 255, 136, 0.05); border: 1px solid rgba(0, 255, 136, 0.2);
-            text-align: center; animation: fadeIn 0.3s ease;
+            padding: 15px; border-radius: 8px; background: rgba(0, 255, 136, 0.05); 
+            border: 1px solid rgba(0, 255, 136, 0.2); text-align: center;
         }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
-        
-        .contact-info { margin-top: 10px; font-family: monospace; font-size: 0.9rem; color: var(--success-green); word-break: break-all; }
-        .qr-container { display: flex; justify-content: center; margin-top: 10px; background: #fff; padding: 10px; border-radius: 8px; width: max-content; margin-inline: auto; }
+        .contact-info { margin-top: 10px; font-family: monospace; font-size: 0.9rem; color: var(--success-green); word-break: break-all; padding: 10px; background: #000; border-radius: 4px; border: 1px solid #333; user-select: all; }
 
-        /* VENDOR MODAL STYLES */
-        #vendor-modal {
+        /* Pure CSS Modal Mechanism */
+        .modal-overlay {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(5px); z-index: 100;
             justify-content: center; align-items: center; padding: 20px;
         }
+        .modal-overlay:target { display: flex; } /* Opens modal when URL has #vendor-modal */
+        
         .modal-content {
             background: #111; border: 1px solid var(--glass-border); border-radius: 15px;
             max-width: 500px; width: 100%; padding: 30px; position: relative;
@@ -91,75 +89,84 @@
         }
         .close-btn {
             position: absolute; top: 15px; right: 20px; color: var(--text-muted);
-            font-size: 1.5rem; cursor: pointer; transition: color 0.2s;
+            font-size: 1.5rem; text-decoration: none; transition: color 0.2s;
         }
         .close-btn:hover { color: var(--monero-orange); }
         .step-box { background: #1a1a1a; padding: 15px; border-radius: 8px; margin-bottom: 15px; border-left: 3px solid var(--monero-orange); }
         .step-title { font-weight: bold; color: var(--monero-orange); margin-bottom: 5px; font-size: 0.9rem; }
-        .copy-input-group { display: flex; margin-top: 10px; }
-        .copy-input-group input {
-            flex-grow: 1; background: #000; border: 1px solid #333; color: var(--text-muted);
-            padding: 8px; border-radius: 4px 0 0 4px; font-family: monospace; font-size: 0.8rem;
+        .select-box {
+            width: 100%; background: #000; border: 1px solid #333; color: var(--text-muted);
+            padding: 10px; border-radius: 4px; font-family: monospace; font-size: 0.8rem;
+            margin-top: 10px; user-select: all; /* Allows easy highlighting */
         }
-        .copy-btn {
-            background: #333; border: 1px solid #333; color: #fff; cursor: pointer;
-            padding: 0 15px; border-radius: 0 4px 4px 0; font-weight: bold; transition: background 0.2s;
-        }
-        .copy-btn:hover { background: var(--monero-orange); color: #000; }
 
         footer { text-align: center; padding: 20px; border-top: 1px solid var(--glass-border); font-size: 0.8rem; background: rgba(0, 0, 0, 0.8); }
         footer span { color: var(--monero-orange); word-break: break-all; }
         
-        #network-status { position: absolute; top: 20px; right: 20px; font-size: 0.8rem; color: #ff3333; }
-        .online { color: var(--success-green) !important; }
+        #security-badge { position: absolute; top: 20px; right: 20px; font-size: 0.8rem; color: var(--success-green); border: 1px solid var(--success-green); padding: 4px 8px; border-radius: 4px; }
     </style>
 </head>
 <body>
 
     <header>
         <h1>Local XMR Matchmaker</h1>
-        <p>Decentralized Board • Verified Sellers Only</p>
-        <button class="vendor-btn" onclick="openVendorModal()">Become a Vendor</button>
-        <div id="network-status">Nostr: Offline</div>
+        <p>100% JS-Free • Static Ledger • Trustless UI</p>
+        <a href="#vendor-modal" class="vendor-btn">Become a Vendor</a>
+        <div id="security-badge">JS-Free Mode Active</div>
     </header>
-    <div id="timer-bar"></div>
 
     <main>
         <div id="order-book">
-            <p style="text-align:center; color: #888;">Connecting to decentralized relays...</p>
-        </div>
+            
+            <div class="trade-card">
+                <div class="profile-section">
+                    <img src="https://api.dicebear.com/7.x/identicon/svg?seed=CypherPunkNR&backgroundColor=0a0a0a" alt="Avatar" class="avatar">
+                    <div class="profile-info">
+                        <div class="profile-name">CypherPunkNR</div>
+                        <div class="profile-bio">Reliable local provider. Cash only in public locations.</div>
+                    </div>
+                </div>
+
+                <div class="trade-tags"><span class="badge">SELL XMR</span></div>
+                <div class="price-row">5.0 XMR @ $142.50</div>
+                <div class="details-row">📍 New Rochelle - Downtown</div>
+                
+                <details>
+                    <summary>Match & Reveal Info</summary>
+                    <div class="reveal-box">
+                        <p style="color: var(--text-main); font-size: 0.85rem;">Secure Session ID (Highlight to copy):</p>
+                        <div class="contact-info">054b8a7f920239d89c21</div>
+                        <p style="font-size: 0.75rem; margin-top: 10px; color: var(--text-muted);">Coordinate meeting and execute manual transfer.</p>
+                    </div>
+                </details>
+            </div>
+            </div>
     </main>
 
-    <div id="vendor-modal">
+    <div id="vendor-modal" class="modal-overlay">
         <div class="modal-content">
-            <span class="close-btn" onclick="closeVendorModal()">&times;</span>
+            <a href="#" class="close-btn">&times;</a>
             <h2 style="color: var(--text-main); margin-bottom: 20px; text-align: center;">Vendor Application</h2>
             
             <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 20px; text-align: center;">
-                Our network strictly limits visibility to trusted local providers. To get listed, complete the concierge process below.
+                Our network strictly limits visibility. To get listed, complete the concierge process below.
             </p>
 
             <div class="step-box">
                 <div class="step-title">STEP 1: Pay the Listing Fee</div>
-                <p style="font-size: 0.85rem; color: #aaa;">Send <strong>0.05 XMR</strong> to the network address. Save your Transaction ID (TxID) as proof of payment.</p>
-                <div class="copy-input-group">
-                    <input type="text" id="fee-address" value="888tNkZrPN6JsEgekjMnABU4TBzc2Dt29EPAvkRxbANsAnjyPbb3iQ1YBRk1UXcdRsiKc9CEv12V8U7nUjE5B5G1Fv7aEwq" readonly>
-                    <button class="copy-btn" onclick="copyText('fee-address', this)">Copy</button>
-                </div>
+                <p style="font-size: 0.85rem; color: #aaa;">Send <strong>0.05 XMR</strong> to the network address (Highlight to copy):</p>
+                <div class="select-box">888tNkZrPN6JsEgekjMnABU4TBzc2Dt29EPAvkRxbANsAnjyPbb3iQ1YBRk1UXcdRsiKc9CEv12V8U7nUjE5B5G1Fv7aEwq</div>
             </div>
 
             <div class="step-box">
                 <div class="step-title">STEP 2: Message Us on Session</div>
                 <p style="font-size: 0.85rem; color: #aaa;">Contact the network admin via Session Messenger.</p>
-                <div class="copy-input-group">
-                    <input type="text" id="session-id" value="056a...YOUR_SESSION_ID_HERE...8f4e" readonly>
-                    <button class="copy-btn" onclick="copyText('session-id', this)">Copy</button>
-                </div>
+                <div class="select-box">056a...YOUR_SESSION_ID...8f4e</div>
             </div>
 
             <div class="step-box">
                 <div class="step-title">STEP 3: Provide Your Details</div>
-                <p style="font-size: 0.85rem; color: #aaa;">In your Session message, include the following so we can publish your listing:</p>
+                <p style="font-size: 0.85rem; color: #aaa;">In your Session message, include the following so we can hardcode your listing:</p>
                 <ul style="font-size: 0.8rem; color: var(--success-green); margin-top: 10px; margin-left: 20px; font-family: monospace;">
                     <li>TxID (Proof of Fee)</li>
                     <li>Vendor Name & Bio</li>
@@ -169,216 +176,14 @@
                     <li>Your Direct Session ID</li>
                 </ul>
             </div>
-            
-            <p style="text-align: center; font-size: 0.75rem; color: #666; margin-top: 15px;">Listings are manually verified and deployed within 24 hours.</p>
         </div>
     </div>
 
     <footer>
         <p>Support the network. General Donations:</p>
         <br>
-        <span style="color: var(--text-muted); font-size: 0.7rem;">888tNkZrPN6JsEgekjMnABU4TBzc2Dt29EPAvkRxbANsAnjyPbb3iQ1YBRk1UXcdRsiKc9CEv12V8U7nUjE5B5G1Fv7aEwq</span>
+        <span style="color: var(--text-muted); font-size: 0.7rem; user-select: all;">888tNkZrPN6JsEgekjMnABU4TBzc2Dt29EPAvkRxbANsAnjyPbb3iQ1YBRk1UXcdRsiKc9CEv12V8U7nUjE5B5G1Fv7aEwq</span>
     </footer>
 
-    <script>
-        // ==========================================
-        // SYSTEM CONFIGURATION
-        // ==========================================
-        const WHITELISTED_SELLERS = ['npub1trusted_seller_alpha_example99']; 
-        const REFRESH_RATE_MS = 60000;
-        const NOSTR_RELAY = 'wss://relay.damus.io'; 
-        const MARKET_TAG = 'xmr-local-nr-zone';
-
-        const orderBookDiv = document.getElementById('order-book');
-        const timerBar = document.getElementById('timer-bar');
-        const networkStatus = document.getElementById('network-status');
-        
-        let liveOrders = new Map(); 
-        let sellerProfiles = new Map(); 
-
-        const DEFAULT_AVATAR = 'https://api.dicebear.com/7.x/identicon/svg?seed=fallback&backgroundColor=0a0a0a';
-
-        // ==========================================
-        // UI & MODAL CONTROLS
-        // ==========================================
-        function openVendorModal() {
-            document.getElementById('vendor-modal').style.display = 'flex';
-        }
-
-        function closeVendorModal() {
-            document.getElementById('vendor-modal').style.display = 'none';
-        }
-
-        function copyText(elementId, btnElement) {
-            const copyText = document.getElementById(elementId);
-            copyText.select();
-            copyText.setSelectionRange(0, 99999); // For mobile devices
-            navigator.clipboard.writeText(copyText.value);
-            
-            const originalText = btnElement.innerText;
-            btnElement.innerText = "Copied!";
-            btnElement.style.background = "var(--success-green)";
-            btnElement.style.color = "#000";
-            
-            setTimeout(() => {
-                btnElement.innerText = originalText;
-                btnElement.style.background = "#333";
-                btnElement.style.color = "#fff";
-            }, 2000);
-        }
-
-        // ==========================================
-        // 1. LIVE NOSTR WEBSOCKET
-        // ==========================================
-        function connectNostr() {
-            const nostrSocket = new WebSocket(NOSTR_RELAY);
-
-            nostrSocket.onopen = () => {
-                networkStatus.innerText = "Nostr: Online";
-                networkStatus.classList.add('online');
-                nostrSocket.send(JSON.stringify(["REQ", "market_sub", { "kinds": [1], "#t": [MARKET_TAG], "limit": 50 }]));
-                nostrSocket.send(JSON.stringify(["REQ", "profile_sub", { "kinds": [0], "authors": WHITELISTED_SELLERS }]));
-            };
-
-            nostrSocket.onmessage = (event) => {
-                const data = JSON.parse(event.data);
-                if (data[0] === "EVENT") processNostrEvent(data[2]);
-            };
-
-            nostrSocket.onerror = () => {
-                networkStatus.innerText = "Nostr: Error";
-                networkStatus.classList.remove('online');
-            };
-        }
-
-        function processNostrEvent(event) {
-            if (!WHITELISTED_SELLERS.includes(event.pubkey)) return;
-
-            if (event.kind === 0) {
-                try {
-                    sellerProfiles.set(event.pubkey, JSON.parse(event.content));
-                    renderOrders(); 
-                } catch (e) {}
-            }
-
-            if (event.kind === 1) {
-                try {
-                    const orderData = JSON.parse(event.content);
-                    if (orderData.asset === 'XMR' && orderData.amount) {
-                        orderData.id = event.id;
-                        orderData.pubkey = event.pubkey;
-                        orderData.timestamp = event.created_at * 1000;
-                        liveOrders.set(event.id, orderData);
-                        renderOrders();
-                    }
-                } catch (e) {}
-            }
-        }
-
-        // ==========================================
-        // 2. UI RENDERING WITH PROFILES
-        // ==========================================
-        function renderOrders() {
-            if (liveOrders.size === 0) {
-                liveOrders.set('dummy1', {
-                    pubkey: 'npub1trusted_seller_alpha_example99', type: 'SELL', asset: 'XMR',
-                    fiatPrice: '$142.50', amount: '5.0', location: 'New Rochelle - Downtown', 
-                    contact: 'Session ID: 054b8a...9c21',
-                    directAddress: '44AFFq5kSiGBoZ4NMDwYtN18obc8AemS33DBLWs3H7otXft3XjrpDtQGv7SqSsaBYBb98uNbr2VBBEt7f2wfn3RVGQBEP3A',
-                    timestamp: Date.now()
-                });
-                
-                sellerProfiles.set('npub1trusted_seller_alpha_example99', {
-                    name: 'CypherPunkNR',
-                    about: 'Reliable local provider. 100+ flawless trades. Cash only in public locations.',
-                    picture: 'https://api.dicebear.com/7.x/bottts/svg?seed=CypherPunkNR&backgroundColor=F26822'
-                });
-            }
-
-            orderBookDiv.innerHTML = ''; 
-            liveOrders.forEach((order) => {
-                const profile = sellerProfiles.get(order.pubkey) || {};
-                const displayName = profile.name || 'Verified Vendor';
-                const avatarUrl = profile.picture || `https://api.dicebear.com/7.x/identicon/svg?seed=${order.pubkey}&backgroundColor=0a0a0a`;
-                const bioText = profile.about || 'Approved local liquidity provider.';
-
-                const card = document.createElement('div');
-                card.className = 'trade-card';
-                card.innerHTML = `
-                    <div class="profile-section">
-                        <img src="${avatarUrl}" alt="Avatar" class="avatar" onerror="this.src='${DEFAULT_AVATAR}'">
-                        <div class="profile-info">
-                            <div class="profile-name">${displayName}</div>
-                            <div class="profile-bio">${bioText}</div>
-                        </div>
-                    </div>
-
-                    <div class="trade-tags">
-                        <span class="badge">${order.type || 'SELL'} ${order.asset}</span>
-                    </div>
-
-                    <div class="price-row">${order.amount} ${order.asset} @ ${order.fiatPrice}</div>
-                    <div class="details-row">📍 ${order.location || 'Local Sector'}</div>
-                    
-                    <button class="action-btn" onclick="revealContact(this, '${order.contact}', '${order.directAddress}')">
-                        Match & Reveal Info
-                    </button>
-                    
-                    <div class="reveal-box">
-                        <p style="color: var(--text-main); font-size: 0.85rem;">Secure Contact:</p>
-                        <div class="contact-info">${order.contact || 'No contact provided'}</div>
-                        <div class="qr-container"></div>
-                        <p style="font-size: 0.75rem; margin-top: 10px; color: var(--text-muted);">Coordinate meeting and execute manual transfer.</p>
-                    </div>
-                `;
-                orderBookDiv.appendChild(card);
-            });
-        }
-
-        // ==========================================
-        // 3. MANUAL TRADE REVEAL
-        // ==========================================
-        function revealContact(button, contactInfo, xmrAddress) {
-            const card = button.closest('.trade-card');
-            const revealBox = card.querySelector('.reveal-box');
-            const qrContainer = card.querySelector('.qr-container');
-            
-            button.style.display = 'none'; 
-            revealBox.style.display = 'block'; 
-            
-            if (xmrAddress && xmrAddress !== 'undefined') {
-                new QRCode(qrContainer, { text: xmrAddress, width: 128, height: 128, colorDark : "#000000", colorLight : "#ffffff" });
-            } else {
-                qrContainer.innerHTML = '<span style="color: black; font-size: 0.8rem;">Ask seller for address via secure contact.</span>';
-            }
-        }
-
-        // ==========================================
-        // TIMER & SYNC LOOP
-        // ==========================================
-        let secondsPassed = 0;
-        function updateTimerBar() {
-            secondsPassed++;
-            timerBar.style.width = (secondsPassed / (REFRESH_RATE_MS / 1000)) * 100 + '%';
-            if (secondsPassed >= (REFRESH_RATE_MS / 1000)) {
-                secondsPassed = 0;
-                timerBar.style.transition = 'none'; 
-                timerBar.style.width = '0%';
-                setTimeout(() => { timerBar.style.transition = 'width 1s linear'; }, 50);
-                
-                if (!document.querySelector('.reveal-box[style*="display: block"]')) {
-                    renderOrders();
-                }
-            }
-        }
-
-        function init() {
-            connectNostr();
-            renderOrders(); 
-            setInterval(updateTimerBar, 1000);
-        }
-
-        window.onload = init;
-    </script>
 </body>
 </html>
