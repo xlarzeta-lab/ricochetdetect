@@ -32,7 +32,7 @@
 
         main { flex-grow: 1; padding: 20px; max-width: 800px; margin: 0 auto; width: 100%; }
 
-        #order-book { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+        #order-book { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; }
 
         .trade-card {
             background: var(--card-bg); border: 1px solid var(--glass-border); border-radius: 15px;
@@ -41,7 +41,20 @@
         }
         .trade-card:hover { transform: translateY(-5px); border-color: var(--monero-orange); }
         
-        .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px; }
+        /* Profile UI Styles */
+        .profile-section {
+            display: flex; align-items: center; gap: 15px; margin-bottom: 15px;
+            border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 15px;
+        }
+        .avatar {
+            width: 50px; height: 50px; border-radius: 50%; object-fit: cover;
+            border: 2px solid var(--monero-orange); background: #222;
+        }
+        .profile-info { display: flex; flex-direction: column; overflow: hidden; }
+        .profile-name { font-weight: bold; font-size: 1.1rem; color: var(--text-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .profile-bio { font-size: 0.8rem; color: var(--text-muted); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; margin-top: 2px; }
+
+        .trade-tags { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
         .badge { background: rgba(242, 104, 34, 0.1); color: var(--monero-orange); padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; }
         .price-row { font-size: 1.2rem; font-weight: bold; margin-bottom: 10px; }
         .details-row { font-size: 0.9rem; color: var(--text-muted); margin-bottom: 15px; }
@@ -51,9 +64,7 @@
             padding: 10px; border-radius: 8px; cursor: pointer; font-weight: bold; transition: all 0.3s ease;
         }
         .action-btn:hover { background: var(--monero-orange); color: var(--bg-dark); }
-        .action-btn:disabled { border-color: var(--text-muted); color: var(--text-muted); background: transparent; cursor: not-allowed; }
 
-        /* Manual Reveal UI */
         .reveal-box {
             display: none; margin-top: 15px; padding: 15px; border-radius: 8px;
             background: rgba(0, 255, 136, 0.05); border: 1px solid rgba(0, 255, 136, 0.2);
@@ -96,10 +107,7 @@
         // ==========================================
         // SYSTEM CONFIGURATION
         // ==========================================
-        
-        // You control who can sell. Charge them a fee to add their key here.
         const WHITELISTED_SELLERS = ['npub1trusted_seller_alpha_example99']; 
-        
         const REFRESH_RATE_MS = 60000;
         const NOSTR_RELAY = 'wss://relay.damus.io'; 
         const MARKET_TAG = 'xmr-local-nr-zone';
@@ -109,6 +117,10 @@
         const networkStatus = document.getElementById('network-status');
         
         let liveOrders = new Map(); 
+        let sellerProfiles = new Map(); // Store the Kind 0 Metadata here
+
+        // Default Avatar fallback (a clean geometric identicon via URL)
+        const DEFAULT_AVATAR = 'https://api.dicebear.com/7.x/identicon/svg?seed=fallback&backgroundColor=0a0a0a';
 
         // ==========================================
         // 1. LIVE NOSTR WEBSOCKET
@@ -119,7 +131,12 @@
             nostrSocket.onopen = () => {
                 networkStatus.innerText = "Nostr: Online";
                 networkStatus.classList.add('online');
+                
+                // Subscription 1: The Trade Orders (Kind 1)
                 nostrSocket.send(JSON.stringify(["REQ", "market_sub", { "kinds": [1], "#t": [MARKET_TAG], "limit": 50 }]));
+                
+                // Subscription 2: The Seller Profiles (Kind 0)
+                nostrSocket.send(JSON.stringify(["REQ", "profile_sub", { "kinds": [0], "authors": WHITELISTED_SELLERS }]));
             };
 
             nostrSocket.onmessage = (event) => {
@@ -134,48 +151,79 @@
         }
 
         function processNostrEvent(event) {
+            // We only care about data from our whitelisted sellers
             if (!WHITELISTED_SELLERS.includes(event.pubkey)) return;
-            try {
-                const orderData = JSON.parse(event.content);
-                // Require asset, amount, and contact info for a manual trade
-                if (orderData.asset === 'XMR' && orderData.amount) {
-                    orderData.id = event.id;
-                    orderData.pubkey = event.pubkey;
-                    orderData.timestamp = event.created_at * 1000;
-                    liveOrders.set(event.id, orderData);
-                    renderOrders();
-                }
-            } catch (e) {}
+
+            // Handle Profile Updates (Kind 0)
+            if (event.kind === 0) {
+                try {
+                    const profileData = JSON.parse(event.content);
+                    sellerProfiles.set(event.pubkey, profileData);
+                    renderOrders(); // Re-render to show the new avatar/name if it just loaded
+                } catch (e) { console.error("Error parsing profile data"); }
+            }
+
+            // Handle Trade Orders (Kind 1)
+            if (event.kind === 1) {
+                try {
+                    const orderData = JSON.parse(event.content);
+                    if (orderData.asset === 'XMR' && orderData.amount) {
+                        orderData.id = event.id;
+                        orderData.pubkey = event.pubkey;
+                        orderData.timestamp = event.created_at * 1000;
+                        liveOrders.set(event.id, orderData);
+                        renderOrders();
+                    }
+                } catch (e) {}
+            }
         }
 
         // ==========================================
-        // 2. UI RENDERING
+        // 2. UI RENDERING WITH PROFILES
         // ==========================================
         function renderOrders() {
             if (liveOrders.size === 0) {
-                // Dummy order so you can see the UI immediately
+                // Dummy order for UI visualization
                 liveOrders.set('dummy1', {
-                    pubkey: 'npub1trusted_seller_alpha_example99', 
-                    type: 'SELL', 
-                    asset: 'XMR',
-                    fiatPrice: '$142.50', 
-                    amount: '5.0', 
-                    location: 'New Rochelle - Downtown', 
+                    pubkey: 'npub1trusted_seller_alpha_example99', type: 'SELL', asset: 'XMR',
+                    fiatPrice: '$142.50', amount: '5.0', location: 'New Rochelle - Downtown', 
                     contact: 'Session ID: 054b8a...9c21',
                     directAddress: '44AFFq5kSiGBoZ4NMDwYtN18obc8AemS33DBLWs3H7otXft3XjrpDtQGv7SqSsaBYBb98uNbr2VBBEt7f2wfn3RVGQBEP3A',
                     timestamp: Date.now()
+                });
+                
+                // Dummy Profile to match
+                sellerProfiles.set('npub1trusted_seller_alpha_example99', {
+                    name: 'CypherPunkNR',
+                    about: 'Reliable local provider. 100+ flawless trades. Cash only in public locations.',
+                    picture: 'https://api.dicebear.com/7.x/bottts/svg?seed=CypherPunkNR&backgroundColor=F26822'
                 });
             }
 
             orderBookDiv.innerHTML = ''; 
             liveOrders.forEach((order) => {
+                const profile = sellerProfiles.get(order.pubkey) || {};
+                
+                // Fallbacks for profile data
+                const displayName = profile.name || 'Verified Vendor';
+                const avatarUrl = profile.picture || `https://api.dicebear.com/7.x/identicon/svg?seed=${order.pubkey}&backgroundColor=0a0a0a`;
+                const bioText = profile.about || 'Approved local liquidity provider.';
+
                 const card = document.createElement('div');
                 card.className = 'trade-card';
                 card.innerHTML = `
-                    <div class="card-header">
-                        <span class="badge">${order.type || 'SELL'} ${order.asset}</span>
-                        <span style="font-size: 0.8rem; color: #888;">Verified Seller</span>
+                    <div class="profile-section">
+                        <img src="${avatarUrl}" alt="Avatar" class="avatar" onerror="this.src='${DEFAULT_AVATAR}'">
+                        <div class="profile-info">
+                            <div class="profile-name">${displayName}</div>
+                            <div class="profile-bio">${bioText}</div>
+                        </div>
                     </div>
+
+                    <div class="trade-tags">
+                        <span class="badge">${order.type || 'SELL'} ${order.asset}</span>
+                    </div>
+
                     <div class="price-row">${order.amount} ${order.asset} @ ${order.fiatPrice}</div>
                     <div class="details-row">📍 ${order.location || 'Local Sector'}</div>
                     
@@ -202,17 +250,11 @@
             const revealBox = card.querySelector('.reveal-box');
             const qrContainer = card.querySelector('.qr-container');
             
-            button.style.display = 'none'; // Hide the button
-            revealBox.style.display = 'block'; // Show the secret info
+            button.style.display = 'none'; 
+            revealBox.style.display = 'block'; 
             
             if (xmrAddress && xmrAddress !== 'undefined') {
-                new QRCode(qrContainer, { 
-                    text: xmrAddress, 
-                    width: 128, 
-                    height: 128,
-                    colorDark : "#000000",
-                    colorLight : "#ffffff",
-                });
+                new QRCode(qrContainer, { text: xmrAddress, width: 128, height: 128, colorDark : "#000000", colorLight : "#ffffff" });
             } else {
                 qrContainer.innerHTML = '<span style="color: black; font-size: 0.8rem;">Ask seller for address via secure contact.</span>';
             }
@@ -231,7 +273,6 @@
                 timerBar.style.width = '0%';
                 setTimeout(() => { timerBar.style.transition = 'width 1s linear'; }, 50);
                 
-                // Only re-render if a user hasn't clicked "reveal" on a card
                 if (!document.querySelector('.reveal-box[style*="display: block"]')) {
                     renderOrders();
                 }
