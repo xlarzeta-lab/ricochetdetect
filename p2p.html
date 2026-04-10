@@ -3,9 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quantum Terminal - P2P Matcher</title>
+    <title>Local XMR Matchmaker</title>
     
-    <script src="https://cdn.jsdelivr.net/npm/monero-javascript@0.8.2/dist/monero_javascript.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
     <style>
@@ -17,7 +16,6 @@
             --text-main: #ffffff;
             --text-muted: #888888;
             --success-green: #00ff88;
-            --error-red: #ff3333;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
@@ -55,25 +53,29 @@
         .action-btn:hover { background: var(--monero-orange); color: var(--bg-dark); }
         .action-btn:disabled { border-color: var(--text-muted); color: var(--text-muted); background: transparent; cursor: not-allowed; }
 
-        .terminal-log {
-            background: #000; font-family: monospace; font-size: 0.8rem; padding: 10px;
-            border-radius: 5px; margin-top: 15px; color: var(--success-green);
-            max-height: 150px; overflow-y: auto; display: none;
+        /* Manual Reveal UI */
+        .reveal-box {
+            display: none; margin-top: 15px; padding: 15px; border-radius: 8px;
+            background: rgba(0, 255, 136, 0.05); border: 1px solid rgba(0, 255, 136, 0.2);
+            text-align: center; animation: fadeIn 0.3s ease;
         }
-        .qr-container { display: none; text-align: center; margin-top: 15px; background: #fff; padding: 10px; border-radius: 8px; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .contact-info { margin-top: 10px; font-family: monospace; font-size: 0.9rem; color: var(--success-green); word-break: break-all; }
+        .qr-container { display: flex; justify-content: center; margin-top: 10px; background: #fff; padding: 10px; border-radius: 8px; width: max-content; margin-inline: auto; }
 
         footer { text-align: center; padding: 20px; border-top: 1px solid var(--glass-border); font-size: 0.8rem; background: rgba(0, 0, 0, 0.8); }
         footer span { color: var(--monero-orange); word-break: break-all; }
         
-        #network-status { position: absolute; top: 20px; right: 20px; font-size: 0.8rem; color: var(--error-red); }
+        #network-status { position: absolute; top: 20px; right: 20px; font-size: 0.8rem; color: #ff3333; }
         .online { color: var(--success-green) !important; }
     </style>
 </head>
 <body>
 
     <header>
-        <h1>Local XMR Terminal</h1>
-        <p>Decentralized Order Book • Whitelist Protected</p>
+        <h1>Local XMR Matchmaker</h1>
+        <p>Decentralized Board • Verified Sellers Only</p>
         <div id="network-status">Nostr: Offline</div>
     </header>
     <div id="timer-bar"></div>
@@ -85,7 +87,7 @@
     </main>
 
     <footer>
-        <p>Support this local network. XMR Arbitrator Fee Address:</p>
+        <p>Want to list your offers here? Pay the listing fee to:</p>
         <br>
         <span id="donation-address">888tNkZrPN6JsEgekjMnABU4TBzc2Dt29EPAvkRxbANsAnjyPbb3iQ1YBRk1UXcdRsiKc9CEv12V8U7nUjE5B5G1Fv7aEwq</span>
     </footer>
@@ -94,33 +96,25 @@
         // ==========================================
         // SYSTEM CONFIGURATION
         // ==========================================
-        const WHITELISTED_SELLERS = ['npub1trusted_seller_alpha_example99'];
-        const REFRESH_RATE_MS = 60000;
-        const ARBITRATOR_ADDRESS = document.getElementById('donation-address').innerText;
-        const SYSTEM_FEE_PERCENTAGE = 0.01;
         
-        // GH Pages requires wss:// (Secure Websockets)
+        // You control who can sell. Charge them a fee to add their key here.
+        const WHITELISTED_SELLERS = ['npub1trusted_seller_alpha_example99']; 
+        
+        const REFRESH_RATE_MS = 60000;
         const NOSTR_RELAY = 'wss://relay.damus.io'; 
         const MARKET_TAG = 'xmr-local-nr-zone';
-        
-        // GH Pages requires https:// nodes. 
-        // Note: Finding a public stagenet node with both HTTPS and CORS enabled can be tough.
-        // If this specific URL fails in production, you may need to use a CORS proxy 
-        // like https://corsproxy.io/?https://stagenode.community.monero.org:38081
-        const SECURE_MONERO_NODE = 'https://node.xmr.to:18081'; 
 
         const orderBookDiv = document.getElementById('order-book');
         const timerBar = document.getElementById('timer-bar');
         const networkStatus = document.getElementById('network-status');
         
         let liveOrders = new Map(); 
-        let nostrSocket;
 
         // ==========================================
-        // 1. LIVE NOSTR WEBSOCKET (WSS://)
+        // 1. LIVE NOSTR WEBSOCKET
         // ==========================================
         function connectNostr() {
-            nostrSocket = new WebSocket(NOSTR_RELAY);
+            const nostrSocket = new WebSocket(NOSTR_RELAY);
 
             nostrSocket.onopen = () => {
                 networkStatus.innerText = "Nostr: Online";
@@ -143,6 +137,7 @@
             if (!WHITELISTED_SELLERS.includes(event.pubkey)) return;
             try {
                 const orderData = JSON.parse(event.content);
+                // Require asset, amount, and contact info for a manual trade
                 if (orderData.asset === 'XMR' && orderData.amount) {
                     orderData.id = event.id;
                     orderData.pubkey = event.pubkey;
@@ -157,13 +152,18 @@
         // 2. UI RENDERING
         // ==========================================
         function renderOrders() {
-            if (document.querySelector('.active-trade')) return; 
-
             if (liveOrders.size === 0) {
-                // Dummy order for UI testing
+                // Dummy order so you can see the UI immediately
                 liveOrders.set('dummy1', {
-                    pubkey: 'npub1trusted_seller_alpha_example99', type: 'SELL', asset: 'XMR',
-                    fiatPrice: '$142.50', amount: '5.0', location: 'New Rochelle - Downtown (In-Person)', timestamp: Date.now()
+                    pubkey: 'npub1trusted_seller_alpha_example99', 
+                    type: 'SELL', 
+                    asset: 'XMR',
+                    fiatPrice: '$142.50', 
+                    amount: '5.0', 
+                    location: 'New Rochelle - Downtown', 
+                    contact: 'Session ID: 054b8a...9c21',
+                    directAddress: '44AFFq5kSiGBoZ4NMDwYtN18obc8AemS33DBLWs3H7otXft3XjrpDtQGv7SqSsaBYBb98uNbr2VBBEt7f2wfn3RVGQBEP3A',
+                    timestamp: Date.now()
                 });
             }
 
@@ -171,7 +171,6 @@
             liveOrders.forEach((order) => {
                 const card = document.createElement('div');
                 card.className = 'trade-card';
-                card.id = `card-${order.pubkey}`;
                 card.innerHTML = `
                     <div class="card-header">
                         <span class="badge">${order.type || 'SELL'} ${order.asset}</span>
@@ -179,92 +178,43 @@
                     </div>
                     <div class="price-row">${order.amount} ${order.asset} @ ${order.fiatPrice}</div>
                     <div class="details-row">📍 ${order.location || 'Local Sector'}</div>
-                    <button id="btn-${order.pubkey}" class="action-btn" onclick="executeRealMultisig('${order.pubkey}', ${order.amount}, '${card.id}')">
-                        Initiate Trade
+                    
+                    <button class="action-btn" onclick="revealContact(this, '${order.contact}', '${order.directAddress}')">
+                        Match & Reveal Info
                     </button>
-                    <div id="terminal-${order.pubkey}" class="terminal-log"></div>
-                    <div id="qr-${order.pubkey}" class="qr-container"></div>
+                    
+                    <div class="reveal-box">
+                        <p style="color: var(--text-main); font-size: 0.85rem;">Secure Contact:</p>
+                        <div class="contact-info">${order.contact || 'No contact provided'}</div>
+                        <div class="qr-container"></div>
+                        <p style="font-size: 0.75rem; margin-top: 10px; color: var(--text-muted);">Coordinate meeting and execute manual transfer.</p>
+                    </div>
                 `;
                 orderBookDiv.appendChild(card);
             });
         }
 
         // ==========================================
-        // 3. SECURE MONERO WASM PROTOCOL
+        // 3. MANUAL TRADE REVEAL
         // ==========================================
-        async function executeRealMultisig(sellerKey, amount, cardId) {
-            const card = document.getElementById(cardId);
-            const btn = document.getElementById(`btn-${sellerKey}`);
-            const terminal = document.getElementById(`terminal-${sellerKey}`);
-            const qrContainer = document.getElementById(`qr-${sellerKey}`);
+        function revealContact(button, contactInfo, xmrAddress) {
+            const card = button.closest('.trade-card');
+            const revealBox = card.querySelector('.reveal-box');
+            const qrContainer = card.querySelector('.qr-container');
             
-            card.classList.add('active-trade');
-            btn.disabled = true;
-            terminal.style.display = 'block';
-
-            const log = (msg) => { terminal.innerHTML += `> ${msg}<br>`; terminal.scrollTop = terminal.scrollHeight; };
-
-            log("INITIATING LIVE MONERO ENVIRONMENT...");
-
-            try {
-                log("Loading Monero Core (WASM) from CDN...");
-                if (typeof monerojs === 'undefined') throw new Error("WASM library failed to load.");
-
-                log(`Connecting to secure node via HTTPS...`);
-                let daemon;
-                try {
-                    daemon = await monerojs.connectToDaemonRpc({ uri: SECURE_MONERO_NODE });
-                    const height = await daemon.getHeight();
-                    log(`Connected securely. Chain height: ${height}`);
-                } catch (nodeError) {
-                    // Fallback for CORS/HTTPS node errors common in browser environments
-                    log(`<span style="color: yellow;">Warning: Public Node blocked connection (CORS/HTTPS). Emulating local cryptography state...</span>`);
-                    await new Promise(r => setTimeout(r, 1000));
-                }
-
-                log("Generating local keypair for escrow...");
-                await new Promise(r => setTimeout(r, 1500));
-                
-                log("Awaiting seller key broadcast via Nostr...");
-                await new Promise(r => setTimeout(r, 2000));
-                
-                log("COMPUTING MULTISIG ADDRESS...");
-                const generatedMultisigAddress = "44AFFq5kSiGBoZ... (Network 2/3 Address)";
-                qrContainer.style.display = 'block';
-                new QRCode(qrContainer, { text: generatedMultisigAddress, width: 128, height: 128 });
-                btn.innerText = "Awaiting Seller Deposit...";
-
-                // Settlement Phase
-                setTimeout(() => {
-                    qrContainer.style.display = 'none';
-                    log(`BLOCKCHAIN CONFIRMATION: ${amount} XMR secured in Escrow.`);
-                    btn.disabled = false;
-                    btn.innerText = "Sign Release Transaction";
-                    btn.style.borderColor = "var(--success-green)";
-                    btn.style.color = "var(--success-green)";
-                    
-                    btn.onclick = async () => {
-                        btn.disabled = true;
-                        btn.innerText = "Computing Cryptography...";
-                        const fee = (amount * SYSTEM_FEE_PERCENTAGE).toFixed(4);
-                        
-                        log("CONSTRUCTING ENFORCED RELEASE TRANSACTION...");
-                        log(`Output 1: ${amount - fee} XMR -> Buyer`);
-                        log(`Output 2 (System Fee): ${fee} XMR -> ${ARBITRATOR_ADDRESS.substring(0, 15)}...`);
-                        
-                        await new Promise(r => setTimeout(r, 1500));
-                        log("Transaction signed successfully. Broadcasting...");
-                        
-                        btn.innerText = "Trade Complete";
-                        btn.style.background = "var(--success-green)";
-                        btn.style.color = "#000";
-                        setTimeout(() => { card.classList.remove('active-trade'); }, 5000);
-                    };
-                }, 4000);
-
-            } catch (error) {
-                log(`<span style="color: var(--error-red)">CRITICAL ERROR: ${error.message}</span>`);
-                btn.innerText = "Execution Failed";
+            button.style.display = 'none'; // Hide the button
+            revealBox.style.display = 'block'; // Show the secret info
+            
+            if (xmrAddress && xmrAddress !== 'undefined') {
+                new QRCode(qrContainer, { 
+                    text: xmrAddress, 
+                    width: 128, 
+                    height: 128,
+                    colorDark : "#000000",
+                    colorLight : "#ffffff",
+                });
+            } else {
+                qrContainer.innerHTML = '<span style="color: black; font-size: 0.8rem;">Ask seller for address via secure contact.</span>';
             }
         }
 
@@ -280,7 +230,11 @@
                 timerBar.style.transition = 'none'; 
                 timerBar.style.width = '0%';
                 setTimeout(() => { timerBar.style.transition = 'width 1s linear'; }, 50);
-                if (!document.querySelector('.active-trade')) renderOrders();
+                
+                // Only re-render if a user hasn't clicked "reveal" on a card
+                if (!document.querySelector('.reveal-box[style*="display: block"]')) {
+                    renderOrders();
+                }
             }
         }
 
