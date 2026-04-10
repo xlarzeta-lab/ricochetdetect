@@ -25,8 +25,14 @@
             padding: 20px; text-align: center; border-bottom: 1px solid var(--glass-border);
             background: rgba(0, 0, 0, 0.5); backdrop-filter: blur(10px); position: sticky; top: 0; z-index: 10;
         }
-        header h1 { color: var(--monero-orange); font-size: 1.5rem; text-transform: uppercase; letter-spacing: 2px; }
-        header p { color: var(--text-muted); font-size: 0.85rem; margin-top: 5px; }
+        header h1 { color: var(--monero-orange); font-size: 1.5rem; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 5px; }
+        header p { color: var(--text-muted); font-size: 0.85rem; margin-bottom: 15px; }
+        
+        .vendor-btn {
+            background: rgba(242, 104, 34, 0.1); border: 1px solid var(--monero-orange); color: var(--monero-orange);
+            padding: 8px 16px; border-radius: 20px; font-size: 0.8rem; font-weight: bold; cursor: pointer; transition: all 0.3s ease;
+        }
+        .vendor-btn:hover { background: var(--monero-orange); color: var(--bg-dark); }
 
         #timer-bar { height: 3px; background: var(--monero-orange); width: 100%; transition: width 1s linear; }
 
@@ -46,11 +52,8 @@
             display: flex; align-items: center; gap: 15px; margin-bottom: 15px;
             border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 15px;
         }
-        .avatar {
-            width: 50px; height: 50px; border-radius: 50%; object-fit: cover;
-            border: 2px solid var(--monero-orange); background: #222;
-        }
-        .profile-info { display: flex; flex-direction: column; overflow: hidden; }
+        .avatar { width: 50px; height: 50px; border-radius: 50%; object-fit: cover; border: 2px solid var(--monero-orange); background: #222; }
+        .profile-info { display: flex; flex-direction: column; overflow: hidden; width: 100%; }
         .profile-name { font-weight: bold; font-size: 1.1rem; color: var(--text-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .profile-bio { font-size: 0.8rem; color: var(--text-muted); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; margin-top: 2px; }
 
@@ -75,6 +78,35 @@
         .contact-info { margin-top: 10px; font-family: monospace; font-size: 0.9rem; color: var(--success-green); word-break: break-all; }
         .qr-container { display: flex; justify-content: center; margin-top: 10px; background: #fff; padding: 10px; border-radius: 8px; width: max-content; margin-inline: auto; }
 
+        /* VENDOR MODAL STYLES */
+        #vendor-modal {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(5px); z-index: 100;
+            justify-content: center; align-items: center; padding: 20px;
+        }
+        .modal-content {
+            background: #111; border: 1px solid var(--glass-border); border-radius: 15px;
+            max-width: 500px; width: 100%; padding: 30px; position: relative;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.8); max-height: 90vh; overflow-y: auto;
+        }
+        .close-btn {
+            position: absolute; top: 15px; right: 20px; color: var(--text-muted);
+            font-size: 1.5rem; cursor: pointer; transition: color 0.2s;
+        }
+        .close-btn:hover { color: var(--monero-orange); }
+        .step-box { background: #1a1a1a; padding: 15px; border-radius: 8px; margin-bottom: 15px; border-left: 3px solid var(--monero-orange); }
+        .step-title { font-weight: bold; color: var(--monero-orange); margin-bottom: 5px; font-size: 0.9rem; }
+        .copy-input-group { display: flex; margin-top: 10px; }
+        .copy-input-group input {
+            flex-grow: 1; background: #000; border: 1px solid #333; color: var(--text-muted);
+            padding: 8px; border-radius: 4px 0 0 4px; font-family: monospace; font-size: 0.8rem;
+        }
+        .copy-btn {
+            background: #333; border: 1px solid #333; color: #fff; cursor: pointer;
+            padding: 0 15px; border-radius: 0 4px 4px 0; font-weight: bold; transition: background 0.2s;
+        }
+        .copy-btn:hover { background: var(--monero-orange); color: #000; }
+
         footer { text-align: center; padding: 20px; border-top: 1px solid var(--glass-border); font-size: 0.8rem; background: rgba(0, 0, 0, 0.8); }
         footer span { color: var(--monero-orange); word-break: break-all; }
         
@@ -87,6 +119,7 @@
     <header>
         <h1>Local XMR Matchmaker</h1>
         <p>Decentralized Board • Verified Sellers Only</p>
+        <button class="vendor-btn" onclick="openVendorModal()">Become a Vendor</button>
         <div id="network-status">Nostr: Offline</div>
     </header>
     <div id="timer-bar"></div>
@@ -97,10 +130,54 @@
         </div>
     </main>
 
+    <div id="vendor-modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeVendorModal()">&times;</span>
+            <h2 style="color: var(--text-main); margin-bottom: 20px; text-align: center;">Vendor Application</h2>
+            
+            <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 20px; text-align: center;">
+                Our network strictly limits visibility to trusted local providers. To get listed, complete the concierge process below.
+            </p>
+
+            <div class="step-box">
+                <div class="step-title">STEP 1: Pay the Listing Fee</div>
+                <p style="font-size: 0.85rem; color: #aaa;">Send <strong>0.05 XMR</strong> to the network address. Save your Transaction ID (TxID) as proof of payment.</p>
+                <div class="copy-input-group">
+                    <input type="text" id="fee-address" value="888tNkZrPN6JsEgekjMnABU4TBzc2Dt29EPAvkRxbANsAnjyPbb3iQ1YBRk1UXcdRsiKc9CEv12V8U7nUjE5B5G1Fv7aEwq" readonly>
+                    <button class="copy-btn" onclick="copyText('fee-address', this)">Copy</button>
+                </div>
+            </div>
+
+            <div class="step-box">
+                <div class="step-title">STEP 2: Message Us on Session</div>
+                <p style="font-size: 0.85rem; color: #aaa;">Contact the network admin via Session Messenger.</p>
+                <div class="copy-input-group">
+                    <input type="text" id="session-id" value="056a...YOUR_SESSION_ID_HERE...8f4e" readonly>
+                    <button class="copy-btn" onclick="copyText('session-id', this)">Copy</button>
+                </div>
+            </div>
+
+            <div class="step-box">
+                <div class="step-title">STEP 3: Provide Your Details</div>
+                <p style="font-size: 0.85rem; color: #aaa;">In your Session message, include the following so we can publish your listing:</p>
+                <ul style="font-size: 0.8rem; color: var(--success-green); margin-top: 10px; margin-left: 20px; font-family: monospace;">
+                    <li>TxID (Proof of Fee)</li>
+                    <li>Vendor Name & Bio</li>
+                    <li>Asset & Amount (e.g., 5 XMR)</li>
+                    <li>Price/Rate</li>
+                    <li>Location (e.g., New Rochelle Area)</li>
+                    <li>Your Direct Session ID</li>
+                </ul>
+            </div>
+            
+            <p style="text-align: center; font-size: 0.75rem; color: #666; margin-top: 15px;">Listings are manually verified and deployed within 24 hours.</p>
+        </div>
+    </div>
+
     <footer>
-        <p>Want to list your offers here? Pay the listing fee to:</p>
+        <p>Support the network. General Donations:</p>
         <br>
-        <span id="donation-address">888tNkZrPN6JsEgekjMnABU4TBzc2Dt29EPAvkRxbANsAnjyPbb3iQ1YBRk1UXcdRsiKc9CEv12V8U7nUjE5B5G1Fv7aEwq</span>
+        <span style="color: var(--text-muted); font-size: 0.7rem;">888tNkZrPN6JsEgekjMnABU4TBzc2Dt29EPAvkRxbANsAnjyPbb3iQ1YBRk1UXcdRsiKc9CEv12V8U7nUjE5B5G1Fv7aEwq</span>
     </footer>
 
     <script>
@@ -117,10 +194,38 @@
         const networkStatus = document.getElementById('network-status');
         
         let liveOrders = new Map(); 
-        let sellerProfiles = new Map(); // Store the Kind 0 Metadata here
+        let sellerProfiles = new Map(); 
 
-        // Default Avatar fallback (a clean geometric identicon via URL)
         const DEFAULT_AVATAR = 'https://api.dicebear.com/7.x/identicon/svg?seed=fallback&backgroundColor=0a0a0a';
+
+        // ==========================================
+        // UI & MODAL CONTROLS
+        // ==========================================
+        function openVendorModal() {
+            document.getElementById('vendor-modal').style.display = 'flex';
+        }
+
+        function closeVendorModal() {
+            document.getElementById('vendor-modal').style.display = 'none';
+        }
+
+        function copyText(elementId, btnElement) {
+            const copyText = document.getElementById(elementId);
+            copyText.select();
+            copyText.setSelectionRange(0, 99999); // For mobile devices
+            navigator.clipboard.writeText(copyText.value);
+            
+            const originalText = btnElement.innerText;
+            btnElement.innerText = "Copied!";
+            btnElement.style.background = "var(--success-green)";
+            btnElement.style.color = "#000";
+            
+            setTimeout(() => {
+                btnElement.innerText = originalText;
+                btnElement.style.background = "#333";
+                btnElement.style.color = "#fff";
+            }, 2000);
+        }
 
         // ==========================================
         // 1. LIVE NOSTR WEBSOCKET
@@ -131,11 +236,7 @@
             nostrSocket.onopen = () => {
                 networkStatus.innerText = "Nostr: Online";
                 networkStatus.classList.add('online');
-                
-                // Subscription 1: The Trade Orders (Kind 1)
                 nostrSocket.send(JSON.stringify(["REQ", "market_sub", { "kinds": [1], "#t": [MARKET_TAG], "limit": 50 }]));
-                
-                // Subscription 2: The Seller Profiles (Kind 0)
                 nostrSocket.send(JSON.stringify(["REQ", "profile_sub", { "kinds": [0], "authors": WHITELISTED_SELLERS }]));
             };
 
@@ -151,19 +252,15 @@
         }
 
         function processNostrEvent(event) {
-            // We only care about data from our whitelisted sellers
             if (!WHITELISTED_SELLERS.includes(event.pubkey)) return;
 
-            // Handle Profile Updates (Kind 0)
             if (event.kind === 0) {
                 try {
-                    const profileData = JSON.parse(event.content);
-                    sellerProfiles.set(event.pubkey, profileData);
-                    renderOrders(); // Re-render to show the new avatar/name if it just loaded
-                } catch (e) { console.error("Error parsing profile data"); }
+                    sellerProfiles.set(event.pubkey, JSON.parse(event.content));
+                    renderOrders(); 
+                } catch (e) {}
             }
 
-            // Handle Trade Orders (Kind 1)
             if (event.kind === 1) {
                 try {
                     const orderData = JSON.parse(event.content);
@@ -183,7 +280,6 @@
         // ==========================================
         function renderOrders() {
             if (liveOrders.size === 0) {
-                // Dummy order for UI visualization
                 liveOrders.set('dummy1', {
                     pubkey: 'npub1trusted_seller_alpha_example99', type: 'SELL', asset: 'XMR',
                     fiatPrice: '$142.50', amount: '5.0', location: 'New Rochelle - Downtown', 
@@ -192,7 +288,6 @@
                     timestamp: Date.now()
                 });
                 
-                // Dummy Profile to match
                 sellerProfiles.set('npub1trusted_seller_alpha_example99', {
                     name: 'CypherPunkNR',
                     about: 'Reliable local provider. 100+ flawless trades. Cash only in public locations.',
@@ -203,8 +298,6 @@
             orderBookDiv.innerHTML = ''; 
             liveOrders.forEach((order) => {
                 const profile = sellerProfiles.get(order.pubkey) || {};
-                
-                // Fallbacks for profile data
                 const displayName = profile.name || 'Verified Vendor';
                 const avatarUrl = profile.picture || `https://api.dicebear.com/7.x/identicon/svg?seed=${order.pubkey}&backgroundColor=0a0a0a`;
                 const bioText = profile.about || 'Approved local liquidity provider.';
