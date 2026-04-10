@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Monero Quantum Terminal v5.0</title>
+    <title>Monero Quantum Terminal v5.1</title>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700;800&family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -12,7 +12,7 @@
             --xmr-glow: rgba(255, 102, 0, 0.6);
             --xmr-dim: rgba(255, 102, 0, 0.08);
             
-            --bg-void: #050507; /* Deeper, richer black */
+            --bg-void: #050507; 
             --bg-glass: rgba(18, 18, 22, 0.45);
             --border-glass: rgba(255, 102, 0, 0.12);
             --border-highlight: rgba(255, 102, 0, 0.3);
@@ -31,7 +31,6 @@
 
         * { box-sizing: border-box; margin: 0; padding: 0; transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
 
-        /* Custom Scrollbar for a native feel */
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: var(--bg-void); }
         ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
@@ -39,42 +38,47 @@
 
         body {
             font-family: 'Inter', sans-serif; 
-            background-color: var(--bg-void); 
-            color: var(--text-main);
-            min-height: 100vh; width: 100vw; 
-            display: flex; flex-direction: column; 
-            overflow-x: hidden;
-            /* Advanced Background: Grid + Ambient Glow */
+            background-color: var(--bg-void); color: var(--text-main);
+            min-height: 100vh; width: 100vw; display: flex; flex-direction: column; overflow-x: hidden;
             background-image: 
                 radial-gradient(circle at 50% -20%, rgba(255,102,0,0.12) 0%, transparent 60%),
                 linear-gradient(rgba(255, 255, 255, 0.015) 1px, transparent 1px),
                 linear-gradient(90deg, rgba(255, 255, 255, 0.015) 1px, transparent 1px);
-            background-size: 100% 100%, 30px 30px, 30px 30px;
-            position: relative;
+            background-size: 100% 100%, 30px 30px, 30px 30px; position: relative;
         }
 
-        /* Subtle CRT Scanline Overlay */
         body::after {
             content: ""; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
             background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
             background-size: 100% 4px, 3px 100%; z-index: 9999; pointer-events: none; opacity: 0.6;
         }
 
+        /* --- NOSCRIPT FALLBACK UI --- */
+        .noscript-overlay {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; 
+            background: rgba(5, 5, 7, 0.95); backdrop-filter: blur(10px);
+            display: flex; justify-content: center; align-items: center; 
+            z-index: 100000; padding: 20px; text-align: center;
+        }
+        .noscript-card {
+            background: rgba(255, 23, 68, 0.05); border: 1px solid var(--action-wait); 
+            border-radius: 16px; padding: 40px; max-width: 600px;
+            box-shadow: 0 0 40px rgba(255, 23, 68, 0.1);
+        }
+        .noscript-card h2 { font-family: 'JetBrains Mono', monospace; color: var(--action-wait); margin-bottom: 20px; text-transform: uppercase; letter-spacing: 2px;}
+        .noscript-card p { font-size: 0.95rem; line-height: 1.6; margin-bottom: 15px; color: #d1d5db; }
+        .noscript-card .highlight { color: var(--xmr-base); font-weight: bold; }
+
         .app-wrapper { display: flex; flex-direction: column; gap: 20px; width: 100%; min-height: 100vh; padding: 20px; flex: 1; z-index: 10; position: relative; }
         .dashboard { display: flex; flex-direction: column; gap: 20px; width: 100%; flex: 1; }
 
-        /* Enhanced Glass Panels */
         .panel {
-            background: var(--bg-glass); 
-            backdrop-filter: blur(24px) saturate(150%); -webkit-backdrop-filter: blur(24px) saturate(150%);
-            border: 1px solid var(--border-glass); 
-            border-top: 1px solid rgba(255,255,255,0.1); /* Subtle top light reflection */
-            border-radius: 24px; padding: 25px;
-            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255,255,255,0.05); 
+            background: var(--bg-glass); backdrop-filter: blur(24px) saturate(150%); -webkit-backdrop-filter: blur(24px) saturate(150%);
+            border: 1px solid var(--border-glass); border-top: 1px solid rgba(255,255,255,0.1); 
+            border-radius: 24px; padding: 25px; box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255,255,255,0.05); 
             display: flex; flex-direction: column;
         }
 
-        /* --- Header --- */
         header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
         .brand { display: flex; align-items: center; gap: 12px; font-family: 'JetBrains Mono', monospace; font-weight: 800; color: #fff; text-transform: uppercase; font-size: 0.9rem; letter-spacing: 1px; }
         .logo-mark { width: 28px; height: 28px; background: linear-gradient(135deg, #FF6600, #ff8c42); border-radius: 50%; display: flex; justify-content: center; align-items: center; color: var(--bg-void); font-size: 16px; font-weight: 800; box-shadow: 0 0 20px var(--xmr-glow); }
@@ -82,75 +86,45 @@
         .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--action-buy); box-shadow: 0 0 12px var(--action-buy-glow); animation: blink 2s ease-in-out infinite; }
         @keyframes blink { 0%, 100% {opacity: 1; transform: scale(1);} 50% {opacity: 0.3; transform: scale(0.8);} }
 
-        /* --- Main Price Area --- */
         .price-container { margin: 15px 0 25px 0; }
         .price-label { font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 3px; margin-bottom: 8px; font-weight: 600; }
-        
-        /* Holographic Text Glow */
-        .price-value { 
-            font-family: 'JetBrains Mono', monospace; font-size: 4rem; font-weight: 800; line-height: 1; letter-spacing: -2px; 
-            text-shadow: 0 0 40px rgba(255, 255, 255, 0.15), 0 0 15px rgba(255, 255, 255, 0.05);
-        }
-        
+        .price-value { font-family: 'JetBrains Mono', monospace; font-size: 4rem; font-weight: 800; line-height: 1; letter-spacing: -2px; text-shadow: 0 0 40px rgba(255, 255, 255, 0.15), 0 0 15px rgba(255, 255, 255, 0.05); }
         .flash-update { animation: priceFlash 1.2s cubic-bezier(0.16, 1, 0.3, 1); }
         @keyframes priceFlash { 0% { color: var(--action-buy); text-shadow: 0 0 50px var(--action-buy-glow); transform: translateY(-2px); } 100% { color: var(--text-main); transform: translateY(0); } }
         .update-timer { font-size: 0.75rem; color: var(--text-muted); font-family: 'JetBrains Mono', monospace; margin-top: 8px; opacity: 0.6; }
 
-        /* --- Right Side Data Grid --- */
         .data-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; flex: 1; align-content: stretch; }
-        
-        /* Interactive Metric Cards */
         .metric-card {
-            background: rgba(10, 10, 12, 0.5); 
-            border: 1px solid rgba(255, 255, 255, 0.04);
-            border-radius: 16px; padding: 20px; 
-            display: flex; flex-direction: column; justify-content: center;
-            cursor: default;
+            background: rgba(10, 10, 12, 0.5); border: 1px solid rgba(255, 255, 255, 0.04); border-radius: 16px; padding: 20px; 
+            display: flex; flex-direction: column; justify-content: center; cursor: default;
         }
-        .metric-card:hover {
-            transform: translateY(-4px);
-            border-color: var(--border-highlight);
-            background: rgba(255, 102, 0, 0.03);
-            box-shadow: 0 10px 20px rgba(0,0,0,0.4), 0 0 20px var(--xmr-dim);
-        }
-        
+        .metric-card:hover { transform: translateY(-4px); border-color: var(--border-highlight); background: rgba(255, 102, 0, 0.03); box-shadow: 0 10px 20px rgba(0,0,0,0.4), 0 0 20px var(--xmr-dim); }
         .metric-title { font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; font-weight: 600;}
         .metric-val { font-family: 'JetBrains Mono', monospace; font-size: 1.4rem; font-weight: 800; margin-bottom: 6px; letter-spacing: -0.5px;}
         .metric-sub { font-size: 0.75rem; font-weight: 600; letter-spacing: 0.5px;}
-        
         .text-buy { color: var(--action-buy); text-shadow: 0 0 10px var(--action-buy-glow);} 
         .text-sell { color: var(--action-wait); text-shadow: 0 0 10px var(--action-wait-glow);} 
         .text-dim { color: var(--text-muted); }
 
-        /* --- Verdict & Blueprint --- */
         .verdict-box { 
             margin-top: auto; padding: 25px; border-radius: 18px; text-align: center; 
-            border: 1px solid transparent; flex: 1; display: flex; flex-direction: column; justify-content: center;
-            background: rgba(0,0,0,0.4);
+            border: 1px solid transparent; flex: 1; display: flex; flex-direction: column; justify-content: center; background: rgba(0,0,0,0.4);
         }
         .verdict-title { font-family: 'JetBrains Mono', monospace; font-weight: 800; font-size: 2.2rem; letter-spacing: 3px; margin-bottom: 12px; text-transform: uppercase;}
-        
         .sig-buy { border-color: rgba(0, 230, 118, 0.4); box-shadow: inset 0 0 40px rgba(0, 230, 118, 0.05), 0 0 30px rgba(0, 230, 118, 0.1); }
         .sig-buy .verdict-title { color: var(--action-buy); text-shadow: 0 0 20px var(--action-buy-glow); }
-        
         .sig-hold { border-color: rgba(255, 234, 0, 0.3); box-shadow: inset 0 0 40px rgba(255, 234, 0, 0.05); }
         .sig-hold .verdict-title { color: var(--action-hold); }
-        
         .sig-wait { border-color: rgba(255, 23, 68, 0.4); box-shadow: inset 0 0 40px rgba(255, 23, 68, 0.05), 0 0 30px rgba(255, 23, 68, 0.1); }
         .sig-wait .verdict-title { color: var(--action-wait); text-shadow: 0 0 20px var(--action-wait-glow); }
 
         .trade-blueprint {
-            background: #000; border-radius: 12px; padding: 18px; margin-top: 20px;
-            font-family: 'JetBrains Mono', monospace; font-size: 0.9rem; 
-            border: 1px solid rgba(255,255,255,0.1);
-            display: flex; flex-direction: column; gap: 12px; text-align: left;
-            position: relative; overflow: hidden;
+            background: #000; border-radius: 12px; padding: 18px; margin-top: 20px; font-family: 'JetBrains Mono', monospace; font-size: 0.9rem; 
+            border: 1px solid rgba(255,255,255,0.1); display: flex; flex-direction: column; gap: 12px; text-align: left; position: relative; overflow: hidden;
         }
-        /* Blueprint subtle animated background */
         .trade-blueprint::before {
             content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 2px;
-            background: linear-gradient(90deg, transparent, var(--xmr-base), transparent);
-            animation: scan 3s linear infinite; opacity: 0.5;
+            background: linear-gradient(90deg, transparent, var(--xmr-base), transparent); animation: scan 3s linear infinite; opacity: 0.5;
         }
         @keyframes scan { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
 
@@ -161,12 +135,29 @@
         .target-tp { color: var(--action-tp); font-weight: 800; font-size: 1.1rem; text-shadow: 0 0 10px rgba(0, 176, 255, 0.4);}
         .target-sl { color: var(--action-wait); font-weight: 800; font-size: 1.1rem; text-shadow: 0 0 10px var(--action-wait-glow);}
 
-        /* --- Donation Footer --- */
+        /* --- AUDIO PLAYER PANEL --- */
+        .audio-panel {
+            flex-direction: column; padding: 15px 25px; align-items: stretch; gap: 15px; flex: none;
+            background: linear-gradient(90deg, rgba(18,18,22,0.8) 0%, rgba(255,102,0,0.05) 100%);
+        }
+        .audio-controls-wrapper { display: flex; align-items: center; gap: 15px; width: 100%; }
+        .play-btn {
+            background: transparent; border: 1px solid var(--xmr-base); color: var(--xmr-base);
+            padding: 8px 16px; border-radius: 8px; cursor: pointer; font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem; font-weight: 800; text-transform: uppercase; white-space: nowrap; width: 90px;
+            display: flex; justify-content: center; align-items: center;
+        }
+        .play-btn:hover { background: rgba(255, 102, 0, 0.1); box-shadow: 0 0 15px var(--xmr-glow); }
+        .play-btn.playing { background: var(--xmr-base); color: #000; box-shadow: 0 0 15px var(--xmr-glow); }
+        
+        .audio-track { flex: 1; height: 6px; background: rgba(255,255,255,0.1); border-radius: 10px; cursor: pointer; position: relative; overflow: hidden; }
+        .audio-progress { height: 100%; width: 0%; background: var(--xmr-base); box-shadow: 0 0 10px var(--xmr-glow); pointer-events: none; }
+        .audio-time { font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; color: var(--text-main); min-width: 90px; text-align: right; }
+        .audio-label { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 2px; font-weight: 600; text-align: center; }
+
         .donation-panel {
-            background: rgba(10, 10, 10, 0.8); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
-            border: 1px solid var(--border-glass); border-radius: 16px;
-            padding: 15px 25px; text-align: center; margin-top: auto; 
-            display: flex; flex-direction: column; align-items: center; gap: 12px;
+            background: rgba(10, 10, 10, 0.8); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border: 1px solid var(--border-glass); border-radius: 16px;
+            padding: 15px 25px; text-align: center; margin-top: auto; display: flex; flex-direction: column; align-items: center; gap: 12px; flex: none;
         }
         .donation-title { font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 2px; font-weight: 600;}
         .donation-address-container { display: flex; align-items: center; gap: 15px; width: 100%; background: #000; padding: 12px 18px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.05); }
@@ -179,7 +170,6 @@
         .copy-btn:hover { background: var(--xmr-base); color: #000; box-shadow: 0 0 15px var(--xmr-glow);}
         .copy-btn.copied { background: var(--action-buy); border-color: var(--action-buy); color: #000; box-shadow: 0 0 15px var(--action-buy-glow);}
 
-        /* --- Loader Overlay --- */
         .loader-overlay {
             position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: var(--bg-void); 
             display: flex; justify-content: center; align-items: center; z-index: 10000; 
@@ -188,15 +178,19 @@
         .spinner { width: 45px; height: 45px; border: 3px solid rgba(255,255,255,0.1); border-top-color: var(--xmr-base); border-radius: 50%; animation: spin 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite; }
         @keyframes spin { to { transform: rotate(360deg); } }
 
-        /* --- Desktop Layout --- */
         @media (min-width: 1024px) {
             body { overflow: hidden; } 
             .app-wrapper { height: 100vh; padding: 25px; max-width: 1600px; margin: 0 auto;}
-            .dashboard { flex-direction: row; align-items: stretch; height: calc(100% - 85px); margin-bottom: 0; }
+            .dashboard { flex-direction: row; align-items: stretch; height: calc(100% - 150px); margin-bottom: 0; }
             .left-col { flex: 1; display: flex; flex-direction: column; justify-content: space-between; height: 100%;}
             .right-col { flex: 1.6; display: flex; flex-direction: column; height: 100%; }
             .data-grid { grid-template-columns: 1fr 1fr 1fr; gap: 20px;}
             .price-value { font-size: 5rem; }
+            
+            .audio-panel { flex-direction: row; justify-content: space-between; align-items: center;}
+            .audio-label { text-align: left; }
+            .audio-controls-wrapper { width: auto; flex: 1; max-width: 600px;}
+
             .donation-panel { flex-direction: row; justify-content: space-between; text-align: left; padding: 15px 25px; margin-top: 0;}
             .donation-address-container { width: auto; flex: 1; margin-left: 30px; max-width: 800px;}
             .xmr-address { font-size: 0.85rem; }
@@ -204,6 +198,18 @@
     </style>
 </head>
 <body>
+
+    <noscript>
+        <div class="noscript-overlay">
+            <div class="noscript-card">
+                <h2>⚠️ UPLINK FAILED: JAVASCRIPT DISABLED</h2>
+                <p>The Monero Quantum Terminal relies on JavaScript to perform live market analysis and fetch real-time blockchain data.</p>
+                <p><strong>Is it safe to enable?</strong></p>
+                <p>Yes. This terminal is a 100% client-side application. All quantitative math, pattern matching, and API calls happen <span class="highlight">entirely inside your own browser</span>. We use no backend servers, no tracking cookies, and your data never leaves your device.</p>
+                <p style="margin-top: 25px; font-weight: bold; color: var(--xmr-base);">Please enable JavaScript and refresh the page to initialize the engine.</p>
+            </div>
+        </div>
+    </noscript>
 
     <div class="app-wrapper" id="app" style="display: none;">
         
@@ -246,7 +252,7 @@
             <div class="panel right-col">
                 <div style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; margin-bottom: 25px; letter-spacing: 2px; font-weight: 800; display: flex; align-items: center; justify-content: space-between;">
                     Quantitative Indicators
-                    <span style="font-size: 0.7rem; color: var(--xmr-base); background: var(--xmr-dim); padding: 4px 10px; border-radius: 100px;">v5.0 Core</span>
+                    <span style="font-size: 0.7rem; color: var(--xmr-base); background: var(--xmr-dim); padding: 4px 10px; border-radius: 100px;">v5.1 Core</span>
                 </div>
                 
                 <div class="data-grid">
@@ -258,6 +264,20 @@
                     <div class="metric-card"><div class="metric-title">Pattern Prob. (7-Day)</div><div class="metric-val" id="probScore">--</div><div class="metric-sub" id="probDesc" style="color:var(--text-muted)">Fractal Match</div></div>
                 </div>
             </div>
+        </div>
+
+        <div class="panel audio-panel">
+            <div class="audio-label">📡 COMMS LINK / AUDIO BRIEFING</div>
+            
+            <div class="audio-controls-wrapper">
+                <button class="play-btn" id="audioBtn">▶ PLAY</button>
+                <div class="audio-track" id="audioTrack">
+                    <div class="audio-progress" id="audioProgress"></div>
+                </div>
+                <div class="audio-time" id="audioTime">00:00 / 00:00</div>
+            </div>
+            
+            <audio id="platformAudio" src="YOUR_AUDIO_FILE.m4a"></audio>
         </div>
 
         <div class="donation-panel">
@@ -275,7 +295,7 @@
     </div>
 
     <script>
-        // --- MATH UTILITIES (Preserved from v4.0) ---
+        // --- MATH UTILITIES ---
         function calcEMA(prices, period) {
             const k = 2 / (period + 1); let ema = [prices[0]];
             for (let i = 1; i < prices.length; i++) ema.push(prices[i] * k + ema[i - 1] * (1 - k));
@@ -328,6 +348,7 @@
             return Math.max(5, Math.min(95, 50 + (avgReturn * 10))); 
         }
 
+        // --- APP STATE ---
         let histPrices = []; let lastUpdate = new Date(); let fearAndGreed = 50;
 
         async function initApp() {
@@ -343,7 +364,6 @@
 
                 await fetchLivePrice();
                 
-                // Add a slight artificial delay so the UI reveal feels smoother
                 setTimeout(() => {
                     document.getElementById('loader').style.display = 'none';
                     document.getElementById('app').style.display = 'flex';
@@ -441,6 +461,55 @@
             }
         }
 
+        // --- AUDIO PLAYER LOGIC ---
+        const audio = document.getElementById('platformAudio');
+        const audioBtn = document.getElementById('audioBtn');
+        const audioTrack = document.getElementById('audioTrack');
+        const audioProgress = document.getElementById('audioProgress');
+        const audioTime = document.getElementById('audioTime');
+
+        function formatTime(seconds) {
+            if (isNaN(seconds)) return "00:00";
+            const min = Math.floor(seconds / 60);
+            const sec = Math.floor(seconds % 60);
+            return `${min < 10 ? '0' : ''}${min}:${sec < 10 ? '0' : ''}${sec}`;
+        }
+
+        audioBtn.addEventListener('click', () => {
+            if (audio.paused) {
+                audio.play();
+                audioBtn.innerText = '⏸ PAUSE';
+                audioBtn.classList.add('playing');
+            } else {
+                audio.pause();
+                audioBtn.innerText = '▶ PLAY';
+                audioBtn.classList.remove('playing');
+            }
+        });
+
+        audio.addEventListener('timeupdate', () => {
+            const percent = (audio.currentTime / audio.duration) * 100;
+            audioProgress.style.width = `${percent}%`;
+            audioTime.innerText = `${formatTime(audio.currentTime)} / ${formatTime(audio.duration)}`;
+        });
+
+        audio.addEventListener('loadedmetadata', () => {
+            audioTime.innerText = `00:00 / ${formatTime(audio.duration)}`;
+        });
+
+        audio.addEventListener('ended', () => {
+            audioBtn.innerText = '▶ PLAY';
+            audioBtn.classList.remove('playing');
+            audioProgress.style.width = '0%';
+        });
+
+        audioTrack.addEventListener('click', (e) => {
+            const rect = audioTrack.getBoundingClientRect();
+            const clickX = e.clientX - rect.left;
+            audio.currentTime = (clickX / rect.width) * audio.duration;
+        });
+
+        // --- CLIPBOARD ---
         function copyAddress() {
             navigator.clipboard.writeText(document.getElementById('xmrAddress').innerText).then(() => {
                 let btn = document.getElementById('copyBtn'); btn.innerText = "Copied!"; btn.classList.add('copied');
