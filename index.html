@@ -2,464 +2,537 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Monero Quantum Terminal v3.0</title>
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700;800&family=Inter:wght@300;500;700&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    
+    <title>New Ro Dash</title>
+    
+    <link rel="manifest" href='data:application/manifest+json,{"name":"New Ro Scooter Dasher","short_name":"NewRo Dash","display":"standalone","background_color":"#000000","theme_color":"#ff3366"}'>
+    
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="NewRo Dash">
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
     <style>
         :root {
-            --xmr-base: #FF6600;
-            --xmr-glow: rgba(255, 102, 0, 0.4);
-            --bg-void: #030303;
-            --bg-glass: rgba(15, 15, 15, 0.65);
-            --border-glass: rgba(255, 102, 0, 0.15);
-            --text-main: #f0f0f0;
-            --text-muted: #707070;
-            --action-buy: #00e676;
-            --action-hold: #ffea00;
-            --action-wait: #ff1744;
+            --bg-deep: #000000;
+            --glass-bg: rgba(18, 18, 18, 0.75);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            
+            --accent-start: #ff2a6d;
+            --accent-end: #ff5f6d;
+            --xmr-orange: #F26822; /* Monero Brand Orange */
+            
+            --dye-warn: #ffd700;
+            --dye-rain: #3399ff;
+            --dye-physics: #00e5ff; 
+            
+            --text-main: #ffffff;
+            --text-muted: #888888;
+            
+            --bento-gap: 12px;
+            --panel-padding: 24px;
         }
 
-        * { box-sizing: border-box; transition: all 0.3s ease; }
-
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: var(--bg-void); color: var(--text-main);
-            margin: 0; padding: 0; min-height: 100vh; width: 100vw;
-            display: flex; flex-direction: column; overflow-x: hidden;
-            background-image: 
-                radial-gradient(circle at 50% 0%, rgba(255,102,0,0.08) 0%, transparent 50%),
-                linear-gradient(rgba(255, 255, 255, 0.015) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(255, 255, 255, 0.015) 1px, transparent 1px);
-            background-size: 100% 100%, 40px 40px, 40px 40px;
+        body, html {
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", sans-serif;
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            width: 100vw;
+            background-color: var(--bg-deep);
+            overflow: hidden;
+            padding-bottom: env(safe-area-inset-bottom);
+            box-sizing: border-box;
+            color: var(--text-main);
         }
 
-        .app-wrapper {
-            display: flex; flex-direction: column; gap: 15px;
-            width: 100%; min-height: 100vh; padding: 15px; flex: 1;
+        #map {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
         }
 
-        .dashboard { display: flex; flex-direction: column; gap: 15px; width: 100%; flex: 1; }
-
-        .panel {
-            background: var(--bg-glass); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-            border: 1px solid var(--border-glass); border-radius: 20px;
-            padding: 20px; position: relative; overflow: hidden;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5); display: flex; flex-direction: column;
+        .top-bar {
+            position: absolute;
+            top: calc(10px + env(safe-area-inset-top));
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 10;
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            padding: 8px 18px;
+            border-radius: 40px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+            pointer-events: none;
         }
 
-        /* --- Header & Live Pulse --- */
-        header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-        .brand { display: flex; align-items: center; gap: 10px; font-family: 'JetBrains Mono', monospace; font-weight: 800; color: var(--xmr-base); text-transform: uppercase; font-size: 0.85rem; }
-        .logo-mark { width: 24px; height: 24px; background: var(--xmr-base); border-radius: 50%; display: flex; justify-content: center; align-items: center; color: var(--bg-void); font-size: 14px; box-shadow: 0 0 15px var(--xmr-glow); }
-        .live-pulse { display: flex; align-items: center; gap: 6px; font-size: 0.7rem; color: var(--action-buy); text-transform: uppercase; letter-spacing: 2px; font-weight: bold; }
-        .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--action-buy); box-shadow: 0 0 10px var(--action-buy); animation: blink 1.5s infinite; }
-        @keyframes blink { 0%, 100% {opacity: 1;} 50% {opacity: 0.2;} }
-
-        /* --- Price Display --- */
-        .price-container { margin: 10px 0; }
-        .price-label { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 5px; }
-        .price-value { font-family: 'JetBrains Mono', monospace; font-size: 3rem; font-weight: 800; line-height: 1; letter-spacing: -1px; text-shadow: 0 0 30px rgba(255, 255, 255, 0.1); }
-        .flash-update { animation: priceFlash 1s ease-out; }
-        @keyframes priceFlash { 0% { color: var(--action-buy); transform: scale(1.02); } 100% { color: var(--text-main); transform: scale(1); } }
-        .update-timer { font-size: 0.7rem; color: var(--text-muted); font-family: 'JetBrains Mono', monospace; margin-top: 5px; opacity: 0.7; }
-
-        /* --- UI Grids --- */
-        .data-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; flex: 1; align-content: stretch; }
-        .metric-card {
-            background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(255, 255, 255, 0.05);
-            border-radius: 12px; padding: 15px; display: flex; flex-direction: column; justify-content: center;
+        .top-bar h2 {
+            margin: 0;
+            font-size: 16px;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--accent-start), var(--accent-end));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: 1px;
+            text-transform: uppercase;
         }
-        .metric-title { font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px;}
-        .metric-val { font-family: 'JetBrains Mono', monospace; font-size: 1.1rem; font-weight: 700; margin-bottom: 4px; }
-        .metric-sub { font-size: 0.7rem; font-weight: 500; }
-        .text-buy { color: var(--action-buy); }
-        .text-sell { color: var(--action-wait); }
-        .text-dim { color: var(--text-muted); }
 
-        /* --- Quant Engine Card --- */
-        .quant-card {
-            background: linear-gradient(145deg, rgba(255,102,0,0.05) 0%, rgba(0,0,0,0.5) 100%);
-            border: 1px solid var(--border-glass); border-radius: 16px; padding: 20px;
-            text-align: center; margin-top: 15px; display: flex; flex-direction: column; justify-content: center;
+        .dashboard {
+            position: absolute;
+            bottom: calc(15px + env(safe-area-inset-bottom));
+            left: 15px;
+            right: 15px;
+            z-index: 10;
+            background: var(--glass-bg);
+            backdrop-filter: blur(25px) saturate(180%);
+            -webkit-backdrop-filter: blur(25px) saturate(180%);
+            border: 1px solid var(--glass-border);
+            padding: var(--panel-padding);
+            border-radius: 32px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: var(--bento-gap);
         }
-        .quant-title { font-family: 'JetBrains Mono', monospace; color: var(--xmr-base); font-size: 0.8rem; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 10px; }
-        .prob-large { font-family: 'JetBrains Mono', monospace; font-size: 2rem; font-weight: 800; margin-bottom: 5px; }
-        .quant-desc { font-size: 0.8rem; color: #aaa; line-height: 1.4; }
 
-        /* --- Verdict Box --- */
-        .verdict-box { margin-top: 15px; padding: 20px; border-radius: 14px; text-align: center; border: 1px solid transparent; flex: 1; display: flex; flex-direction: column; justify-content: center;}
-        .verdict-title { font-family: 'JetBrains Mono', monospace; font-weight: 800; font-size: 2rem; letter-spacing: 2px; margin-bottom: 10px;}
-        .sig-buy { background: rgba(0, 230, 118, 0.1); border-color: rgba(0, 230, 118, 0.3); color: var(--action-buy); }
-        .sig-hold { background: rgba(255, 234, 0, 0.1); border-color: rgba(255, 234, 0, 0.3); color: var(--action-hold); }
-        .sig-wait { background: rgba(255, 23, 68, 0.1); border-color: rgba(255, 23, 68, 0.3); color: var(--action-wait); }
+        .status-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: var(--bento-gap);
+        }
 
-        .limit-order-box {
-            background: rgba(0,0,0,0.6); border-radius: 8px; padding: 10px; margin-top: 15px;
-            font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; border: 1px dashed rgba(255,255,255,0.2);
+        .status-cell {
+            display: none; 
+            flex: 1 1 calc(50% - var(--bento-gap)); 
+            background: rgba(0,0,0,0.4);
+            border: 1px solid transparent;
+            border-radius: 16px;
+            padding: 12px;
+            font-size: 12px;
+            font-weight: 700;
+            text-align: center;
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            transition: all 0.3s ease;
         }
-        .target-price { color: var(--xmr-base); font-weight: bold; font-size: 1.1rem;}
 
-        /* --- Donation Footer --- */
-        .donation-panel {
-            background: rgba(10, 10, 10, 0.8); backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 102, 0, 0.2); border-radius: 16px;
-            padding: 15px 20px; text-align: center; margin-top: auto;
-            display: flex; flex-direction: column; align-items: center; gap: 10px;
+        #weather-banner {
+            display: block; 
+            color: var(--text-muted); 
+            border-color: rgba(255, 255, 255, 0.05);
         }
-        .donation-title { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; }
-        .donation-address-container {
-            display: flex; align-items: center; gap: 10px; width: 100%;
-            background: #000; padding: 10px 15px; border-radius: 8px; border: 1px solid #333;
-        }
-        .xmr-address {
-            font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; color: var(--text-main);
-            word-break: break-all; flex: 1; text-align: left; opacity: 0.8;
-        }
-        .copy-btn {
-            background: transparent; border: 1px solid var(--xmr-base); color: var(--xmr-base);
-            padding: 6px 12px; border-radius: 6px; cursor: pointer; font-family: 'JetBrains Mono', monospace;
-            font-size: 0.7rem; font-weight: 700; text-transform: uppercase; white-space: nowrap;
-        }
-        .copy-btn:hover { background: rgba(255, 102, 0, 0.1); }
-        .copy-btn.copied { background: var(--action-buy); border-color: var(--action-buy); color: #000; }
 
-        /* Loader */
-        .loader-overlay {
-            position: absolute; top: 0; left: 0; width: 100vw; height: 100vh;
-            background: var(--bg-void); display: flex; justify-content: center; align-items: center;
-            z-index: 100; font-family: 'JetBrains Mono', monospace; color: var(--xmr-base); font-size: 0.85rem; flex-direction: column; gap: 15px; text-align: center;
+        #weather-banner.active {
+            border-color: rgba(51, 153, 255, 0.3);
+            color: var(--dye-rain);
+            background: rgba(51, 153, 255, 0.1);
+            box-shadow: 0 0 12px rgba(51, 153, 255, 0.1);
         }
-        .spinner { width: 35px; height: 35px; border: 3px solid #222; border-top-color: var(--xmr-base); border-radius: 50%; animation: spin 1s linear infinite; }
-        @keyframes spin { to { transform: rotate(360deg); } }
 
-        /* Desktop Adjustments */
-        @media (min-width: 900px) {
-            body { overflow: hidden; } 
-            .app-wrapper { height: 100vh; padding: 20px; }
-            .dashboard { flex-direction: row; align-items: stretch; height: calc(100% - 70px); margin-bottom: 0; }
-            .left-col { flex: 1; display: flex; flex-direction: column; justify-content: space-between; height: 100%;}
-            .right-col { flex: 1.4; display: flex; flex-direction: column; height: 100%; }
-            .data-grid { grid-template-columns: 1fr 1fr 1fr; } /* 3 Columns on Desktop to fit new metrics */
-            .price-value { font-size: 4rem; }
-            .donation-panel { flex-direction: row; justify-content: space-between; text-align: left; padding: 12px 20px; margin-top: 0;}
-            .donation-address-container { width: auto; flex: 1; margin-left: 20px; }
-            .xmr-address { font-size: 0.85rem; }
+        #warning-banner.active {
+            display: block;
+            border-color: rgba(255, 171, 0, 0.3);
+            color: var(--dye-warn);
+            background: rgba(255, 171, 0, 0.1);
+            box-shadow: 0 0 12px rgba(255, 171, 0, 0.1);
+        }
+
+        #physics-banner.active {
+            display: block;
+            border-color: rgba(0, 229, 255, 0.3);
+            color: var(--dye-physics);
+            background: rgba(0, 229, 255, 0.1);
+            box-shadow: 0 0 12px rgba(0, 229, 255, 0.1);
+            flex-basis: 100%; 
+        }
+
+        /* Earnings Banner Dynamic Styles */
+        #earnings-banner.active.good {
+            display: block;
+            border-color: rgba(50, 205, 50, 0.3);
+            color: #32cd32;
+            background: rgba(50, 205, 50, 0.1);
+            box-shadow: 0 0 12px rgba(50, 205, 50, 0.1);
+            flex-basis: 100%; 
+        }
+
+        #earnings-banner.active.bad {
+            display: block;
+            border-color: rgba(255, 77, 77, 0.3);
+            color: #ff4d4d;
+            background: rgba(255, 77, 77, 0.1);
+            box-shadow: 0 0 12px rgba(255, 77, 77, 0.1);
+            flex-basis: 100%; 
+        }
+
+        .input-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: var(--bento-gap);
+        }
+
+        .input-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: var(--bento-gap);
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+            font-weight: 800;
+            padding-left: 2px;
+        }
+
+        input {
+            width: 100%;
+            padding: 16px;
+            background-color: rgba(0,0,0,0.5);
+            border: 1px solid transparent;
+            color: var(--text-main);
+            border-radius: 14px;
+            box-sizing: border-box;
+            font-size: 16px;
+            font-weight: 700;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        input:focus {
+            outline: none;
+            border-color: rgba(255, 42, 109, 0.3);
+            box-shadow: 0 0 15px rgba(255, 42, 109, 0.15);
+            background-color: rgba(0,0,0,0.7);
+        }
+
+        /* GPS Button */
+        button {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, var(--accent-start), var(--accent-end));
+            color: white;
+            border: none;
+            border-radius: 18px;
+            font-size: 16px;
+            font-weight: 800;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 6px 20px rgba(255, 42, 109, 0.3);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        button:active {
+            transform: scale(0.96) translateY(2px);
+            box-shadow: 0 3px 10px rgba(255, 42, 109, 0.2);
+        }
+
+        /* Monero Donation Footer */
+        .xmr-footer {
+            display: flex;
+            align-items: center;
+            background: rgba(0,0,0,0.4);
+            border-radius: 12px;
+            padding: 10px 14px;
+            border: 1px solid rgba(242, 104, 34, 0.15);
+        }
+
+        .xmr-label {
+            color: var(--xmr-orange);
+            font-size: 11px;
+            font-weight: 800;
+            margin-right: 12px;
+            letter-spacing: 1px;
+        }
+
+        .xmr-input {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            font-size: 11px;
+            width: 100%;
+            padding: 0;
+            outline: none;
+            cursor: pointer;
+            text-overflow: ellipsis;
+        }
+
+        .xmr-input:focus {
+            box-shadow: none;
+            background: transparent;
+        }
+
+        .leaflet-container {
+            background-color: var(--bg-deep) !important;
         }
     </style>
 </head>
 <body>
 
-    <div class="app-wrapper" id="app" style="display: none;">
+    <div id="map"></div>
+
+    <div class="top-bar">
+        <h2>NewRo Dash</h2>
+    </div>
+
+    <div class="dashboard">
         
-        <div class="dashboard">
-            <div class="panel left-col">
-                <div style="flex: 1; display: flex; flex-direction: column;">
-                    <header>
-                        <div class="brand"><div class="logo-mark">M</div> XMR Terminal 3.0</div>
-                        <div class="live-pulse"><div class="dot"></div> Live</div>
-                    </header>
-
-                    <div class="price-container">
-                        <div class="price-label">Monero Spot Price</div>
-                        <div class="price-value" id="currentPrice">$--</div>
-                        <div class="update-timer" id="updateTimer">Last updated: Just now</div>
-                    </div>
-
-                    <div class="verdict-box" id="mainVerdict">
-                        <div class="verdict-title" id="verdictTitle">ANALYZING</div>
-                        <div id="verdictDesc" style="font-size: 0.95rem; color: #eee; line-height: 1.5;">Processing quantum vectors...</div>
-                        
-                        <div class="limit-order-box" id="limitBox" style="display: none;">
-                            Target Entry Limit Order: <span class="target-price" id="limitPrice">$--</span>
-                        </div>
-                    </div>
+        <div class="status-grid">
+            <div id="weather-banner" class="status-cell">🌥️ Loading Weather...</div>
+            <div id="warning-banner" class="status-cell"></div>
+            <div id="physics-banner" class="status-cell"></div>
+            <div id="earnings-banner" class="status-cell"></div>
+        </div>
+        
+        <div class="input-grid">
+            <div class="input-row">
+                <div class="input-group">
+                    <label for="orderPay">Order Pay ($)</label>
+                    <input type="number" id="orderPay" placeholder="0.00" step="0.50" oninput="calculateAndDraw()">
                 </div>
 
-                <div class="quant-card">
-                    <div class="quant-title">Pattern Match Probability</div>
-                    <div class="prob-large" id="probScore">--%</div>
-                    <div class="quant-desc" id="quantDesc">Scanning 365 days of history for similar fractal structures...</div>
+                <div class="input-group">
+                    <label for="orderDist">Distance (mi)</label>
+                    <input type="number" id="orderDist" placeholder="0.0" step="0.1" oninput="calculateAndDraw()">
                 </div>
             </div>
 
-            <div class="panel right-col">
-                <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; margin-bottom: 20px; letter-spacing: 1px;">Advanced Quant Indicators</div>
-                
-                <div class="data-grid">
-                    <div class="metric-card">
-                        <div class="metric-title">Smart Money (OBV)</div>
-                        <div class="metric-val" id="obvValue">--</div>
-                        <div class="metric-sub" id="obvStatus">--</div>
-                    </div>
-                    <div class="metric-card">
-                        <div class="metric-title">Momentum (RSI)</div>
-                        <div class="metric-val" id="rsiValue">--</div>
-                        <div class="metric-sub" id="rsiStatus">--</div>
-                    </div>
-                    <div class="metric-card">
-                        <div class="metric-title">Trend (MACD)</div>
-                        <div class="metric-val" id="macdValue">--</div>
-                        <div class="metric-sub" id="macdStatus">--</div>
-                    </div>
-                    <div class="metric-card">
-                        <div class="metric-title">Macro (EMA 50)</div>
-                        <div class="metric-val" id="emaValue">--</div>
-                        <div class="metric-sub" id="emaStatus">--</div>
-                    </div>
-                    <div class="metric-card">
-                        <div class="metric-title">Volatility (B-Bands)</div>
-                        <div class="metric-val" id="bbValue">--</div>
-                        <div class="metric-sub" id="bbStatus">--</div>
-                    </div>
-                    <div class="metric-card">
-                        <div class="metric-title">Market Filter (BTC)</div>
-                        <div class="metric-val" id="btcValue">--</div>
-                        <div class="metric-sub" id="btcStatus">--</div>
-                    </div>
+            <div class="input-row">
+                <div class="input-group">
+                    <label for="maxRange">Max Range (mi)</label>
+                    <input type="number" id="maxRange" value="30" oninput="calculateAndDraw()">
                 </div>
+
+                <div class="input-group">
+                    <label for="batteryPct">Battery (%)</label>
+                    <input type="number" id="batteryPct" value="50" oninput="calculateAndDraw()">
+                </div>
+            </div>
+
+            <div class="input-group" style="display: none;">
+                <input type="number" id="routeElevation" value="80" oninput="calculateAndDraw()">
             </div>
         </div>
 
-        <div class="donation-panel">
-            <div class="donation-title">Support the Algorithm</div>
-            <div class="donation-address-container">
-                <span class="xmr-address" id="xmrAddress">88Uc3K7NwEsFsVWioAy6rt57mvkg6pNC7Cu1qWxZn53z5Wdxahvjtp5ZkT21Df2DKvcFaDrfFSHM2bXXipDot3zSMXwwZUG</span>
-                <button class="copy-btn" id="copyBtn" onclick="copyAddress()">Copy</button>
-            </div>
+        <button id="gps-btn" onclick="startGPS()">📍 Enable Live Tracking</button>
+
+        <div class="xmr-footer">
+            <span class="xmr-label">DONATE</span>
+            <input type="text" class="xmr-input" value="Your_XMR_Address_Here" readonly onclick="this.select();" title="Click to copy">
         </div>
-
     </div>
 
-    <div class="loader-overlay" id="loader">
-        <div class="spinner"></div>
-        <div id="loaderText">BOOTING QUANTUM ENGINE v3.0...</div>
-    </div>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
     <script>
-        // --- LEVEL 6 MATH UTILITIES ---
-        function calcEMA(prices, period) {
-            const k = 2 / (period + 1);
-            let ema = [prices[0]];
-            for (let i = 1; i < prices.length; i++) ema.push(prices[i] * k + ema[i - 1] * (1 - k));
-            return ema;
-        }
+        // Start at New Ro Station by default, but this will update with GPS
+        let activeLocation = [40.9115, -73.7824]; 
+        
+        let liveTemp = null;
+        let liveWind = null;
+        let weatherLoaded = false;
 
-        function calcSMA(prices, period) {
-            let slice = prices.slice(-period);
-            return slice.reduce((a, b) => a + b, 0) / period;
-        }
-
-        function calcStdDev(prices, period, sma) {
-            let slice = prices.slice(-period);
-            let variance = slice.reduce((sq, n) => sq + Math.pow(n - sma, 2), 0) / period;
-            return Math.sqrt(variance);
-        }
-
-        function calcBollingerBands(prices, period = 20, multiplier = 2) {
-            if (prices.length < period) return { upper: 0, lower: 0, squeeze: false };
-            let sma = calcSMA(prices, period);
-            let sd = calcStdDev(prices, period, sma);
-            let upper = sma + (sd * multiplier);
-            let lower = sma - (sd * multiplier);
-            let width = (upper - lower) / sma; // Percentage width to detect squeeze
-            return { upper, lower, width, sma };
-        }
-
-        function calcRSI(prices, period = 14) {
-            let gains = 0, losses = 0;
-            for (let i = prices.length - period; i < prices.length; i++) {
-                let diff = prices[i] - prices[i - 1];
-                if (diff > 0) gains += diff; else losses -= diff;
+        window.addEventListener('DOMContentLoaded', (event) => {
+            const savedRange = localStorage.getItem('scooterMaxRange');
+            if (savedRange) {
+                document.getElementById('maxRange').value = savedRange;
             }
-            let rs = (gains / period) / ((losses / period) || 1);
-            return 100 - (100 / (1 + rs));
-        }
+            checkWeather();
+        });
 
-        function calcMACD(prices) {
-            let ema12 = calcEMA(prices, 12); let ema26 = calcEMA(prices, 26);
-            let macdLine = prices.map((_, i) => ema12[i] - ema26[i]);
-            let signalLine = calcEMA(macdLine, 9);
-            return macdLine[macdLine.length - 1] - signalLine[signalLine.length - 1];
-        }
+        const map = L.map('map', { 
+            zoomControl: false,
+            attributionControl: false 
+        }).setView(activeLocation, 13);
 
-        function calcOBV(prices, volumes) {
-            let obv = [0];
-            for (let i = 1; i < prices.length; i++) {
-                if (prices[i] > prices[i - 1]) obv.push(obv[i - 1] + volumes[i]);
-                else if (prices[i] < prices[i - 1]) obv.push(obv[i - 1] - volumes[i]);
-                else obv.push(obv[i - 1]);
-            }
-            return obv[obv.length - 1] - obv[obv.length - 8];
-        }
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+            maxZoom: 19
+        }).addTo(map);
 
-        function patternMatch(prices) {
-            const windowSize = 14; const lookahead = 7; 
-            if (prices.length < windowSize * 2) return 50; 
-            let currentSlice = prices.slice(-windowSize);
-            let currentBase = currentSlice[0];
-            let currentNorm = currentSlice.map(p => (p - currentBase) / currentBase);
+        const customMarker = L.circleMarker(activeLocation, {
+            radius: 8,
+            fillColor: "#ffffff",
+            color: "#ff2a6d",
+            weight: 3,
+            opacity: 1,
+            fillOpacity: 1
+        }).addTo(map);
 
-            let bestMatches = [];
-            for (let i = 0; i < prices.length - windowSize - lookahead; i++) {
-                let histSlice = prices.slice(i, i + windowSize);
-                let histBase = histSlice[0];
-                let histNorm = histSlice.map(p => (p - histBase) / histBase);
+        let currentCircle = null;
 
-                let distance = 0;
-                for (let j = 0; j < windowSize; j++) distance += Math.pow(currentNorm[j] - histNorm[j], 2);
-
-                let futurePrice = prices[i + windowSize + lookahead];
-                let endOfSlicePrice = histSlice[histSlice.length - 1];
-                let percentReturn = ((futurePrice - endOfSlicePrice) / endOfSlicePrice) * 100;
-                bestMatches.push({ distance, percentReturn });
-            }
-
-            bestMatches.sort((a, b) => a.distance - b.distance);
-            let top5 = bestMatches.slice(0, 5);
-            let avgReturn = top5.reduce((sum, match) => sum + match.percentReturn, 0) / 5;
-            let probability = 50 + (avgReturn * 10);
-            return Math.max(5, Math.min(95, probability)); 
-        }
-
-        let histPrices = [];
-        let histVolumes = [];
-        let lastUpdate = new Date();
-
-        async function initApp() {
-            try {
-                let res = await fetch('https://api.coingecko.com/api/v3/coins/monero/market_chart?vs_currency=usd&days=365&interval=daily');
-                let data = await res.json();
-                
-                histPrices = data.prices.slice(0, -1).map(p => p[1]); 
-                histVolumes = data.total_volumes.slice(0, -1).map(v => v[1]);
-
-                document.getElementById('loaderText').innerText = "CALCULATING VECTORS...";
-                await fetchLivePrice();
-
-                document.getElementById('loader').style.display = 'none';
-                document.getElementById('app').style.display = 'flex';
-
-                setInterval(fetchLivePrice, 60000); 
-                setInterval(() => {
-                    let secs = Math.floor((new Date() - lastUpdate) / 1000);
-                    document.getElementById('updateTimer').innerText = `Updated: ${secs === 0 ? 'Just now' : secs + 's ago'}`;
-                }, 1000);
-
-            } catch (error) {
-                document.getElementById('loaderText').innerText = "API LIMIT REACHED. RETRY IN 1 MIN.";
-                document.getElementById('loaderText').style.color = "var(--action-wait)";
-            }
-        }
-
-        async function fetchLivePrice() {
-            try {
-                // NEW: Fetching Bitcoin alongside Monero to establish Macro Context
-                let res = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=monero,bitcoin&vs_currencies=usd&include_24hr_vol=true&include_24hr_change=true');
-                let data = await res.json();
-                
-                let p = data.monero.usd;
-                let v = data.monero.usd_24h_vol;
-                let btcChange = data.bitcoin.usd_24h_change; // BTC Macro Filter
-
-                let el = document.getElementById('currentPrice');
-                el.innerText = `$${p.toFixed(2)}`;
-                el.classList.remove('flash-update'); void el.offsetWidth; el.classList.add('flash-update');
-                lastUpdate = new Date();
-
-                runEngine(p, v, btcChange);
-            } catch (e) { console.log("Live ping missed."); }
-        }
-
-        function runEngine(livePrice, liveVol, btcChange) {
-            let activePrices = [...histPrices, livePrice];
-            let activeVols = [...histVolumes, liveVol];
-
-            let rsi = calcRSI(activePrices);
-            let macdHist = calcMACD(activePrices);
-            let ema50 = calcEMA(activePrices, 50).pop();
-            let obvTrend = calcOBV(activePrices, activeVols);
-            let patternProb = patternMatch(activePrices);
+        // GPS Tracking Logic
+        function startGPS() {
+            const btn = document.getElementById('gps-btn');
             
-            // NEW MATH: Bollinger Bands
-            let bBands = calcBollingerBands(activePrices);
-            let isSqueeze = bBands.width < 0.10; // If bands are tighter than 10%, massive move coming
-            let bBandStatus = isSqueeze ? "Squeeze (Breakout Imminent)" : (livePrice <= bBands.lower ? "At Support Floor" : "Normal Volatility");
-
-            function setUI(id, val, stat, isGood) {
-                document.getElementById(id+'Value').innerText = val;
-                let sEl = document.getElementById(id+'Status');
-                sEl.innerText = stat;
-                sEl.className = 'metric-sub ' + (isGood === null ? 'text-dim' : isGood ? 'text-buy' : 'text-sell');
-            }
-
-            setUI('obv', obvTrend > 0 ? 'Accumulating' : 'Distributing', obvTrend > 0 ? 'Smart Money Entering' : 'Volume Dropping', obvTrend > 0);
-            setUI('rsi', rsi.toFixed(1), rsi < 45 ? 'Oversold (Good)' : rsi > 65 ? 'Overbought (Bad)' : 'Neutral', rsi < 45 ? true : rsi > 65 ? false : null);
-            setUI('macd', macdHist > 0 ? 'Positive' : 'Negative', macdHist > 0 ? 'Uptrending' : 'Downtrending', macdHist > 0);
-            setUI('ema', `$${ema50.toFixed(0)}`, livePrice > ema50 ? 'Above Support' : 'Below Macro Trend', livePrice > ema50);
-            
-            // NEW UI: Volatility & Bitcoin
-            setUI('bb', `${(bBands.width * 100).toFixed(1)}% Width`, bBandStatus, isSqueeze ? true : (livePrice <= bBands.lower ? true : null));
-            setUI('btc', `${btcChange > 0 ? '+' : ''}${btcChange.toFixed(2)}%`, btcChange > 0 ? 'Market Safe' : 'Macro Risk (BTC Down)', btcChange > 0);
-
-            let pEl = document.getElementById('probScore');
-            pEl.innerText = `${patternProb.toFixed(1)}%`;
-            pEl.style.color = patternProb > 60 ? 'var(--action-buy)' : patternProb < 40 ? 'var(--action-wait)' : 'var(--xmr-base)';
-
-            // FINAL SCORING WITH NEW PARAMETERS
-            let score = 0;
-            if (rsi < 45) score += 1; else if (rsi > 65) score -= 1;
-            if (macdHist > 0) score += 1; else score -= 1;
-            if (obvTrend > 0) score += 1.5; else score -= 1.5;
-            if (patternProb > 60) score += 1.5; else if (patternProb < 40) score -= 1.5;
-            
-            // The Bitcoin Filter: Penalize the score if the broader market is crashing
-            if (btcChange < -2.0) score -= 2; 
-            else if (btcChange > 2.0) score += 1;
-
-            let vBox = document.getElementById('mainVerdict');
-            let vTitle = document.getElementById('verdictTitle');
-            let vDesc = document.getElementById('verdictDesc');
-            let lBox = document.getElementById('limitBox');
-            let lPrice = document.getElementById('limitPrice');
-
-            vBox.className = 'verdict-box';
-
-            if (score >= 2.5) {
-                vTitle.innerText = "EXECUTE BUY";
-                vDesc.innerText = "Algorithm alignment, strong volume, and safe macroeconomic conditions. Breakout probability is high.";
-                vBox.classList.add('sig-buy');
-                // Calculate precise Limit Order using the lower Bollinger Band
-                lBox.style.display = "block";
-                lBox.style.borderColor = "var(--action-buy)";
-                lPrice.innerText = `$${bBands.lower.toFixed(2)}`;
-            } else if (score >= 0) {
-                vTitle.innerText = "HOLD / DCA";
-                vDesc.innerText = "Market is in consolidation. Await confirmation of the trend before executing large orders.";
-                vBox.classList.add('sig-hold');
-                lBox.style.display = "none";
+            if ("geolocation" in navigator) {
+                btn.innerHTML = "Locating...";
+                navigator.geolocation.watchPosition((position) => {
+                    activeLocation = [position.coords.latitude, position.coords.longitude];
+                    
+                    // Update Marker & Map View
+                    customMarker.setLatLng(activeLocation);
+                    map.setView(activeLocation, 14);
+                    
+                    // Visually update button state
+                    btn.innerHTML = "🟢 GPS Active";
+                    btn.style.background = "linear-gradient(135deg, #32cd32, #28a745)";
+                    btn.style.boxShadow = "0 6px 20px rgba(50, 205, 50, 0.3)";
+                    
+                    // Recalculate radius from new live location
+                    calculateAndDraw();
+                    
+                }, (error) => {
+                    btn.innerHTML = "⚠️ GPS Denied";
+                    console.log("GPS Error:", error);
+                }, {
+                    enableHighAccuracy: true,
+                    maximumAge: 10000,
+                    timeout: 5000
+                });
             } else {
-                vTitle.innerText = "WAIT / SELL";
-                vDesc.innerText = "High risk environment. Do not enter trades while momentum and broad market conditions are negative.";
-                vBox.classList.add('sig-wait');
-                lBox.style.display = "block";
-                lBox.style.borderColor = "var(--action-wait)";
-                // Suggest a "buy the extreme dip" target way below current price
-                lPrice.innerText = `$${(bBands.lower * 0.95).toFixed(2)}`;
-                lBox.innerHTML = `Extreme Dip Target: <span class="target-price" style="color:var(--action-wait)">$${(bBands.lower * 0.95).toFixed(2)}</span>`;
+                btn.innerHTML = "GPS Not Supported";
             }
         }
 
-        function copyAddress() {
-            const address = document.getElementById('xmrAddress').innerText;
-            navigator.clipboard.writeText(address).then(() => {
-                const btn = document.getElementById('copyBtn');
-                btn.innerText = "Copied!";
-                btn.classList.add('copied');
-                setTimeout(() => { btn.innerText = "Copy"; btn.classList.remove('copied'); }, 2500);
-            });
+        async function checkWeather() {
+            const weatherBanner = document.getElementById('weather-banner');
+            try {
+                const url = 'https://api.open-meteo.com/v1/forecast?latitude=40.9115&longitude=-73.7824&current=temperature_2m,wind_speed_10m&hourly=precipitation_probability&temperature_unit=fahrenheit&wind_speed_unit=mph&forecast_hours=5';
+                const response = await fetch(url);
+                const data = await response.json();
+                
+                liveTemp = data.current.temperature_2m;
+                liveWind = data.current.wind_speed_10m;
+                weatherLoaded = true;
+
+                const rainProbabilities = data.hourly.precipitation_probability;
+                const maxRainChance = Math.max(...rainProbabilities);
+
+                if (maxRainChance > 30) {
+                    weatherBanner.innerHTML = `🌧️ ${maxRainChance}% Rain Alert`;
+                    weatherBanner.classList.add('active');
+                } else {
+                    weatherBanner.innerHTML = `🌥️ ${maxRainChance}% Rain Chance`;
+                    weatherBanner.classList.remove('active');
+                }
+
+                calculateAndDraw();
+            } catch (error) {
+                weatherBanner.innerHTML = `⚠️ Weather Offline`;
+                weatherBanner.classList.remove('active');
+            }
         }
 
-        window.onload = initApp;
+        // Master Calculation Function (Runs automatically on any input)
+        function calculateAndDraw() {
+            // 1. Get Values
+            const maxRangeInput = document.getElementById('maxRange').value;
+            const maxRange = parseFloat(maxRangeInput) || 0;
+            const batteryPct = parseFloat(document.getElementById('batteryPct').value) || 0;
+            const elevationGain = parseFloat(document.getElementById('routeElevation').value) || 0;
+            
+            const orderPay = parseFloat(document.getElementById('orderPay').value);
+            const orderDist = parseFloat(document.getElementById('orderDist').value);
+
+            localStorage.setItem('scooterMaxRange', maxRangeInput);
+
+            // 2. Profitability Engine
+            const earningsBanner = document.getElementById('earnings-banner');
+            if (orderPay > 0 && orderDist > 0) {
+                const perMile = (orderPay / orderDist).toFixed(2);
+                if (perMile >= 2.00) {
+                    earningsBanner.innerHTML = `💸 $${perMile}/mi (Profitable)`;
+                    earningsBanner.className = 'status-cell active good';
+                } else {
+                    earningsBanner.innerHTML = `⚠️ $${perMile}/mi (Low Pay)`;
+                    earningsBanner.className = 'status-cell active bad';
+                }
+            } else {
+                earningsBanner.className = 'status-cell';
+            }
+
+            // 3. Topography Warning
+            const warningBanner = document.getElementById('warning-banner');
+            if (elevationGain > 150) {
+                warningBanner.innerHTML = "⚠️ Steep Inclines!";
+                warningBanner.classList.add('active');
+            } else {
+                warningBanner.classList.remove('active');
+            }
+
+            // 4. Advanced Physics Penalty
+            let tempPenalty = 1.0;
+            let windPenalty = 1.0;
+            let penaltyReasons = [];
+
+            if (weatherLoaded) {
+                if (liveTemp <= 32) {
+                    tempPenalty = 0.75; 
+                    penaltyReasons.push(`Cold (${Math.round(liveTemp)}°F)`);
+                } else if (liveTemp <= 45) {
+                    tempPenalty = 0.85; 
+                    penaltyReasons.push(`Chilly (${Math.round(liveTemp)}°F)`);
+                }
+
+                if (liveWind >= 20) {
+                    windPenalty = 0.80; 
+                    penaltyReasons.push(`Wind (${Math.round(liveWind)}mph)`);
+                } else if (liveWind >= 12) {
+                    windPenalty = 0.90; 
+                    penaltyReasons.push(`Breezy (${Math.round(liveWind)}mph)`);
+                }
+            }
+
+            const physicsBanner = document.getElementById('physics-banner');
+            if (penaltyReasons.length > 0) {
+                const totalPercentLost = Math.round((1 - (tempPenalty * windPenalty)) * 100);
+                physicsBanner.innerHTML = `❄️ -${totalPercentLost}% Range: ${penaltyReasons.join(' & ')}`;
+                physicsBanner.classList.add('active');
+            } else {
+                physicsBanner.classList.remove('active');
+            }
+
+            // 5. Draw Radius Mapping
+            const baseRemainingMiles = maxRange * (batteryPct / 100);
+            const actualRemainingMiles = baseRemainingMiles * tempPenalty * windPenalty;
+            
+            const safeRadiusMiles = actualRemainingMiles / 2;
+            const safeRadiusMeters = safeRadiusMiles * 1609.34;
+
+            if (currentCircle) {
+                map.removeLayer(currentCircle);
+            }
+
+            // Circle drawn around the live activeLocation, not just New Ro Station
+            currentCircle = L.circle(activeLocation, {
+                color: '#ff2a6d', 
+                weight: 3,
+                fillColor: '#ff2a6d', 
+                fillOpacity: 0.08,
+                radius: safeRadiusMeters
+            }).addTo(map);
+        }
+
+        // Run once on load
+        window.onload = calculateAndDraw;
     </script>
 </body>
 </html>
