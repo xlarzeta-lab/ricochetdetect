@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Monero Quantum Terminal v6.2</title>
+    <title>Monero Quantum Terminal v7.0</title>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700;800&family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -44,6 +44,7 @@
             border-radius: 24px; padding: 25px; box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6); display: flex; flex-direction: column;
         }
 
+        /* --- Header --- */
         header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
         .brand { display: flex; align-items: center; gap: 12px; font-family: 'JetBrains Mono', monospace; font-weight: 800; text-transform: uppercase; font-size: 0.9rem; }
         .logo-mark { width: 28px; height: 28px; background: linear-gradient(135deg, #FF6600, #ff8c42); border-radius: 50%; display: flex; justify-content: center; align-items: center; color: var(--bg-void); font-size: 16px; font-weight: 800; box-shadow: 0 0 20px var(--xmr-glow); }
@@ -52,12 +53,17 @@
         .ledger-btn { background: rgba(255,102,0,0.1); border: 1px solid var(--xmr-base); color: var(--xmr-base); padding: 8px 14px; border-radius: 6px; font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; font-weight: 800; cursor: pointer; text-transform: uppercase;}
         .ledger-btn:hover { background: var(--xmr-base); color: #000; box-shadow: 0 0 15px var(--xmr-glow); }
 
-        .price-container { margin: 10px 0 20px 0; }
+        /* --- Price & Mini Portfolio --- */
+        .price-container { margin: 10px 0 20px 0; display: flex; justify-content: space-between; align-items: flex-end;}
         .price-label { font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 3px; margin-bottom: 8px; font-weight: 600; }
         .price-value { font-family: 'JetBrains Mono', monospace; font-size: 4rem; font-weight: 800; line-height: 1; letter-spacing: -2px; text-shadow: 0 0 40px rgba(255, 255, 255, 0.15); }
         .flash-update { animation: priceFlash 1.2s cubic-bezier(0.16, 1, 0.3, 1); }
         @keyframes priceFlash { 0% { color: var(--action-buy); text-shadow: 0 0 50px var(--action-buy-glow); transform: translateY(-2px); } 100% { color: var(--text-main); transform: translateY(0); } }
         .update-timer { font-size: 0.75rem; color: var(--text-muted); font-family: 'JetBrains Mono', monospace; margin-top: 8px; opacity: 0.6; }
+        
+        .mini-port { text-align: right; background: rgba(0,0,0,0.5); padding: 10px 15px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05);}
+        .mini-port-label { font-size: 0.6rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px;}
+        .mini-port-val { font-family: 'JetBrains Mono'; font-size: 1.2rem; font-weight: 800; color: var(--action-buy); }
 
         .mtm-matrix { display: flex; gap: 10px; margin-bottom: 20px; background: rgba(0,0,0,0.4); border-radius: 12px; padding: 12px; border: 1px solid rgba(255,255,255,0.05); }
         .mtm-col { flex: 1; text-align: center; }
@@ -104,20 +110,32 @@
         .copy-btn:hover { background: var(--xmr-base); color: #000; box-shadow: 0 0 15px var(--xmr-glow);}
         .copy-btn.copied { background: var(--action-buy); border-color: var(--action-buy); color: #000; box-shadow: 0 0 15px var(--action-buy-glow);}
 
-        /* --- Shadow Ledger Modal --- */
+        /* --- Terminal / Portfolio Modal --- */
         .ledger-modal { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.8); backdrop-filter: blur(15px); z-index: 50000; display: none; justify-content: center; align-items: center; padding: 20px;}
-        .ledger-content { background: var(--bg-void); border: 1px solid var(--border-highlight); border-radius: 20px; width: 100%; max-width: 800px; max-height: 80vh; overflow-y: auto; padding: 25px; box-shadow: 0 0 50px rgba(255,102,0,0.2); }
+        .ledger-content { background: var(--bg-void); border: 1px solid var(--border-highlight); border-radius: 20px; width: 100%; max-width: 800px; max-height: 90vh; overflow-y: auto; padding: 25px; box-shadow: 0 0 50px rgba(255,102,0,0.2); }
         .ledger-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 15px; margin-bottom: 15px; }
         .ledger-title { font-family: 'JetBrains Mono'; font-size: 1.2rem; color: var(--xmr-base); font-weight: 800; text-transform: uppercase; }
         .close-btn { background: none; border: none; color: #fff; font-size: 1.5rem; cursor: pointer; }
+        
         .ledger-stats { display: flex; gap: 15px; margin-bottom: 20px; }
         .stat-box { flex: 1; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); padding: 15px; border-radius: 12px; text-align: center; font-family: 'JetBrains Mono'; }
         
+        /* Execution Desk */
+        .execution-desk { background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 15px; margin-bottom: 20px; text-align: center;}
+        .exec-title { font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 10px; font-weight: 600;}
+        .exec-buttons { display: flex; gap: 10px; justify-content: center;}
+        .exec-btn { flex: 1; padding: 10px; border-radius: 8px; font-family: 'JetBrains Mono'; font-weight: 800; font-size: 0.8rem; cursor: pointer; text-transform: uppercase; border: none;}
+        .btn-buy { background: rgba(0, 230, 118, 0.1); border: 1px solid var(--action-buy); color: var(--action-buy); }
+        .btn-buy:hover { background: var(--action-buy); color: #000; box-shadow: 0 0 15px var(--action-buy-glow); }
+        .btn-sell { background: rgba(255, 23, 68, 0.1); border: 1px solid var(--action-wait); color: var(--action-wait); }
+        .btn-sell:hover { background: var(--action-wait); color: #000; box-shadow: 0 0 15px var(--action-wait-glow); }
+
         .trade-item { background: #000; border: 1px solid rgba(255,255,255,0.05); padding: 15px; border-radius: 10px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; font-family: 'JetBrains Mono'; font-size: 0.8rem;}
         .status-open { color: var(--action-hold); text-shadow: 0 0 10px rgba(255,234,0,0.4); } 
         .status-win { color: var(--action-buy); text-shadow: 0 0 10px var(--action-buy-glow); } 
         .status-loss { color: var(--action-wait); text-shadow: 0 0 10px var(--action-wait-glow); }
         .status-pending { color: var(--text-muted); }
+        .status-market { color: var(--xmr-base); font-weight: bold;}
 
         .loader-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: var(--bg-void); display: flex; justify-content: center; align-items: center; z-index: 10000; font-family: 'JetBrains Mono'; color: var(--xmr-base); flex-direction: column; gap: 20px;}
         .spinner { width: 45px; height: 45px; border: 3px solid rgba(255,255,255,0.1); border-top-color: var(--xmr-base); border-radius: 50%; animation: spin 0.8s linear infinite; }
@@ -151,17 +169,29 @@
     <div class="ledger-modal" id="ledgerModal">
         <div class="ledger-content">
             <div class="ledger-header">
-                <div class="ledger-title">Shadow Ledger (Paper Trading)</div>
+                <div class="ledger-title">Terminal Exchange (Simulated)</div>
                 <button class="close-btn" onclick="toggleLedger()">×</button>
             </div>
+            
             <div class="ledger-stats">
-                <div class="stat-box"><div style="font-size:0.7rem;color:#888;">WIN RATE</div><div id="statWinRate" style="font-size:1.5rem;color:var(--action-buy);">0%</div></div>
-                <div class="stat-box"><div style="font-size:0.7rem;color:#888;">ACTIVE (OPEN)</div><div id="statOpen" style="font-size:1.5rem;color:var(--action-hold);">0</div></div>
-                <div class="stat-box"><div style="font-size:0.7rem;color:#888;">PENDING (LIMIT)</div><div id="statPending" style="font-size:1.5rem;color:var(--text-muted);">0</div></div>
+                <div class="stat-box"><div style="font-size:0.7rem;color:#888;">USD BALANCE</div><div id="statUsd" style="font-size:1.5rem;color:#fff;">$0.00</div></div>
+                <div class="stat-box"><div style="font-size:0.7rem;color:#888;">XMR HOLDINGS</div><div id="statXmr" style="font-size:1.5rem;color:var(--xmr-base);">0.00</div></div>
+                <div class="stat-box"><div style="font-size:0.7rem;color:#888;">TOTAL NET WORTH</div><div id="statTotal" style="font-size:1.5rem;color:var(--action-buy);">0</div></div>
             </div>
+
+            <div class="execution-desk">
+                <div class="exec-title">Market Execution Desk</div>
+                <div class="exec-buttons">
+                    <button class="exec-btn btn-buy" onclick="marketTrade('BUY', 0.25)">Buy 25%</button>
+                    <button class="exec-btn btn-buy" onclick="marketTrade('BUY', 1.0)">Buy 100%</button>
+                    <button class="exec-btn btn-sell" onclick="marketTrade('SELL', 0.25)">Sell 25%</button>
+                    <button class="exec-btn btn-sell" onclick="marketTrade('SELL', 1.0)">Sell 100%</button>
+                </div>
+            </div>
+
             <div id="ledgerList" style="display: flex; flex-direction: column; gap: 10px;">
                 </div>
-            <button onclick="clearLedger()" style="margin-top:20px; width:100%; padding:10px; background:none; border:1px solid #ff1744; color:#ff1744; border-radius:8px; cursor:pointer; font-family:monospace;">CLEAR LEDGER HISTORY</button>
+            <button onclick="resetAccount()" style="margin-top:20px; width:100%; padding:10px; background:none; border:1px solid #ff1744; color:#ff1744; border-radius:8px; cursor:pointer; font-family:monospace;">RESET ACCOUNT TO $10,000</button>
         </div>
     </div>
 
@@ -170,16 +200,22 @@
             <div class="panel left-col">
                 <div style="flex: 1; display: flex; flex-direction: column;">
                     <header>
-                        <div class="brand"><div class="logo-mark">M</div> Terminal 6.2</div>
+                        <div class="brand"><div class="logo-mark">M</div> Terminal 7.0</div>
                         <div class="header-actions">
-                            <button class="ledger-btn" onclick="toggleLedger()">[+] Shadow Ledger</button>
+                            <button class="ledger-btn" onclick="toggleLedger()">[+] Terminal Account</button>
                         </div>
                     </header>
 
                     <div class="price-container">
-                        <div class="price-label">Monero Spot (USD)</div>
-                        <div class="price-value" id="currentPrice">$--</div>
-                        <div class="update-timer" id="updateTimer">Last tick: Just now</div>
+                        <div>
+                            <div class="price-label">Monero Spot (USD)</div>
+                            <div class="price-value" id="currentPrice">$--</div>
+                            <div class="update-timer" id="updateTimer">Last tick: Just now</div>
+                        </div>
+                        <div class="mini-port">
+                            <div class="mini-port-label">Simulated Net Worth</div>
+                            <div class="mini-port-val" id="miniNetWorth">$--</div>
+                        </div>
                     </div>
 
                     <div class="verdict-box" id="mainVerdict">
@@ -190,7 +226,7 @@
                             <div class="bp-row"><span class="bp-label">Target Entry</span><span class="target-entry" id="bpEntry">$--</span></div>
                             <div class="bp-row"><span class="bp-label">Take Profit</span><span class="target-tp" id="bpTakeProfit">$--</span></div>
                             <div class="bp-row"><span class="bp-label">Stop Loss</span><span class="target-sl" id="bpStopLoss">$--</span></div>
-                            <button class="log-btn" id="logBtn" onclick="logCurrentTrade()">LOG TRADE TO SHADOW LEDGER</button>
+                            <button class="log-btn" id="logBtn" onclick="logLimitOrder()">SET PENDING LIMIT ORDER</button>
                         </div>
                     </div>
                 </div>
@@ -241,14 +277,13 @@
 
     <div class="loader-overlay" id="loader">
         <div class="spinner"></div>
-        <div id="loaderText">BOOTING QUANTUM ENGINE v6.2...</div>
+        <div id="loaderText">BOOTING QUANTUM ENGINE v7.0...</div>
     </div>
 
     <script>
         function calcEMA(prices, period) {
             const k = 2 / (period + 1); let ema = [prices[0]];
-            for (let i = 1; i < prices.length; i++) ema.push(prices[i] * k + ema[i - 1] * (1 - k));
-            return ema;
+            for (let i = 1; i < prices.length; i++) ema.push(prices[i] * k + ema[i - 1] * (1 - k)); return ema;
         }
         function calcSMA(prices, period) { return prices.slice(-period).reduce((a, b) => a + b, 0) / period; }
         function calcStdDev(prices, period, sma) { return Math.sqrt(prices.slice(-period).reduce((sq, n) => sq + Math.pow(n - sma, 2), 0) / period); }
@@ -260,8 +295,7 @@
         function calcRSI(prices, period = 14) {
             let gains = 0, losses = 0;
             for (let i = prices.length - period; i < prices.length; i++) {
-                let diff = prices[i] - prices[i - 1];
-                if (diff > 0) gains += diff; else losses -= diff;
+                let diff = prices[i] - prices[i - 1]; if (diff > 0) gains += diff; else losses -= diff;
             }
             let rs = (gains / period) / ((losses / period) || 1); return 100 - (100 / (1 + rs));
         }
@@ -279,69 +313,94 @@
         }
 
         let histMacro = []; let histMicro = []; let fearAndGreed = 50; let lastUpdate = new Date();
-        let currentTradeParams = null; 
+        let currentTradeParams = null; let currentLivePrice = 0;
 
-        // --- SHADOW LEDGER V2 (Limit Order Fix) ---
-        let ledger = JSON.parse(localStorage.getItem('xmr_shadow_ledger')) || [];
+        // --- VERSION 7.0: PORTFOLIO ENGINE ---
+        let portfolio = JSON.parse(localStorage.getItem('xmr_sim_portfolio')) || { usd: 10000.00, xmr: 0.00, history: [] };
 
         function toggleLedger() {
             const modal = document.getElementById('ledgerModal');
             modal.style.display = modal.style.display === 'flex' ? 'none' : 'flex';
-            renderLedger();
+            updatePortfolioUI();
         }
 
-        function logCurrentTrade() {
-            if(!currentTradeParams) return;
-            ledger.push({
-                id: Date.now(), date: new Date().toLocaleDateString() + " " + new Date().toLocaleTimeString(),
-                entry: currentTradeParams.entry, tp: currentTradeParams.tp, sl: currentTradeParams.sl, 
-                status: 'PENDING', closePrice: null // NEW: Starts as Pending
-            });
-            localStorage.setItem('xmr_shadow_ledger', JSON.stringify(ledger));
-            document.getElementById('logBtn').innerText = "✓ PENDING ORDER LOGGED";
-            setTimeout(() => { document.getElementById('logBtn').innerText = "LOG TRADE TO SHADOW LEDGER"; }, 2000);
-            renderLedger();
-        }
-
-        function evaluateLedger(livePrice) {
-            let changed = false;
-            ledger.forEach(t => {
-                if(t.status === 'PENDING') {
-                    // Check if live price dipped enough to fill the Limit Order
-                    if(livePrice <= t.entry) { t.status = 'OPEN'; changed = true; }
-                } else if(t.status === 'OPEN') {
-                    // Check for Take Profit or Stop Loss
-                    if(livePrice >= t.tp) { t.status = 'WIN'; t.closePrice = livePrice; changed = true; }
-                    else if(livePrice <= t.sl) { t.status = 'LOSS'; t.closePrice = livePrice; changed = true; }
-                }
-            });
-            if(changed) { localStorage.setItem('xmr_shadow_ledger', JSON.stringify(ledger)); renderLedger(); }
-        }
-
-        function clearLedger() {
-            if(confirm("Erase all paper trading data?")) { ledger = []; localStorage.removeItem('xmr_shadow_ledger'); renderLedger(); }
-        }
-
-        function renderLedger() {
-            const list = document.getElementById('ledgerList'); list.innerHTML = '';
-            let wins = 0, losses = 0, open = 0, pending = 0;
+        function updatePortfolioUI() {
+            let netWorth = portfolio.usd + (portfolio.xmr * currentLivePrice);
+            document.getElementById('statUsd').innerText = `$${portfolio.usd.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+            document.getElementById('statXmr').innerText = `${portfolio.xmr.toFixed(4)} XMR`;
+            document.getElementById('statTotal').innerText = `$${netWorth.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+            document.getElementById('miniNetWorth').innerText = `$${netWorth.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
             
-            ledger.slice().reverse().forEach(t => {
-                if(t.status === 'WIN') wins++; else if(t.status === 'LOSS') losses++; else if(t.status === 'OPEN') open++; else pending++;
-                
-                let statClass = t.status === 'WIN' ? 'status-win' : t.status === 'LOSS' ? 'status-loss' : t.status === 'OPEN' ? 'status-open' : 'status-pending';
-                
+            const list = document.getElementById('ledgerList'); list.innerHTML = '';
+            portfolio.history.slice().reverse().forEach(t => {
+                let statClass = t.status === 'WIN' ? 'status-win' : t.status === 'LOSS' ? 'status-loss' : t.status === 'OPEN' ? 'status-open' : t.status === 'MARKET' ? 'status-market' : 'status-pending';
                 list.innerHTML += `<div class="trade-item">
-                    <div><span style="color:#888">${t.date}</span><br>Entry: $${t.entry.toFixed(2)}</div>
-                    <div>TP: $${t.tp.toFixed(2)}<br>SL: $${t.sl.toFixed(2)}</div>
-                    <div class="${statClass}" style="font-weight:bold;">${t.status} ${t.closePrice ? '($'+t.closePrice.toFixed(2)+')' : ''}</div>
+                    <div><span style="color:#888">${t.date}</span><br>${t.type}: $${t.entry.toFixed(2)}</div>
+                    <div>${t.tp ? 'TP: $'+t.tp.toFixed(2)+'<br>SL: $'+t.sl.toFixed(2) : 'Size: ' + t.amount.toFixed(4) + ' XMR'}</div>
+                    <div class="${statClass}">${t.status} ${t.closePrice ? '($'+t.closePrice.toFixed(2)+')' : ''}</div>
                 </div>`;
             });
+        }
+
+        function marketTrade(type, percent) {
+            if (currentLivePrice === 0) return;
+            if (type === 'BUY') {
+                let spendUsd = portfolio.usd * percent;
+                if (spendUsd < 1) return alert("Not enough USD balance.");
+                let xmrBought = spendUsd / currentLivePrice;
+                portfolio.usd -= spendUsd; portfolio.xmr += xmrBought;
+                portfolio.history.push({ type: 'MARKET BUY', entry: currentLivePrice, amount: xmrBought, status: 'MARKET', date: new Date().toLocaleString() });
+            } else if (type === 'SELL') {
+                let sellXmr = portfolio.xmr * percent;
+                if (sellXmr <= 0.0001) return alert("Not enough XMR balance.");
+                let usdEarned = sellXmr * currentLivePrice;
+                portfolio.xmr -= sellXmr; portfolio.usd += usdEarned;
+                portfolio.history.push({ type: 'MARKET SELL', entry: currentLivePrice, amount: sellXmr, status: 'MARKET', date: new Date().toLocaleString() });
+            }
+            savePortfolio(); updatePortfolioUI();
+        }
+
+        function logLimitOrder() {
+            if(!currentTradeParams) return;
+            // Deduct funds immediately for limit order to prevent double spending
+            let spendUsd = portfolio.usd * 0.25; // Default 25% allocation for limits
+            if (spendUsd < 1) return alert("Not enough USD to place limit order.");
             
-            let totalClosed = wins + losses;
-            document.getElementById('statWinRate').innerText = totalClosed > 0 ? Math.round((wins/totalClosed)*100) + '%' : '0%';
-            document.getElementById('statOpen').innerText = open; 
-            document.getElementById('statPending').innerText = pending;
+            portfolio.usd -= spendUsd;
+            portfolio.history.push({
+                type: 'LIMIT BUY', date: new Date().toLocaleString(), amountUsd: spendUsd, amountXmr: spendUsd / currentTradeParams.entry,
+                entry: currentTradeParams.entry, tp: currentTradeParams.tp, sl: currentTradeParams.sl, status: 'PENDING', closePrice: null 
+            });
+            savePortfolio();
+            document.getElementById('logBtn').innerText = "✓ LIMIT ORDER SET";
+            setTimeout(() => { document.getElementById('logBtn').innerText = "SET PENDING LIMIT ORDER"; }, 2000);
+            updatePortfolioUI();
+        }
+
+        function evaluateLimitOrders(livePrice) {
+            let changed = false;
+            portfolio.history.forEach(t => {
+                if(t.status === 'PENDING' && livePrice <= t.entry) { 
+                    t.status = 'OPEN'; portfolio.xmr += t.amountXmr; changed = true; // Order filled, grant XMR
+                } else if(t.status === 'OPEN') {
+                    if(livePrice >= t.tp) { 
+                        t.status = 'WIN'; t.closePrice = livePrice; 
+                        portfolio.xmr -= t.amountXmr; portfolio.usd += (t.amountXmr * livePrice); changed = true; 
+                    } else if(livePrice <= t.sl) { 
+                        t.status = 'LOSS'; t.closePrice = livePrice; 
+                        portfolio.xmr -= t.amountXmr; portfolio.usd += (t.amountXmr * livePrice); changed = true; 
+                    }
+                }
+            });
+            if(changed) { savePortfolio(); updatePortfolioUI(); }
+        }
+
+        function savePortfolio() { localStorage.setItem('xmr_sim_portfolio', JSON.stringify(portfolio)); }
+        
+        function resetAccount() {
+            if(confirm("Erase all history and reset balance to $10,000?")) { 
+                portfolio = { usd: 10000.00, xmr: 0.00, history: [] }; savePortfolio(); updatePortfolioUI(); 
+            }
         }
 
         function copyAddress() {
@@ -378,14 +437,15 @@
             try {
                 let res = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=monero,bitcoin&vs_currencies=usd&include_24hr_change=true');
                 let data = await res.json();
-                let p = data.monero.usd; let btcChange = data.bitcoin.usd_24h_change;
+                currentLivePrice = data.monero.usd; let btcChange = data.bitcoin.usd_24h_change;
 
-                let el = document.getElementById('currentPrice'); el.innerText = `$${p.toFixed(2)}`;
+                let el = document.getElementById('currentPrice'); el.innerText = `$${currentLivePrice.toFixed(2)}`;
                 el.classList.remove('flash-update'); void el.offsetWidth; el.classList.add('flash-update');
                 lastUpdate = new Date(); 
                 
-                evaluateLedger(p); 
-                runEngine(p, btcChange);
+                evaluateLimitOrders(currentLivePrice); 
+                updatePortfolioUI();
+                runEngine(currentLivePrice, btcChange);
             } catch (e) {}
         }
 
