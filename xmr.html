@@ -3,71 +3,35 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Monero Quantum Terminal v5.1</title>
+    <title>Monero Quantum Terminal v6.0</title>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700;800&family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
     <style>
         :root {
-            /* Premium Core Palette */
-            --xmr-base: #FF6600;
-            --xmr-glow: rgba(255, 102, 0, 0.6);
-            --xmr-dim: rgba(255, 102, 0, 0.08);
-            
-            --bg-void: #050507; 
-            --bg-glass: rgba(18, 18, 22, 0.45);
-            --border-glass: rgba(255, 102, 0, 0.12);
-            --border-highlight: rgba(255, 102, 0, 0.3);
-            
-            --text-main: #f8f9fa;
-            --text-muted: #8b8d98;
-            
-            /* Action Colors */
-            --action-buy: #00e676;
-            --action-buy-glow: rgba(0, 230, 118, 0.4);
-            --action-hold: #ffea00;
-            --action-wait: #ff1744;
-            --action-wait-glow: rgba(255, 23, 68, 0.4);
+            --xmr-base: #FF6600; --xmr-glow: rgba(255, 102, 0, 0.6); --xmr-dim: rgba(255, 102, 0, 0.08);
+            --bg-void: #050507; --bg-glass: rgba(18, 18, 22, 0.45); --border-glass: rgba(255, 102, 0, 0.12);
+            --text-main: #f8f9fa; --text-muted: #8b8d98;
+            --action-buy: #00e676; --action-buy-glow: rgba(0, 230, 118, 0.4);
+            --action-hold: #ffea00; --action-wait: #ff1744; --action-wait-glow: rgba(255, 23, 68, 0.4);
             --action-tp: #00b0ff;
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
-
+        * { box-sizing: border-box; margin: 0; padding: 0; transition: all 0.3s ease; }
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: var(--bg-void); }
         ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
-        ::-webkit-scrollbar-thumb:hover { background: var(--xmr-dim); }
 
         body {
-            font-family: 'Inter', sans-serif; 
-            background-color: var(--bg-void); color: var(--text-main);
+            font-family: 'Inter', sans-serif; background-color: var(--bg-void); color: var(--text-main);
             min-height: 100vh; width: 100vw; display: flex; flex-direction: column; overflow-x: hidden;
-            background-image: 
-                radial-gradient(circle at 50% -20%, rgba(255,102,0,0.12) 0%, transparent 60%),
-                linear-gradient(rgba(255, 255, 255, 0.015) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(255, 255, 255, 0.015) 1px, transparent 1px);
+            background-image: radial-gradient(circle at 50% -20%, rgba(255,102,0,0.12) 0%, transparent 60%),
+                linear-gradient(rgba(255, 255, 255, 0.015) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, 0.015) 1px, transparent 1px);
             background-size: 100% 100%, 30px 30px, 30px 30px; position: relative;
         }
-
         body::after {
             content: ""; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
             background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
             background-size: 100% 4px, 3px 100%; z-index: 9999; pointer-events: none; opacity: 0.6;
         }
-
-        /* --- NOSCRIPT FALLBACK UI --- */
-        .noscript-overlay {
-            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; 
-            background: rgba(5, 5, 7, 0.95); backdrop-filter: blur(10px);
-            display: flex; justify-content: center; align-items: center; 
-            z-index: 100000; padding: 20px; text-align: center;
-        }
-        .noscript-card {
-            background: rgba(255, 23, 68, 0.05); border: 1px solid var(--action-wait); 
-            border-radius: 16px; padding: 40px; max-width: 600px;
-            box-shadow: 0 0 40px rgba(255, 23, 68, 0.1);
-        }
-        .noscript-card h2 { font-family: 'JetBrains Mono', monospace; color: var(--action-wait); margin-bottom: 20px; text-transform: uppercase; letter-spacing: 2px;}
-        .noscript-card p { font-size: 0.95rem; line-height: 1.6; margin-bottom: 15px; color: #d1d5db; }
-        .noscript-card .highlight { color: var(--xmr-base); font-weight: bold; }
 
         .app-wrapper { display: flex; flex-direction: column; gap: 20px; width: 100%; min-height: 100vh; padding: 20px; flex: 1; z-index: 10; position: relative; }
         .dashboard { display: flex; flex-direction: column; gap: 20px; width: 100%; flex: 1; }
@@ -75,150 +39,113 @@
         .panel {
             background: var(--bg-glass); backdrop-filter: blur(24px) saturate(150%); -webkit-backdrop-filter: blur(24px) saturate(150%);
             border: 1px solid var(--border-glass); border-top: 1px solid rgba(255,255,255,0.1); 
-            border-radius: 24px; padding: 25px; box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255,255,255,0.05); 
-            display: flex; flex-direction: column;
+            border-radius: 24px; padding: 25px; box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6); display: flex; flex-direction: column;
         }
 
+        /* --- Header --- */
         header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
-        .brand { display: flex; align-items: center; gap: 12px; font-family: 'JetBrains Mono', monospace; font-weight: 800; color: #fff; text-transform: uppercase; font-size: 0.9rem; letter-spacing: 1px; }
+        .brand { display: flex; align-items: center; gap: 12px; font-family: 'JetBrains Mono', monospace; font-weight: 800; text-transform: uppercase; font-size: 0.9rem; }
         .logo-mark { width: 28px; height: 28px; background: linear-gradient(135deg, #FF6600, #ff8c42); border-radius: 50%; display: flex; justify-content: center; align-items: center; color: var(--bg-void); font-size: 16px; font-weight: 800; box-shadow: 0 0 20px var(--xmr-glow); }
-        .live-pulse { display: flex; align-items: center; gap: 8px; font-size: 0.75rem; color: var(--action-buy); text-transform: uppercase; letter-spacing: 2px; font-weight: 800; }
-        .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--action-buy); box-shadow: 0 0 12px var(--action-buy-glow); animation: blink 2s ease-in-out infinite; }
-        @keyframes blink { 0%, 100% {opacity: 1; transform: scale(1);} 50% {opacity: 0.3; transform: scale(0.8);} }
+        
+        .header-actions { display: flex; gap: 15px; align-items: center; }
+        .ledger-btn { background: rgba(255,102,0,0.1); border: 1px solid var(--xmr-base); color: var(--xmr-base); padding: 6px 12px; border-radius: 6px; font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; font-weight: 800; cursor: pointer; text-transform: uppercase;}
+        .ledger-btn:hover { background: var(--xmr-base); color: #000; box-shadow: 0 0 15px var(--xmr-glow); }
 
         .price-container { margin: 15px 0 25px 0; }
         .price-label { font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 3px; margin-bottom: 8px; font-weight: 600; }
-        .price-value { font-family: 'JetBrains Mono', monospace; font-size: 4rem; font-weight: 800; line-height: 1; letter-spacing: -2px; text-shadow: 0 0 40px rgba(255, 255, 255, 0.15), 0 0 15px rgba(255, 255, 255, 0.05); }
+        .price-value { font-family: 'JetBrains Mono', monospace; font-size: 4rem; font-weight: 800; line-height: 1; letter-spacing: -2px; text-shadow: 0 0 40px rgba(255, 255, 255, 0.15); }
         .flash-update { animation: priceFlash 1.2s cubic-bezier(0.16, 1, 0.3, 1); }
         @keyframes priceFlash { 0% { color: var(--action-buy); text-shadow: 0 0 50px var(--action-buy-glow); transform: translateY(-2px); } 100% { color: var(--text-main); transform: translateY(0); } }
         .update-timer { font-size: 0.75rem; color: var(--text-muted); font-family: 'JetBrains Mono', monospace; margin-top: 8px; opacity: 0.6; }
 
-        .data-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; flex: 1; align-content: stretch; }
-        .metric-card {
-            background: rgba(10, 10, 12, 0.5); border: 1px solid rgba(255, 255, 255, 0.04); border-radius: 16px; padding: 20px; 
-            display: flex; flex-direction: column; justify-content: center; cursor: default;
-        }
-        .metric-card:hover { transform: translateY(-4px); border-color: var(--border-highlight); background: rgba(255, 102, 0, 0.03); box-shadow: 0 10px 20px rgba(0,0,0,0.4), 0 0 20px var(--xmr-dim); }
-        .metric-title { font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; font-weight: 600;}
-        .metric-val { font-family: 'JetBrains Mono', monospace; font-size: 1.4rem; font-weight: 800; margin-bottom: 6px; letter-spacing: -0.5px;}
-        .metric-sub { font-size: 0.75rem; font-weight: 600; letter-spacing: 0.5px;}
-        .text-buy { color: var(--action-buy); text-shadow: 0 0 10px var(--action-buy-glow);} 
-        .text-sell { color: var(--action-wait); text-shadow: 0 0 10px var(--action-wait-glow);} 
-        .text-dim { color: var(--text-muted); }
+        /* --- MTM Matrix --- */
+        .mtm-matrix { display: flex; gap: 10px; margin-bottom: 20px; background: rgba(0,0,0,0.4); border-radius: 12px; padding: 12px; border: 1px solid rgba(255,255,255,0.05); }
+        .mtm-col { flex: 1; text-align: center; }
+        .mtm-label { font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 4px; }
+        .mtm-val { font-family: 'JetBrains Mono', monospace; font-size: 0.9rem; font-weight: 800; text-transform: uppercase; }
 
-        .verdict-box { 
-            margin-top: auto; padding: 25px; border-radius: 18px; text-align: center; 
-            border: 1px solid transparent; flex: 1; display: flex; flex-direction: column; justify-content: center; background: rgba(0,0,0,0.4);
-        }
-        .verdict-title { font-family: 'JetBrains Mono', monospace; font-weight: 800; font-size: 2.2rem; letter-spacing: 3px; margin-bottom: 12px; text-transform: uppercase;}
-        .sig-buy { border-color: rgba(0, 230, 118, 0.4); box-shadow: inset 0 0 40px rgba(0, 230, 118, 0.05), 0 0 30px rgba(0, 230, 118, 0.1); }
-        .sig-buy .verdict-title { color: var(--action-buy); text-shadow: 0 0 20px var(--action-buy-glow); }
-        .sig-hold { border-color: rgba(255, 234, 0, 0.3); box-shadow: inset 0 0 40px rgba(255, 234, 0, 0.05); }
-        .sig-hold .verdict-title { color: var(--action-hold); }
-        .sig-wait { border-color: rgba(255, 23, 68, 0.4); box-shadow: inset 0 0 40px rgba(255, 23, 68, 0.05), 0 0 30px rgba(255, 23, 68, 0.1); }
-        .sig-wait .verdict-title { color: var(--action-wait); text-shadow: 0 0 20px var(--action-wait-glow); }
+        .data-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; flex: 1; align-content: start; }
+        .metric-card { background: rgba(10, 10, 12, 0.5); border: 1px solid rgba(255, 255, 255, 0.04); border-radius: 16px; padding: 15px; display: flex; flex-direction: column; justify-content: center; }
+        .metric-title { font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; font-weight: 600;}
+        .metric-val { font-family: 'JetBrains Mono', monospace; font-size: 1.2rem; font-weight: 800; margin-bottom: 4px; }
+        .metric-sub { font-size: 0.7rem; font-weight: 600; }
+        .text-buy { color: var(--action-buy); text-shadow: 0 0 10px var(--action-buy-glow);} .text-sell { color: var(--action-wait); text-shadow: 0 0 10px var(--action-wait-glow);} 
 
-        .trade-blueprint {
-            background: #000; border-radius: 12px; padding: 18px; margin-top: 20px; font-family: 'JetBrains Mono', monospace; font-size: 0.9rem; 
-            border: 1px solid rgba(255,255,255,0.1); display: flex; flex-direction: column; gap: 12px; text-align: left; position: relative; overflow: hidden;
-        }
-        .trade-blueprint::before {
-            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 2px;
-            background: linear-gradient(90deg, transparent, var(--xmr-base), transparent); animation: scan 3s linear infinite; opacity: 0.5;
-        }
-        @keyframes scan { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
+        .verdict-box { margin-top: auto; padding: 25px; border-radius: 18px; text-align: center; border: 1px solid transparent; background: rgba(0,0,0,0.4); display: flex; flex-direction: column;}
+        .verdict-title { font-family: 'JetBrains Mono', monospace; font-weight: 800; font-size: 2rem; letter-spacing: 3px; margin-bottom: 10px;}
+        .sig-buy { border-color: rgba(0, 230, 118, 0.4); box-shadow: inset 0 0 40px rgba(0, 230, 118, 0.05); } .sig-buy .verdict-title { color: var(--action-buy); }
+        .sig-hold { border-color: rgba(255, 234, 0, 0.3); } .sig-hold .verdict-title { color: var(--action-hold); }
+        .sig-wait { border-color: rgba(255, 23, 68, 0.4); box-shadow: inset 0 0 40px rgba(255, 23, 68, 0.05); } .sig-wait .verdict-title { color: var(--action-wait); }
 
+        .trade-blueprint { background: #000; border-radius: 12px; padding: 18px; margin-top: 15px; font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; border: 1px solid rgba(255,255,255,0.1); display: flex; flex-direction: column; gap: 10px; text-align: left; }
         .bp-row { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed rgba(255,255,255,0.1); padding-bottom: 8px; }
-        .bp-row:last-child { border-bottom: none; padding-bottom: 0; }
-        .bp-label { color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px;}
-        .target-entry { color: #fff; font-weight: 800; font-size: 1.1rem; }
-        .target-tp { color: var(--action-tp); font-weight: 800; font-size: 1.1rem; text-shadow: 0 0 10px rgba(0, 176, 255, 0.4);}
-        .target-sl { color: var(--action-wait); font-weight: 800; font-size: 1.1rem; text-shadow: 0 0 10px var(--action-wait-glow);}
-
-        /* --- AUDIO PLAYER PANEL --- */
-        .audio-panel {
-            flex-direction: column; padding: 15px 25px; align-items: stretch; gap: 15px; flex: none;
-            background: linear-gradient(90deg, rgba(18,18,22,0.8) 0%, rgba(255,102,0,0.05) 100%);
-        }
-        .audio-controls-wrapper { display: flex; align-items: center; gap: 15px; width: 100%; }
-        .play-btn {
-            background: transparent; border: 1px solid var(--xmr-base); color: var(--xmr-base);
-            padding: 8px 16px; border-radius: 8px; cursor: pointer; font-family: 'JetBrains Mono', monospace;
-            font-size: 0.8rem; font-weight: 800; text-transform: uppercase; white-space: nowrap; width: 90px;
-            display: flex; justify-content: center; align-items: center;
-        }
-        .play-btn:hover { background: rgba(255, 102, 0, 0.1); box-shadow: 0 0 15px var(--xmr-glow); }
-        .play-btn.playing { background: var(--xmr-base); color: #000; box-shadow: 0 0 15px var(--xmr-glow); }
+        .bp-label { color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase; }
+        .target-entry { color: #fff; font-weight: 800; } .target-tp { color: var(--action-tp); font-weight: 800; } .target-sl { color: var(--action-wait); font-weight: 800; }
         
-        .audio-track { flex: 1; height: 6px; background: rgba(255,255,255,0.1); border-radius: 10px; cursor: pointer; position: relative; overflow: hidden; }
-        .audio-progress { height: 100%; width: 0%; background: var(--xmr-base); box-shadow: 0 0 10px var(--xmr-glow); pointer-events: none; }
-        .audio-time { font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; color: var(--text-main); min-width: 90px; text-align: right; }
-        .audio-label { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 2px; font-weight: 600; text-align: center; }
+        .log-btn { background: rgba(255,255,255,0.05); border: 1px dashed var(--xmr-base); color: var(--xmr-base); width: 100%; padding: 10px; border-radius: 8px; font-family: 'JetBrains Mono'; font-weight: 800; cursor: pointer; text-transform: uppercase; margin-top: 5px; }
+        .log-btn:hover { background: var(--xmr-base); color: #000; }
 
-        .donation-panel {
-            background: rgba(10, 10, 10, 0.8); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border: 1px solid var(--border-glass); border-radius: 16px;
-            padding: 15px 25px; text-align: center; margin-top: auto; display: flex; flex-direction: column; align-items: center; gap: 12px; flex: none;
-        }
-        .donation-title { font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 2px; font-weight: 600;}
-        .donation-address-container { display: flex; align-items: center; gap: 15px; width: 100%; background: #000; padding: 12px 18px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.05); }
-        .xmr-address { font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; color: var(--text-muted); word-break: break-all; flex: 1; text-align: left; }
-        .copy-btn { 
-            background: transparent; border: 1px solid var(--xmr-base); color: var(--xmr-base); 
-            padding: 8px 16px; border-radius: 8px; cursor: pointer; font-family: 'JetBrains Mono', monospace; 
-            font-size: 0.8rem; font-weight: 800; text-transform: uppercase; white-space: nowrap; 
-        }
-        .copy-btn:hover { background: var(--xmr-base); color: #000; box-shadow: 0 0 15px var(--xmr-glow);}
-        .copy-btn.copied { background: var(--action-buy); border-color: var(--action-buy); color: #000; box-shadow: 0 0 15px var(--action-buy-glow);}
+        /* --- Shadow Ledger Modal --- */
+        .ledger-modal { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.8); backdrop-filter: blur(15px); z-index: 50000; display: none; justify-content: center; align-items: center; padding: 20px;}
+        .ledger-content { background: var(--bg-void); border: 1px solid var(--border-highlight); border-radius: 20px; width: 100%; max-width: 800px; max-height: 80vh; overflow-y: auto; padding: 25px; box-shadow: 0 0 50px rgba(255,102,0,0.2); }
+        .ledger-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 15px; margin-bottom: 15px; }
+        .ledger-title { font-family: 'JetBrains Mono'; font-size: 1.2rem; color: var(--xmr-base); font-weight: 800; text-transform: uppercase; }
+        .close-btn { background: none; border: none; color: #fff; font-size: 1.5rem; cursor: pointer; }
+        
+        .ledger-stats { display: flex; gap: 15px; margin-bottom: 20px; }
+        .stat-box { flex: 1; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); padding: 15px; border-radius: 12px; text-align: center; font-family: 'JetBrains Mono'; }
+        
+        .trade-item { background: #000; border: 1px solid rgba(255,255,255,0.05); padding: 15px; border-radius: 10px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; font-family: 'JetBrains Mono'; font-size: 0.8rem;}
+        .status-open { color: var(--action-hold); } .status-win { color: var(--action-buy); } .status-loss { color: var(--action-wait); }
 
-        .loader-overlay {
-            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: var(--bg-void); 
-            display: flex; justify-content: center; align-items: center; z-index: 10000; 
-            font-family: 'JetBrains Mono', monospace; color: var(--xmr-base); font-size: 0.9rem; flex-direction: column; gap: 20px; text-align: center; letter-spacing: 2px;
-        }
-        .spinner { width: 45px; height: 45px; border: 3px solid rgba(255,255,255,0.1); border-top-color: var(--xmr-base); border-radius: 50%; animation: spin 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite; }
+        /* Loader */
+        .loader-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: var(--bg-void); display: flex; justify-content: center; align-items: center; z-index: 10000; font-family: 'JetBrains Mono'; color: var(--xmr-base); flex-direction: column; gap: 20px;}
+        .spinner { width: 45px; height: 45px; border: 3px solid rgba(255,255,255,0.1); border-top-color: var(--xmr-base); border-radius: 50%; animation: spin 0.8s linear infinite; }
         @keyframes spin { to { transform: rotate(360deg); } }
 
         @media (min-width: 1024px) {
             body { overflow: hidden; } 
-            .app-wrapper { height: 100vh; padding: 25px; max-width: 1600px; margin: 0 auto;}
-            .dashboard { flex-direction: row; align-items: stretch; height: calc(100% - 150px); margin-bottom: 0; }
-            .left-col { flex: 1; display: flex; flex-direction: column; justify-content: space-between; height: 100%;}
-            .right-col { flex: 1.6; display: flex; flex-direction: column; height: 100%; }
-            .data-grid { grid-template-columns: 1fr 1fr 1fr; gap: 20px;}
-            .price-value { font-size: 5rem; }
-            
-            .audio-panel { flex-direction: row; justify-content: space-between; align-items: center;}
-            .audio-label { text-align: left; }
-            .audio-controls-wrapper { width: auto; flex: 1; max-width: 600px;}
-
-            .donation-panel { flex-direction: row; justify-content: space-between; text-align: left; padding: 15px 25px; margin-top: 0;}
-            .donation-address-container { width: auto; flex: 1; margin-left: 30px; max-width: 800px;}
-            .xmr-address { font-size: 0.85rem; }
+            .app-wrapper { height: 100vh; max-width: 1600px; margin: 0 auto;}
+            .dashboard { flex-direction: row; align-items: stretch; height: 100%; margin-bottom: 0; }
+            .left-col { flex: 1; } .right-col { flex: 1.4; }
+            .data-grid { grid-template-columns: 1fr 1fr 1fr; }
         }
     </style>
 </head>
 <body>
 
     <noscript>
-        <div class="noscript-overlay">
-            <div class="noscript-card">
-                <h2>⚠️ UPLINK FAILED: JAVASCRIPT DISABLED</h2>
-                <p>The Monero Quantum Terminal relies on JavaScript to perform live market analysis and fetch real-time blockchain data.</p>
-                <p><strong>Is it safe to enable?</strong></p>
-                <p>Yes. This terminal is a 100% client-side application. All quantitative math, pattern matching, and API calls happen <span class="highlight">entirely inside your own browser</span>. We use no backend servers, no tracking cookies, and your data never leaves your device.</p>
-                <p style="margin-top: 25px; font-weight: bold; color: var(--xmr-base);">Please enable JavaScript and refresh the page to initialize the engine.</p>
-            </div>
+        <div style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #000; z-index: 999999; color: red; display: flex; justify-content: center; align-items: center; font-family: monospace; padding: 20px; text-align: center;">
+            <h2>⚠️ JAVASCRIPT REQUIRED. THIS IS A CLIENT-SIDE APP. ENABLE JS TO RUN THE QUANT ENGINE.</h2>
         </div>
     </noscript>
 
+    <div class="ledger-modal" id="ledgerModal">
+        <div class="ledger-content">
+            <div class="ledger-header">
+                <div class="ledger-title">Shadow Ledger (Paper Trading)</div>
+                <button class="close-btn" onclick="toggleLedger()">×</button>
+            </div>
+            <div class="ledger-stats">
+                <div class="stat-box"><div style="font-size:0.7rem;color:#888;">WIN RATE</div><div id="statWinRate" style="font-size:1.5rem;color:var(--action-buy);">0%</div></div>
+                <div class="stat-box"><div style="font-size:0.7rem;color:#888;">OPEN TRADES</div><div id="statOpen" style="font-size:1.5rem;color:#fff;">0</div></div>
+                <div class="stat-box"><div style="font-size:0.7rem;color:#888;">TOTAL TRADES</div><div id="statTotal" style="font-size:1.5rem;color:#fff;">0</div></div>
+            </div>
+            <div id="ledgerList" style="display: flex; flex-direction: column; gap: 10px;">
+                </div>
+            <button onclick="clearLedger()" style="margin-top:20px; width:100%; padding:10px; background:none; border:1px solid #ff1744; color:#ff1744; border-radius:8px; cursor:pointer; font-family:monospace;">CLEAR LEDGER HISTORY</button>
+        </div>
+    </div>
+
     <div class="app-wrapper" id="app" style="display: none;">
-        
         <div class="dashboard">
             <div class="panel left-col">
                 <div style="flex: 1; display: flex; flex-direction: column;">
                     <header>
-                        <div class="brand"><div class="logo-mark">M</div> Quantum Terminal</div>
-                        <div class="live-pulse"><div class="dot"></div> Live Node</div>
+                        <div class="brand"><div class="logo-mark">M</div> Terminal 6.0</div>
+                        <div class="header-actions">
+                            <button class="ledger-btn" onclick="toggleLedger()">[+] Shadow Ledger</button>
+                        </div>
                     </header>
 
                     <div class="price-container">
@@ -229,69 +156,46 @@
 
                     <div class="verdict-box" id="mainVerdict">
                         <div class="verdict-title" id="verdictTitle">ANALYZING</div>
-                        <div id="verdictDesc" style="font-size: 0.95rem; color: #d1d5db; line-height: 1.6;">Processing quantum vectors...</div>
+                        <div id="verdictDesc" style="font-size: 0.9rem; color: #d1d5db; margin-bottom: 15px;">Processing Multi-Timeframe Vectors...</div>
                         
                         <div class="trade-blueprint" id="blueprintBox" style="display: none;">
-                            <div class="bp-row">
-                                <span class="bp-label">Target Entry (Limit)</span>
-                                <span class="target-entry" id="bpEntry">$--</span>
-                            </div>
-                            <div class="bp-row">
-                                <span class="bp-label">Take Profit (Resistance)</span>
-                                <span class="target-tp" id="bpTakeProfit">$--</span>
-                            </div>
-                            <div class="bp-row">
-                                <span class="bp-label">Stop Loss (Risk Mgt)</span>
-                                <span class="target-sl" id="bpStopLoss">$--</span>
-                            </div>
+                            <div class="bp-row"><span class="bp-label">Target Entry</span><span class="target-entry" id="bpEntry">$--</span></div>
+                            <div class="bp-row"><span class="bp-label">Take Profit</span><span class="target-tp" id="bpTakeProfit">$--</span></div>
+                            <div class="bp-row"><span class="bp-label">Stop Loss</span><span class="target-sl" id="bpStopLoss">$--</span></div>
+                            <button class="log-btn" id="logBtn" onclick="logCurrentTrade()">LOG TRADE TO SHADOW LEDGER</button>
                         </div>
                     </div>
                 </div>
             </div>
 
             <div class="panel right-col">
-                <div style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; margin-bottom: 25px; letter-spacing: 2px; font-weight: 800; display: flex; align-items: center; justify-content: space-between;">
-                    Quantitative Indicators
-                    <span style="font-size: 0.7rem; color: var(--xmr-base); background: var(--xmr-dim); padding: 4px 10px; border-radius: 100px;">v5.1 Core</span>
+                <div class="mtm-matrix">
+                    <div class="mtm-col">
+                        <div class="mtm-label">Macro State (365D)</div>
+                        <div class="mtm-val" id="mtmMacro">--</div>
+                    </div>
+                    <div style="width: 1px; background: rgba(255,255,255,0.1);"></div>
+                    <div class="mtm-col">
+                        <div class="mtm-label">Micro State (14D / 1H)</div>
+                        <div class="mtm-val" id="mtmMicro">--</div>
+                    </div>
                 </div>
                 
                 <div class="data-grid">
-                    <div class="metric-card"><div class="metric-title">Market Psychology</div><div class="metric-val" id="fngValue">--</div><div class="metric-sub" id="fngStatus">--</div></div>
                     <div class="metric-card"><div class="metric-title">Market Filter (BTC)</div><div class="metric-val" id="btcValue">--</div><div class="metric-sub" id="btcStatus">--</div></div>
-                    <div class="metric-card"><div class="metric-title">Volatility (B-Bands)</div><div class="metric-val" id="bbValue">--</div><div class="metric-sub" id="bbStatus">--</div></div>
-                    <div class="metric-card"><div class="metric-title">Macro Trend (EMA 50)</div><div class="metric-val" id="emaValue">--</div><div class="metric-sub" id="emaStatus">--</div></div>
-                    <div class="metric-card"><div class="metric-title">Momentum (RSI)</div><div class="metric-val" id="rsiValue">--</div><div class="metric-sub" id="rsiStatus">--</div></div>
-                    <div class="metric-card"><div class="metric-title">Pattern Prob. (7-Day)</div><div class="metric-val" id="probScore">--</div><div class="metric-sub" id="probDesc" style="color:var(--text-muted)">Fractal Match</div></div>
+                    <div class="metric-card"><div class="metric-title">Macro Volatility</div><div class="metric-val" id="bbValue">--</div><div class="metric-sub" id="bbStatus">--</div></div>
+                    <div class="metric-card"><div class="metric-title">Micro Momentum</div><div class="metric-val" id="rsiMicroValue">--</div><div class="metric-sub" id="rsiMicroStatus">--</div></div>
+                    <div class="metric-card"><div class="metric-title">Macro Trend</div><div class="metric-val" id="emaValue">--</div><div class="metric-sub" id="emaStatus">--</div></div>
+                    <div class="metric-card"><div class="metric-title">Pattern Match</div><div class="metric-val" id="probScore">--</div><div class="metric-sub" style="color:#888;">Fractal Historical</div></div>
+                    <div class="metric-card"><div class="metric-title">Psychology</div><div class="metric-val" id="fngValue">--</div><div class="metric-sub" id="fngStatus">--</div></div>
                 </div>
-            </div>
-        </div>
-
-        <div class="panel audio-panel">
-            <div class="audio-label">📡 COMMS LINK / AUDIO BRIEFING</div>
-            
-            <div class="audio-controls-wrapper">
-                <button class="play-btn" id="audioBtn">▶ PLAY</button>
-                <div class="audio-track" id="audioTrack">
-                    <div class="audio-progress" id="audioProgress"></div>
-                </div>
-                <div class="audio-time" id="audioTime">00:00 / 00:00</div>
-            </div>
-            
-            <audio id="platformAudio" src="YOUR_AUDIO_FILE.m4a"></audio>
-        </div>
-
-        <div class="donation-panel">
-            <div class="donation-title">Support The Algorithm</div>
-            <div class="donation-address-container">
-                <span class="xmr-address" id="xmrAddress">88Uc3K7NwEsFsVWioAy6rt57mvkg6pNC7Cu1qWxZn53z5Wdxahvjtp5ZkT21Df2DKvcFaDrfFSHM2bXXipDot3zSMXwwZUG</span>
-                <button class="copy-btn" id="copyBtn" onclick="copyAddress()">Copy</button>
             </div>
         </div>
     </div>
 
     <div class="loader-overlay" id="loader">
         <div class="spinner"></div>
-        <div id="loaderText">ESTABLISHING SECURE UPLINK...</div>
+        <div id="loaderText">BOOTING QUANTUM ENGINE v6.0...</div>
     </div>
 
     <script>
@@ -301,81 +205,115 @@
             for (let i = 1; i < prices.length; i++) ema.push(prices[i] * k + ema[i - 1] * (1 - k));
             return ema;
         }
-
         function calcSMA(prices, period) { return prices.slice(-period).reduce((a, b) => a + b, 0) / period; }
-
-        function calcStdDev(prices, period, sma) {
-            let variance = prices.slice(-period).reduce((sq, n) => sq + Math.pow(n - sma, 2), 0) / period;
-            return Math.sqrt(variance);
-        }
-
+        function calcStdDev(prices, period, sma) { return Math.sqrt(prices.slice(-period).reduce((sq, n) => sq + Math.pow(n - sma, 2), 0) / period); }
         function calcBollingerBands(prices, period = 20, multiplier = 2) {
-            if (prices.length < period) return { upper: 0, lower: 0, width: 0, sma: 0 };
+            if (prices.length < period) return { upper: 0, lower: 0, width: 0 };
             let sma = calcSMA(prices, period); let sd = calcStdDev(prices, period, sma);
-            let upper = sma + (sd * multiplier); let lower = sma - (sd * multiplier);
-            return { upper, lower, width: (upper - lower) / sma, sma };
+            return { upper: sma + (sd * multiplier), lower: sma - (sd * multiplier), width: (sma + (sd * multiplier) - (sma - (sd * multiplier))) / sma };
         }
-
         function calcRSI(prices, period = 14) {
             let gains = 0, losses = 0;
             for (let i = prices.length - period; i < prices.length; i++) {
                 let diff = prices[i] - prices[i - 1];
                 if (diff > 0) gains += diff; else losses -= diff;
             }
-            let rs = (gains / period) / ((losses / period) || 1);
-            return 100 - (100 / (1 + rs));
+            let rs = (gains / period) / ((losses / period) || 1); return 100 - (100 / (1 + rs));
         }
-
-        function getSupportResistance(prices, period = 30) {
-            let slice = prices.slice(-period);
-            return { support: Math.min(...slice), resistance: Math.max(...slice) };
-        }
-
         function patternMatch(prices) {
-            const windowSize = 14; const lookahead = 7; 
-            if (prices.length < windowSize * 2) return 50; 
+            const windowSize = 14; const lookahead = 7; if (prices.length < windowSize * 2) return 50; 
             let currentNorm = prices.slice(-windowSize).map((p,_,arr) => (p - arr[0]) / arr[0]);
             let bestMatches = [];
-
             for (let i = 0; i < prices.length - windowSize - lookahead; i++) {
-                let histSlice = prices.slice(i, i + windowSize);
-                let histNorm = histSlice.map(p => (p - histSlice[0]) / histSlice[0]);
+                let histSlice = prices.slice(i, i + windowSize); let histNorm = histSlice.map(p => (p - histSlice[0]) / histSlice[0]);
                 let distance = currentNorm.reduce((sum, val, idx) => sum + Math.pow(val - histNorm[idx], 2), 0);
-                let percentReturn = ((prices[i + windowSize + lookahead] - histSlice[histSlice.length - 1]) / histSlice[histSlice.length - 1]) * 100;
-                bestMatches.push({ distance, percentReturn });
+                bestMatches.push({ distance, percentReturn: ((prices[i + windowSize + lookahead] - histSlice[histSlice.length - 1]) / histSlice[histSlice.length - 1]) * 100 });
             }
             let avgReturn = bestMatches.sort((a, b) => a.distance - b.distance).slice(0, 5).reduce((sum, m) => sum + m.percentReturn, 0) / 5;
             return Math.max(5, Math.min(95, 50 + (avgReturn * 10))); 
         }
 
         // --- APP STATE ---
-        let histPrices = []; let lastUpdate = new Date(); let fearAndGreed = 50;
+        let histMacro = []; let histMicro = []; let fearAndGreed = 50; let lastUpdate = new Date();
+        let currentTradeParams = null; // Temp holder for the active blueprint
 
+        // --- SHADOW LEDGER LOGIC ---
+        let ledger = JSON.parse(localStorage.getItem('xmr_shadow_ledger')) || [];
+
+        function toggleLedger() {
+            const modal = document.getElementById('ledgerModal');
+            modal.style.display = modal.style.display === 'flex' ? 'none' : 'flex';
+            renderLedger();
+        }
+
+        function logCurrentTrade() {
+            if(!currentTradeParams) return;
+            ledger.push({
+                id: Date.now(), date: new Date().toLocaleDateString() + " " + new Date().toLocaleTimeString(),
+                entry: currentTradeParams.entry, tp: currentTradeParams.tp, sl: currentTradeParams.sl, status: 'OPEN', closePrice: null
+            });
+            localStorage.setItem('xmr_shadow_ledger', JSON.stringify(ledger));
+            document.getElementById('logBtn').innerText = "✓ TRADE LOGGED";
+            setTimeout(() => { document.getElementById('logBtn').innerText = "LOG TRADE TO SHADOW LEDGER"; }, 2000);
+            renderLedger();
+        }
+
+        function evaluateLedger(livePrice) {
+            let changed = false;
+            ledger.forEach(t => {
+                if(t.status === 'OPEN') {
+                    if(livePrice >= t.tp) { t.status = 'WIN'; t.closePrice = livePrice; changed = true; }
+                    else if(livePrice <= t.sl) { t.status = 'LOSS'; t.closePrice = livePrice; changed = true; }
+                }
+            });
+            if(changed) { localStorage.setItem('xmr_shadow_ledger', JSON.stringify(ledger)); renderLedger(); }
+        }
+
+        function clearLedger() {
+            if(confirm("Erase all paper trading data?")) { ledger = []; localStorage.removeItem('xmr_shadow_ledger'); renderLedger(); }
+        }
+
+        function renderLedger() {
+            const list = document.getElementById('ledgerList'); list.innerHTML = '';
+            let wins = 0, losses = 0, open = 0;
+            
+            ledger.slice().reverse().forEach(t => {
+                if(t.status === 'WIN') wins++; else if(t.status === 'LOSS') losses++; else open++;
+                let statClass = t.status === 'WIN' ? 'status-win' : t.status === 'LOSS' ? 'status-loss' : 'status-open';
+                list.innerHTML += `<div class="trade-item">
+                    <div><span style="color:#888">${t.date}</span><br>Entry: $${t.entry.toFixed(2)}</div>
+                    <div>TP: $${t.tp.toFixed(2)}<br>SL: $${t.sl.toFixed(2)}</div>
+                    <div class="${statClass}" style="font-weight:bold;">${t.status} ${t.closePrice ? '($'+t.closePrice.toFixed(2)+')' : ''}</div>
+                </div>`;
+            });
+            
+            let totalClosed = wins + losses;
+            document.getElementById('statWinRate').innerText = totalClosed > 0 ? Math.round((wins/totalClosed)*100) + '%' : '0%';
+            document.getElementById('statOpen').innerText = open; document.getElementById('statTotal').innerText = ledger.length;
+        }
+
+        // --- MAIN ENGINE ---
         async function initApp() {
             try {
-                let res = await fetch('https://api.coingecko.com/api/v3/coins/monero/market_chart?vs_currency=usd&days=365&interval=daily');
-                histPrices = (await res.json()).prices.slice(0, -1).map(p => p[1]); 
+                // Fetch Daily (Macro)
+                let resDaily = await fetch('https://api.coingecko.com/api/v3/coins/monero/market_chart?vs_currency=usd&days=365&interval=daily');
+                histMacro = (await resDaily.json()).prices.slice(0, -1).map(p => p[1]); 
                 
-                try {
-                    let fngRes = await fetch('https://api.alternative.me/fng/');
-                    let fngData = await fngRes.json();
-                    fearAndGreed = parseInt(fngData.data[0].value);
-                } catch(e) { console.log("F&G API failed, defaulting to 50"); }
+                await new Promise(r => setTimeout(r, 800)); // Rate limit buffer
+
+                // Fetch Hourly (Micro - 14 days)
+                let resHourly = await fetch('https://api.coingecko.com/api/v3/coins/monero/market_chart?vs_currency=usd&days=14');
+                histMicro = (await resHourly.json()).prices.slice(0, -1).map(p => p[1]);
+
+                try { fearAndGreed = parseInt((await (await fetch('https://api.alternative.me/fng/')).json()).data[0].value); } catch(e) {}
 
                 await fetchLivePrice();
+                document.getElementById('loader').style.display = 'none'; document.getElementById('app').style.display = 'flex';
                 
-                setTimeout(() => {
-                    document.getElementById('loader').style.display = 'none';
-                    document.getElementById('app').style.display = 'flex';
-                }, 800);
-
                 setInterval(fetchLivePrice, 60000); 
-                setInterval(() => {
-                    let secs = Math.floor((new Date() - lastUpdate) / 1000);
-                    document.getElementById('updateTimer').innerText = `Updated: ${secs === 0 ? 'Just now' : secs + 's ago'}`;
-                }, 1000);
-            } catch (error) {
-                document.getElementById('loaderText').innerText = "API LIMIT REACHED. RETRY IN 1 MIN.";
+                setInterval(() => { document.getElementById('updateTimer').innerText = `Updated: ${Math.floor((new Date() - lastUpdate) / 1000)}s ago`; }, 1000);
+            } catch (e) {
+                document.getElementById('loaderText').innerText = "API LIMIT REACHED. REFRESH IN 1 MIN.";
                 document.getElementById('loaderText').style.color = "var(--action-wait)";
             }
         }
@@ -386,137 +324,75 @@
                 let data = await res.json();
                 let p = data.monero.usd; let btcChange = data.bitcoin.usd_24h_change;
 
-                let el = document.getElementById('currentPrice');
-                el.innerText = `$${p.toFixed(2)}`;
+                let el = document.getElementById('currentPrice'); el.innerText = `$${p.toFixed(2)}`;
                 el.classList.remove('flash-update'); void el.offsetWidth; el.classList.add('flash-update');
-                lastUpdate = new Date(); runEngine(p, btcChange);
+                lastUpdate = new Date(); 
+                
+                evaluateLedger(p); // Check Shadow Ledger
+                runEngine(p, btcChange);
             } catch (e) {}
         }
 
         function runEngine(livePrice, btcChange) {
-            let activePrices = [...histPrices, livePrice];
-            let rsi = calcRSI(activePrices);
-            let ema50 = calcEMA(activePrices, 50).pop();
-            let bBands = calcBollingerBands(activePrices);
-            let patternProb = patternMatch(activePrices);
-            let zones = getSupportResistance(activePrices, 30);
+            let activeMacro = [...histMacro, livePrice]; let activeMicro = [...histMicro, livePrice];
+
+            // Macro Math
+            let rsiMacro = calcRSI(activeMacro); let ema50 = calcEMA(activeMacro, 50).pop();
+            let bBands = calcBollingerBands(activeMacro); let patternProb = patternMatch(activeMacro);
+            
+            // Micro Math (Hourly)
+            let rsiMicro = calcRSI(activeMicro, 14); 
 
             function setUI(id, val, stat, isGood) {
-                document.getElementById(id+'Value').innerText = val;
-                let sEl = document.getElementById(id+'Status');
-                sEl.innerText = stat; sEl.className = 'metric-sub ' + (isGood === null ? 'text-dim' : isGood ? 'text-buy' : 'text-sell');
+                document.getElementById(id+'Value').innerText = val; document.getElementById(id+'Status').innerText = stat;
+                document.getElementById(id+'Status').className = 'metric-sub ' + (isGood === null ? 'text-dim' : isGood ? 'text-buy' : 'text-sell');
             }
 
-            let fngText = fearAndGreed < 25 ? "Extreme Fear (Buy Opp)" : fearAndGreed > 75 ? "Extreme Greed (Sell Risk)" : "Neutral Sentiment";
-            setUI('fng', fearAndGreed, fngText, fearAndGreed < 40 ? true : fearAndGreed > 60 ? false : null);
-            setUI('btc', `${btcChange > 0 ? '+' : ''}${btcChange.toFixed(2)}%`, btcChange > 0 ? 'Market Safe' : 'Macro Risk (BTC Down)', btcChange > 0);
-            let isSqueeze = bBands.width < 0.10;
-            setUI('bb', `${(bBands.width * 100).toFixed(1)}% Width`, isSqueeze ? "Squeeze (Breakout Imminent)" : "Normal Volatility", isSqueeze ? true : null);
-            setUI('ema', `$${ema50.toFixed(0)}`, livePrice > ema50 ? 'Holding Macro Support' : 'Below Macro Trend', livePrice > ema50);
-            setUI('rsi', rsi.toFixed(1), rsi < 45 ? 'Oversold (Discount)' : rsi > 65 ? 'Overbought (Risk)' : 'Neutral Momentum', rsi < 45 ? true : rsi > 65 ? false : null);
+            setUI('fng', fearAndGreed, fearAndGreed < 30 ? "Fear (Buy Opp)" : fearAndGreed > 70 ? "Greed (Sell Risk)" : "Neutral", fearAndGreed < 40 ? true : fearAndGreed > 60 ? false : null);
+            setUI('btc', `${btcChange > 0 ? '+' : ''}${btcChange.toFixed(2)}%`, btcChange > 0 ? 'Safe' : 'Risk', btcChange > 0);
+            setUI('bb', `${(bBands.width * 100).toFixed(1)}%`, bBands.width < 0.10 ? "Squeeze" : "Normal Volatility", bBands.width < 0.10 ? true : null);
+            setUI('ema', `$${ema50.toFixed(0)}`, livePrice > ema50 ? 'Above Support' : 'Below Trend', livePrice > ema50);
+            setUI('rsiMicro', rsiMicro.toFixed(1), rsiMicro < 40 ? 'Oversold (Dip)' : rsiMicro > 60 ? 'Overbought (Peak)' : 'Neutral', rsiMicro < 40 ? true : rsiMicro > 60 ? false : null);
             
-            let pEl = document.getElementById('probScore'); pEl.innerText = `${patternProb.toFixed(1)}%`;
-            pEl.className = 'metric-val ' + (patternProb > 60 ? 'text-buy' : patternProb < 40 ? 'text-sell' : '');
+            document.getElementById('probScore').innerText = `${patternProb.toFixed(1)}%`;
+            document.getElementById('probScore').className = 'metric-val ' + (patternProb > 60 ? 'text-buy' : patternProb < 40 ? 'text-sell' : '');
 
-            // SCORING
-            let score = 0;
-            if (rsi < 45) score += 1; else if (rsi > 65) score -= 1;
-            if (patternProb > 60) score += 1.5; else if (patternProb < 40) score -= 1.5;
-            if (btcChange < -2.0) score -= 2; else if (btcChange > 2.0) score += 1;
-            if (fearAndGreed < 30) score += 1.5; else if (fearAndGreed > 70) score -= 1.5;
-
-            let vBox = document.getElementById('mainVerdict');
-            let vTitle = document.getElementById('verdictTitle');
-            let vDesc = document.getElementById('verdictDesc');
-            let bpBox = document.getElementById('blueprintBox');
+            // MULTI-TIMEFRAME MATRIX EVALUATION
+            let macroScore = 0; let microScore = 0;
+            if (rsiMacro < 45) macroScore++; else if (rsiMacro > 65) macroScore--;
+            if (patternProb > 60) macroScore++; else if (patternProb < 40) macroScore--;
+            if (btcChange > 1.0) macroScore++; else if (btcChange < -1.0) macroScore--;
             
-            vBox.className = 'verdict-box';
+            if (rsiMicro < 40) microScore++; else if (rsiMicro > 60) microScore--;
 
-            if (score >= 2) {
-                vTitle.innerText = "EXECUTE BUY";
-                vDesc.innerText = "Math, market filter, and sentiment align. High probability of upward expansion.";
-                vBox.classList.add('sig-buy');
+            let mtmMacroEl = document.getElementById('mtmMacro'); let mtmMicroEl = document.getElementById('mtmMicro');
+            mtmMacroEl.innerText = macroScore > 0 ? "BULLISH" : macroScore < 0 ? "BEARISH" : "NEUTRAL";
+            mtmMacroEl.className = 'mtm-val ' + (macroScore > 0 ? 'text-buy' : macroScore < 0 ? 'text-sell' : 'text-dim');
+            mtmMicroEl.innerText = microScore > 0 ? "BULLISH" : microScore < 0 ? "BEARISH" : "NEUTRAL";
+            mtmMicroEl.className = 'mtm-val ' + (microScore > 0 ? 'text-buy' : microScore < 0 ? 'text-sell' : 'text-dim');
+
+            let vBox = document.getElementById('mainVerdict'); let vTitle = document.getElementById('verdictTitle'); let vDesc = document.getElementById('verdictDesc');
+            let bpBox = document.getElementById('blueprintBox'); vBox.className = 'verdict-box';
+
+            // FINAL SYNC
+            if (macroScore > 0 && microScore >= 0) {
+                vTitle.innerText = "EXECUTE BUY"; vDesc.innerText = "Matrix Alignment: Macro trend is bullish and hourly micro-momentum shows an entry window.";
+                vBox.classList.add('sig-buy'); bpBox.style.display = "flex"; bpBox.style.borderColor = "var(--action-buy)";
                 
-                bpBox.style.display = "flex";
-                bpBox.style.borderColor = "var(--action-buy)";
-                document.getElementById('bpEntry').innerText = `$${Math.min(livePrice, bBands.lower * 1.01).toFixed(2)}`;
-                document.getElementById('bpTakeProfit').innerText = `$${zones.resistance.toFixed(2)}`;
-                document.getElementById('bpStopLoss').innerText = `$${(zones.support * 0.98).toFixed(2)}`;
+                // Set Global Trade Params for Ledger
+                currentTradeParams = { entry: Math.min(livePrice, bBands.lower * 1.02), tp: livePrice * 1.15, sl: bBands.lower * 0.95 };
                 
-            } else if (score >= -1) {
-                vTitle.innerText = "HOLD / DCA";
-                vDesc.innerText = "Market is in consolidation. Await trend confirmation before executing large orders.";
-                vBox.classList.add('sig-hold');
-                bpBox.style.display = "none";
+                document.getElementById('bpEntry').innerText = `$${currentTradeParams.entry.toFixed(2)}`;
+                document.getElementById('bpTakeProfit').innerText = `$${currentTradeParams.tp.toFixed(2)}`;
+                document.getElementById('bpStopLoss').innerText = `$${currentTradeParams.sl.toFixed(2)}`;
+            } else if (macroScore >= 0) {
+                vTitle.innerText = "HOLD / WAIT"; vDesc.innerText = "Macro is healthy, but hourly Micro indicates bad short-term entry. Wait for micro dip.";
+                vBox.classList.add('sig-hold'); bpBox.style.display = "none"; currentTradeParams = null;
             } else {
-                vTitle.innerText = "WAIT / SELL";
-                vDesc.innerText = "High risk environment. Negative momentum and greedy sentiment. Protect capital.";
-                vBox.classList.add('sig-wait');
-                
-                bpBox.style.display = "flex";
-                bpBox.style.borderColor = "rgba(255, 23, 68, 0.4)";
-                document.getElementById('bpEntry').innerText = `$${zones.support.toFixed(2)} (Extreme Dip Target)`;
-                document.getElementById('bpTakeProfit').innerText = "N/A";
-                document.getElementById('bpStopLoss').innerText = "N/A";
+                vTitle.innerText = "DO NOT TRADE"; vDesc.innerText = "Macro matrix is bearish. High risk of downside expansion. Protect capital.";
+                vBox.classList.add('sig-wait'); bpBox.style.display = "none"; currentTradeParams = null;
             }
         }
-
-        // --- AUDIO PLAYER LOGIC ---
-        const audio = document.getElementById('platformAudio');
-        const audioBtn = document.getElementById('audioBtn');
-        const audioTrack = document.getElementById('audioTrack');
-        const audioProgress = document.getElementById('audioProgress');
-        const audioTime = document.getElementById('audioTime');
-
-        function formatTime(seconds) {
-            if (isNaN(seconds)) return "00:00";
-            const min = Math.floor(seconds / 60);
-            const sec = Math.floor(seconds % 60);
-            return `${min < 10 ? '0' : ''}${min}:${sec < 10 ? '0' : ''}${sec}`;
-        }
-
-        audioBtn.addEventListener('click', () => {
-            if (audio.paused) {
-                audio.play();
-                audioBtn.innerText = '⏸ PAUSE';
-                audioBtn.classList.add('playing');
-            } else {
-                audio.pause();
-                audioBtn.innerText = '▶ PLAY';
-                audioBtn.classList.remove('playing');
-            }
-        });
-
-        audio.addEventListener('timeupdate', () => {
-            const percent = (audio.currentTime / audio.duration) * 100;
-            audioProgress.style.width = `${percent}%`;
-            audioTime.innerText = `${formatTime(audio.currentTime)} / ${formatTime(audio.duration)}`;
-        });
-
-        audio.addEventListener('loadedmetadata', () => {
-            audioTime.innerText = `00:00 / ${formatTime(audio.duration)}`;
-        });
-
-        audio.addEventListener('ended', () => {
-            audioBtn.innerText = '▶ PLAY';
-            audioBtn.classList.remove('playing');
-            audioProgress.style.width = '0%';
-        });
-
-        audioTrack.addEventListener('click', (e) => {
-            const rect = audioTrack.getBoundingClientRect();
-            const clickX = e.clientX - rect.left;
-            audio.currentTime = (clickX / rect.width) * audio.duration;
-        });
-
-        // --- CLIPBOARD ---
-        function copyAddress() {
-            navigator.clipboard.writeText(document.getElementById('xmrAddress').innerText).then(() => {
-                let btn = document.getElementById('copyBtn'); btn.innerText = "Copied!"; btn.classList.add('copied');
-                setTimeout(() => { btn.innerText = "Copy"; btn.classList.remove('copied'); }, 2500);
-            });
-        }
-
         window.onload = initApp;
     </script>
 </body>
