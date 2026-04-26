@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Marketplace Receipt Generator</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <style>
     /* Base Variables */
     :root {
@@ -13,6 +14,8 @@
         --border-color: #e5e7eb;
         --accent: #3b82f6;
         --accent-hover: #2563eb;
+        --success: #10b981;
+        --success-hover: #059669;
     }
     
     body {
@@ -80,9 +83,15 @@
         box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
     }
     
+    .btn-group {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        margin-top: 20px;
+    }
+
     button {
         width: 100%;
-        background-color: var(--accent);
         color: white;
         border: none;
         padding: 14px;
@@ -91,22 +100,38 @@
         border-radius: 6px;
         cursor: pointer;
         transition: background-color 0.2s;
-        margin-top: 15px;
     }
     
-    button:hover {
+    .btn-print {
+        background-color: var(--accent);
+    }
+    .btn-print:hover {
         background-color: var(--accent-hover);
     }
 
+    .btn-download {
+        background-color: var(--success);
+    }
+    .btn-download:hover {
+        background-color: var(--success-hover);
+    }
+
     /* Receipt Styling (Thermal Printer Look) */
+    .receipt-wrapper {
+        display: flex;
+        justify-content: center;
+        background: #e5e7eb;
+        padding: 20px;
+        border-radius: 8px;
+    }
+
     .receipt {
         font-family: 'Courier New', Courier, monospace;
         width: 100%;
         max-width: 320px;
-        margin: 0 auto;
         padding: 25px;
         border: 1px solid #ddd;
-        background: #fff;
+        background: #fff; /* Critical for clean image download */
         color: #000;
     }
     
@@ -187,6 +212,10 @@
             display: flex;
             justify-content: center;
         }
+        .receipt-wrapper {
+            background: none;
+            padding: 0;
+        }
         .receipt {
             border: none;
             box-shadow: none;
@@ -237,46 +266,52 @@
             <input type="date" id="saleDate" oninput="updateReceipt()">
         </div>
         
-        <button onclick="window.print()">Print / Save as PDF</button>
+        <div class="btn-group">
+            <button onclick="downloadImage()" class="btn-download">📱 Download Image (Mobile)</button>
+            <button onclick="window.print()" class="btn-print">🖨️ Print / Save as PDF (Desktop)</button>
+        </div>
     </div>
 
     <div class="receipt-section">
-        <div class="receipt" id="receipt">
-            <div class="receipt-header">
-                <h3>Proof of Purchase</h3>
-                <p>Marketplace Sale</p>
-                <p id="r-date">Date: mm/dd/yyyy</p>
-            </div>
-            
-            <div class="receipt-body">
-                <div class="receipt-row">
-                    <span>Seller:</span>
-                    <span id="r-seller" style="text-align: right; max-width: 60%; word-wrap: break-word;">N/A</span>
-                </div>
-                <div class="receipt-row">
-                    <span>Buyer:</span>
-                    <span id="r-buyer" style="text-align: right; max-width: 60%; word-wrap: break-word;">N/A</span>
+        <h2>Preview</h2>
+        <div class="receipt-wrapper">
+            <div class="receipt" id="receipt">
+                <div class="receipt-header">
+                    <h3>Proof of Purchase</h3>
+                    <p>Marketplace Sale</p>
+                    <p id="r-date">Date: mm/dd/yyyy</p>
                 </div>
                 
-                <div class="item-block">
-                    <span>Item:</span>
-                    <span class="item-desc" id="r-item">No item description</span>
+                <div class="receipt-body">
+                    <div class="receipt-row">
+                        <span>Seller:</span>
+                        <span id="r-seller" style="text-align: right; max-width: 60%; word-wrap: break-word;">N/A</span>
+                    </div>
+                    <div class="receipt-row">
+                        <span>Buyer:</span>
+                        <span id="r-buyer" style="text-align: right; max-width: 60%; word-wrap: break-word;">N/A</span>
+                    </div>
+                    
+                    <div class="item-block">
+                        <span>Item:</span>
+                        <span class="item-desc" id="r-item">No item description</span>
+                    </div>
+                    
+                    <div class="receipt-row receipt-total">
+                        <span>TOTAL:</span>
+                        <span id="r-price">$0.00</span>
+                    </div>
+                    
+                    <div class="receipt-row" style="margin-top: 10px;">
+                        <span>Payment via:</span>
+                        <span id="r-method">Cash</span>
+                    </div>
                 </div>
-                
-                <div class="receipt-row receipt-total">
-                    <span>TOTAL:</span>
-                    <span id="r-price">$0.00</span>
-                </div>
-                
-                <div class="receipt-row" style="margin-top: 10px;">
-                    <span>Payment via:</span>
-                    <span id="r-method">Cash</span>
-                </div>
-            </div>
 
-            <div class="receipt-footer">
-                <p>Item sold "as is".<br>All sales are final.</p>
-                <p style="margin-top: 15px; font-weight: bold;">THANK YOU!</p>
+                <div class="receipt-footer">
+                    <p>Item sold "as is".<br>All sales are final.</p>
+                    <p style="margin-top: 15px; font-weight: bold;">THANK YOU!</p>
+                </div>
             </div>
         </div>
     </div>
@@ -319,6 +354,43 @@
         document.getElementById('r-price').innerText = '$' + price.toFixed(2);
         document.getElementById('r-method').innerText = method;
         document.getElementById('r-date').innerText = 'Date: ' + dateStr;
+    }
+
+    // Function to download the receipt as an image for mobile devices
+    function downloadImage() {
+        const receiptElement = document.getElementById('receipt');
+        const originalButtonText = document.querySelector('.btn-download').innerText;
+        
+        // Temporarily change button text to show it's working
+        document.querySelector('.btn-download').innerText = "Generating...";
+
+        // Use html2canvas to take a snapshot of the receipt div
+        html2canvas(receiptElement, {
+            scale: 3, // Higher scale for crisp text on mobile retina screens
+            backgroundColor: "#ffffff", // Ensure background is white
+            useCORS: true 
+        }).then(canvas => {
+            // Convert canvas to image URL
+            const imageURL = canvas.toDataURL("image/png");
+            
+            // Create a temporary link element to trigger the download
+            const link = document.createElement('a');
+            
+            // Format filename with current date
+            const dateStr = document.getElementById('saleDate').value;
+            link.download = `Marketplace_Receipt_${dateStr}.png`;
+            link.href = imageURL;
+            
+            // Click the link to download
+            link.click();
+            
+            // Restore button text
+            document.querySelector('.btn-download').innerText = originalButtonText;
+        }).catch(err => {
+            console.error("Error generating image: ", err);
+            alert("Something went wrong generating the image. Please try again.");
+            document.querySelector('.btn-download').innerText = originalButtonText;
+        });
     }
 </script>
 
