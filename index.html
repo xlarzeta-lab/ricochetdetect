@@ -27,40 +27,72 @@
             background-color: var(--bg-color);
             color: var(--text-main);
             line-height: 1.6;
+            overflow-x: hidden;
         }
+
+        /* =========================================
+           MOBILE-FIRST BASE STYLES 
+           ========================================= */
 
         /* Navigation */
         nav {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 20px 5%;
-            background-color: rgba(10, 10, 10, 0.95);
+            padding: 15px 5%;
+            background-color: rgba(10, 10, 10, 0.98);
             position: fixed;
             width: 100%;
             top: 0;
             z-index: 1000;
             border-bottom: 1px solid #333;
+            flex-wrap: wrap;
         }
 
         .logo {
-            font-size: 1.8rem;
+            font-size: 1.5rem;
             font-weight: 900;
             letter-spacing: 2px;
             color: var(--text-main);
             text-decoration: none;
             text-transform: uppercase;
             text-shadow: 0 0 10px rgba(157, 0, 255, 0.5);
+            z-index: 1001;
         }
 
         .logo span {
             color: var(--accent-purple);
         }
 
+        /* Mobile Hamburger Menu Button */
+        .menu-toggle {
+            display: block;
+            background: transparent;
+            border: none;
+            color: var(--text-main);
+            font-size: 1.8rem;
+            cursor: pointer;
+            order: 3;
+        }
+
+        .nav-links {
+            display: none;
+            flex-direction: column;
+            width: 100%;
+            text-align: center;
+            padding: 20px 0;
+            order: 4;
+        }
+
+        .nav-links.active {
+            display: flex;
+        }
+
         .nav-links a {
             color: var(--text-main);
             text-decoration: none;
-            margin-left: 30px;
+            margin: 15px 0;
+            font-size: 1.2rem;
             font-weight: 500;
             transition: color 0.3s;
         }
@@ -73,10 +105,15 @@
             background: transparent;
             color: var(--text-main);
             border: 1px solid var(--accent-purple);
-            padding: 8px 16px;
+            padding: 6px 12px;
             border-radius: 4px;
+            font-size: 0.9rem;
             cursor: pointer;
             transition: all 0.3s;
+            order: 2;
+            margin-left: auto;
+            margin-right: 15px;
+            z-index: 1001;
         }
 
         .cart-btn:hover {
@@ -86,6 +123,7 @@
         /* Hero Section */
         .hero {
             height: 100vh;
+            min-height: 500px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -96,17 +134,17 @@
         }
 
         .hero-content h1 {
-            font-size: 4rem;
+            font-size: 2.5rem;
             text-transform: uppercase;
             font-weight: 900;
             margin-bottom: 10px;
-            letter-spacing: 3px;
+            letter-spacing: 2px;
         }
 
         .hero-content p {
-            font-size: 1.2rem;
+            font-size: 1rem;
             color: var(--text-muted);
-            margin-bottom: 30px;
+            margin-bottom: 25px;
             max-width: 600px;
             margin-left: auto;
             margin-right: auto;
@@ -116,12 +154,13 @@
             display: inline-block;
             background-color: var(--accent-purple);
             color: #fff;
-            padding: 15px 40px;
+            padding: 12px 30px;
             text-decoration: none;
             font-weight: bold;
             text-transform: uppercase;
             border-radius: 4px;
             letter-spacing: 1px;
+            font-size: 0.9rem;
             transition: background-color 0.3s, transform 0.2s;
         }
 
@@ -132,21 +171,21 @@
 
         /* Shop Section */
         .shop-section {
-            padding: 80px 5%;
+            padding: 50px 5%;
         }
 
         .section-title {
             text-align: center;
-            font-size: 2.5rem;
-            margin-bottom: 50px;
+            font-size: 2rem;
+            margin-bottom: 30px;
             text-transform: uppercase;
             letter-spacing: 2px;
         }
 
         .product-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 40px;
+            grid-template-columns: 1fr; /* 1 column for mobile */
+            gap: 30px;
         }
 
         .product-card {
@@ -159,14 +198,9 @@
             flex-direction: column;
         }
 
-        .product-card:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 10px 20px rgba(157, 0, 255, 0.1);
-        }
-
         .product-image {
             width: 100%;
-            height: 400px;
+            height: 300px; /* Shorter for mobile */
             object-fit: cover;
             background-color: #222;
         }
@@ -180,7 +214,7 @@
         }
 
         .product-title {
-            font-size: 1.2rem;
+            font-size: 1.1rem;
             margin-bottom: 10px;
             font-weight: 600;
         }
@@ -202,6 +236,7 @@
             cursor: pointer;
             text-transform: uppercase;
             font-weight: bold;
+            font-size: 0.9rem;
             transition: all 0.3s;
             margin-top: auto;
         }
@@ -233,10 +268,6 @@
             font-size: 0.8rem;
             letter-spacing: 1px;
         }
-        
-        summary:hover {
-            color: var(--accent-purple);
-        }
 
         details ul {
             margin-top: 10px;
@@ -258,13 +289,87 @@
 
         .footer-content p {
             color: var(--text-muted);
-            font-size: 0.9rem;
+            font-size: 0.85rem;
         }
 
-        /* Responsive */
-        @media (max-width: 768px) {
-            .nav-links { display: none; }
-            .hero-content h1 { font-size: 2.5rem; }
+        /* =========================================
+           TABLET & DESKTOP STYLES (min-width: 768px) 
+           ========================================= */
+        @media (min-width: 768px) {
+            
+            /* Nav Desktop Layout */
+            nav {
+                padding: 20px 5%;
+                flex-wrap: nowrap;
+            }
+
+            .logo {
+                font-size: 1.8rem;
+            }
+
+            .menu-toggle {
+                display: none; /* Hide hamburger icon */
+            }
+
+            .cart-btn {
+                order: 4; /* Move cart to the far right */
+                margin-left: 30px;
+                margin-right: 0;
+                padding: 8px 16px;
+                font-size: 1rem;
+            }
+
+            .nav-links {
+                display: flex;
+                flex-direction: row;
+                width: auto;
+                padding: 0;
+                order: 3;
+            }
+
+            .nav-links a {
+                margin: 0 0 0 30px;
+                font-size: 1rem;
+            }
+
+            /* Hero Desktop Layout */
+            .hero-content h1 {
+                font-size: 4rem;
+                letter-spacing: 3px;
+            }
+
+            .hero-content p {
+                font-size: 1.2rem;
+                margin-bottom: 30px;
+            }
+
+            .btn-primary {
+                padding: 15px 40px;
+                font-size: 1rem;
+            }
+
+            /* Shop Desktop Layout */
+            .shop-section {
+                padding: 80px 5%;
+            }
+
+            .section-title {
+                font-size: 2.5rem;
+                margin-bottom: 50px;
+            }
+
+            .product-grid {
+                grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+                gap: 40px;
+            }
+
+            .product-image {
+                height: 400px; /* Taller images on desktop */
+            }
+            
+            .product-title {
+                font-size: 1.2rem;
+            }
         }
     </style>
 </head>
@@ -272,12 +377,16 @@
 
     <nav>
         <a href="#" class="logo">KOV<span>ARA</span></a>
-        <div class="nav-links">
-            <a href="#home">Home</a>
-            <a href="#shop">Shop</a>
-            <a href="#about">About</a>
-        </div>
+        
         <button class="cart-btn" onclick="viewCart()">Cart (<span id="cart-count">0</span>)</button>
+        
+        <button class="menu-toggle" onclick="toggleMenu()">☰</button>
+        
+        <div class="nav-links" id="nav-links">
+            <a href="#home" onclick="closeMenu()">Home</a>
+            <a href="#shop" onclick="closeMenu()">Shop</a>
+            <a href="#about" onclick="closeMenu()">About</a>
+        </div>
     </nav>
 
     <header class="hero" id="home">
@@ -332,7 +441,7 @@
             </div>
 
             <div class="product-card">
-                <img src="chain.PNG" alt="Cuban Chain" class="product-image">
+                <img src="Capture2.PNG" alt="Cuban Chain" class="product-image">
                 <div class="product-info">
                     <h3 class="product-title">Standard Cuban Link Chain</h3>
                     <p class="product-price">$1100.00</p>
@@ -375,14 +484,22 @@
         let cartTotalItems = 0;
         let cartTotalPrice = 0;
 
+        // Mobile Menu Functions
+        function toggleMenu() {
+            document.getElementById('nav-links').classList.toggle('active');
+        }
+
+        function closeMenu() {
+            document.getElementById('nav-links').classList.remove('active');
+        }
+
+        // Cart Functions
         function addToCart(itemName, price) {
             cartTotalItems++;
             cartTotalPrice += price;
             
-            // Update the cart number in the navigation bar
             document.getElementById('cart-count').innerText = cartTotalItems;
             
-            // Optional: Give the user visual feedback
             alert(`Added ${itemName} to your cart!`);
         }
 
