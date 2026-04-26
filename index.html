@@ -292,6 +292,41 @@
             font-size: 0.85rem;
         }
 
+        /* Payment Methods Styling */
+        .payment-methods {
+            margin-top: 25px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .cash-app-badge {
+            background-color: #00D632; /* Cash App Green */
+            color: white;
+            font-weight: bold;
+            padding: 6px 14px;
+            border-radius: 20px;
+            display: inline-flex;
+            align-items: center;
+            font-size: 0.95rem;
+            letter-spacing: 0.5px;
+            box-shadow: 0 4px 6px rgba(0, 214, 50, 0.2);
+            transition: transform 0.2s;
+        }
+
+        .cash-app-badge:hover {
+            transform: translateY(-2px);
+        }
+
+        .cash-app-badge svg {
+            width: 18px;
+            height: 18px;
+            margin-right: 6px;
+            fill: white;
+        }
+
         /* =========================================
            TABLET & DESKTOP STYLES (min-width: 768px) 
            ========================================= */
@@ -476,7 +511,18 @@
         <div class="footer-content">
             <a href="#" class="logo" style="font-size: 1.2rem; display: block; margin-bottom: 10px;">KOV<span>ARA</span></a>
             <p>Designed in Atlanta, GA. Worldwide Shipping.</p>
-            <p style="margin-top: 20px;">&copy; 2026 KOVARA Worldwide. All rights reserved.</p>
+            
+            <div class="payment-methods">
+                <span style="color: var(--text-muted); font-size: 0.95rem;">Secure Checkout via:</span>
+                <div class="cash-app-badge" title="Pay with Cash App">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M11.8 10.9c-2.27-.59-3-1.2-3-2.15 0-1.09 1.01-1.85 2.7-1.85 1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-1.94.42-3.5 1.68-3.5 3.61 0 2.31 1.91 3.46 4.7 4.13 2.5.6 3 1.48 3 2.41 0 .69-.49 1.79-2.7 1.79-2.06 0-2.87-.92-2.98-2.1h-2.2c.12 2.19 1.76 3.42 3.68 3.83V21h3v-2.15c1.95-.37 3.5-1.5 3.5-3.55 0-2.84-2.43-3.81-4.7-4.4z"/>
+                    </svg>
+                    Cash App
+                </div>
+            </div>
+
+            <p style="margin-top: 30px; font-size: 0.8rem;">&copy; 2026 KOVARA Worldwide. All rights reserved.</p>
         </div>
     </footer>
 
