@@ -10,23 +10,28 @@
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;700;900&display=swap" rel="stylesheet">
 
     <style>
-        /* CSS Variables for Brand Colors */
+        /* CSS Variables */
         :root {
-            --bg-color: #050505; /* Deeper black */
-            --surface-color: #121212;
+            --bg-color: #030303; 
+            --surface-color: #0d0d0d;
             --text-main: #ffffff;
             --text-muted: #888888;
             --accent-purple: #9d00ff;
-            --accent-hover: #b84dff;
+            --accent-glow: rgba(157, 0, 255, 0.6);
             --success: #00D632;
+            --monero-orange: #FF6600;
         }
 
-        /* Base Reset */
+        /* Base Reset & Pure CSS Smooth Scrolling */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Montserrat', sans-serif; /* Upgraded Font */
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        html {
+            scroll-behavior: smooth;
         }
 
         body {
@@ -38,109 +43,143 @@
         }
 
         /* =========================================
-           MOBILE-FIRST BASE STYLES 
+           PURE CSS NAVIGATION (NO JS) 
            ========================================= */
-
-        /* Glassmorphism Navigation */
         nav {
             display: flex;
             justify-content: space-between;
             align-items: center;
             padding: 15px 5%;
-            background-color: rgba(5, 5, 5, 0.75);
-            backdrop-filter: blur(12px); /* Frosted glass effect */
-            -webkit-backdrop-filter: blur(12px);
+            background-color: rgba(3, 3, 3, 0.85);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
             position: fixed;
             width: 100%;
             top: 0;
             z-index: 1000;
             border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-            flex-wrap: wrap;
-            transition: all 0.3s ease;
         }
 
         .logo {
-            font-size: 1.5rem;
+            font-size: 1.8rem;
             font-weight: 900;
-            letter-spacing: 3px;
+            letter-spacing: 4px;
             color: var(--text-main);
             text-decoration: none;
             text-transform: uppercase;
-            text-shadow: 0 0 15px rgba(157, 0, 255, 0.4);
-            z-index: 1001;
+            text-shadow: 0 0 20px var(--accent-glow);
+            z-index: 1002;
+            position: relative;
         }
 
         .logo span {
             color: var(--accent-purple);
         }
 
-        .menu-toggle {
-            display: block;
-            background: transparent;
-            border: none;
-            color: var(--text-main);
-            font-size: 1.8rem;
+        /* CSS Checkbox Hack for Mobile Menu */
+        .menu-btn {
+            display: none;
+        }
+
+        .menu-icon {
             cursor: pointer;
-            order: 3;
-            transition: color 0.3s;
+            padding: 28px 20px;
+            position: relative;
+            user-select: none;
+            z-index: 1002;
+            display: block;
         }
-        
-        .menu-toggle:hover {
-            color: var(--accent-purple);
+
+        .navicon {
+            background: var(--text-main);
+            display: block;
+            height: 2px;
+            position: relative;
+            transition: background .2s ease-out;
+            width: 24px;
         }
+
+        .navicon:before, .navicon:after {
+            background: var(--text-main);
+            content: '';
+            display: block;
+            height: 100%;
+            position: absolute;
+            transition: all .2s ease-out;
+            width: 100%;
+        }
+
+        .navicon:before { top: 8px; }
+        .navicon:after { top: -8px; }
+
+        /* Menu Icon Animation */
+        .menu-btn:checked ~ .menu-icon .navicon { background: transparent; }
+        .menu-btn:checked ~ .menu-icon .navicon:before { transform: rotate(-45deg); top: 0; }
+        .menu-btn:checked ~ .menu-icon .navicon:after { transform: rotate(45deg); top: 0; }
 
         .nav-links {
-            display: none;
-            flex-direction: column;
+            position: fixed;
+            top: 0;
+            left: 0;
             width: 100%;
-            text-align: center;
-            padding: 20px 0;
-            order: 4;
+            height: 100vh;
+            background: rgba(5, 5, 5, 0.98);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.4s ease-in-out;
+            z-index: 1001;
+            backdrop-filter: blur(10px);
         }
 
-        .nav-links.active {
-            display: flex;
+        .menu-btn:checked ~ .nav-links {
+            opacity: 1;
+            visibility: visible;
         }
 
         .nav-links a {
-            color: var(--text-muted);
+            color: var(--text-main);
             text-decoration: none;
-            margin: 15px 0;
-            font-size: 1.1rem;
-            font-weight: 500;
-            transition: color 0.3s;
+            margin: 20px 0;
+            font-size: 1.5rem;
+            font-weight: 700;
             text-transform: uppercase;
-            letter-spacing: 1px;
+            letter-spacing: 2px;
+            transition: color 0.3s, text-shadow 0.3s;
         }
 
         .nav-links a:hover {
-            color: var(--text-main);
+            color: var(--accent-purple);
+            text-shadow: 0 0 15px var(--accent-glow);
         }
 
+        /* Cart Button (Pure CSS target) */
         .cart-btn {
             background: transparent;
             color: var(--text-main);
             border: 1px solid var(--accent-purple);
-            padding: 8px 16px;
-            border-radius: 30px; /* Pill shape */
+            padding: 8px 18px;
+            border-radius: 30px;
             font-size: 0.85rem;
             font-weight: 700;
-            cursor: pointer;
+            text-decoration: none;
             transition: all 0.3s ease;
-            order: 2;
-            margin-left: auto;
-            margin-right: 15px;
-            z-index: 1001;
             text-transform: uppercase;
             letter-spacing: 1px;
+            z-index: 1002;
         }
 
         .cart-btn:hover {
             background: var(--accent-purple);
-            box-shadow: 0 0 15px rgba(157, 0, 255, 0.4);
+            box-shadow: 0 0 20px var(--accent-glow);
         }
 
-        /* Hero Section */
+        /* =========================================
+           HERO SECTION 
+           ========================================= */
         .hero {
             height: 100vh;
             min-height: 600px;
@@ -148,149 +187,197 @@
             align-items: center;
             justify-content: center;
             text-align: center;
-            background: linear-gradient(to bottom, rgba(0,0,0,0.4), rgba(5,5,5,1)), url('https://images.unsplash.com/photo-1574686001095-21d1d9ec34df?q=80&w=2000&auto=format&fit=crop') center/cover fixed;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.6), rgba(3,3,3,1)), url('https://images.unsplash.com/photo-1574686001095-21d1d9ec34df?q=80&w=2000&auto=format&fit=crop') center/cover fixed;
             padding: 0 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Cyberpunk Grid Overlay */
+        .hero::after {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-image: linear-gradient(rgba(157, 0, 255, 0.05) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(157, 0, 255, 0.05) 1px, transparent 1px);
+            background-size: 40px 40px;
+            pointer-events: none;
         }
 
         .hero-content {
-            animation: fadeInUp 1s ease-out;
+            animation: glowUp 1.5s ease-out;
+            position: relative;
+            z-index: 2;
         }
 
-        @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(30px); }
-            to { opacity: 1; transform: translateY(0); }
+        @keyframes glowUp {
+            0% { opacity: 0; filter: blur(10px); transform: scale(0.95); }
+            100% { opacity: 1; filter: blur(0); transform: scale(1); }
         }
 
         .hero-content h1 {
-            font-size: 3rem;
+            font-size: 3.5rem;
             text-transform: uppercase;
             font-weight: 900;
             margin-bottom: 15px;
-            letter-spacing: 4px;
-            text-shadow: 2px 2px 10px rgba(0,0,0,0.8);
+            letter-spacing: 6px;
+            text-shadow: 0px 0px 30px rgba(157, 0, 255, 0.8);
         }
 
         .hero-content p {
-            font-size: 1rem;
-            color: #cccccc;
-            margin-bottom: 35px;
+            font-size: 1.1rem;
+            color: #d1d1d1;
+            margin-bottom: 40px;
             max-width: 600px;
             margin-left: auto;
             margin-right: auto;
             font-weight: 400;
+            letter-spacing: 1px;
         }
 
         .btn-primary {
             display: inline-block;
             background-color: var(--accent-purple);
             color: #fff;
-            padding: 14px 35px;
+            padding: 16px 45px;
             text-decoration: none;
-            font-weight: 700;
+            font-weight: 900;
             text-transform: uppercase;
-            border-radius: 30px;
-            letter-spacing: 2px;
-            font-size: 0.9rem;
+            border-radius: 4px; /* Harder edges for streetwear feel */
+            letter-spacing: 3px;
+            font-size: 0.95rem;
             transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(157, 0, 255, 0.3);
+            box-shadow: 0 0 15px var(--accent-glow);
+            border: 1px solid var(--accent-purple);
         }
 
         .btn-primary:hover {
-            background-color: var(--accent-hover);
-            transform: translateY(-3px);
-            box-shadow: 0 6px 20px rgba(157, 0, 255, 0.5);
+            background-color: transparent;
+            color: var(--accent-purple);
+            box-shadow: inset 0 0 20px var(--accent-glow), 0 0 30px var(--accent-glow);
         }
 
-        /* Shop Section */
+        /* =========================================
+           SHOP SECTION 
+           ========================================= */
         .shop-section {
-            padding: 80px 5%;
+            padding: 100px 5%;
+            position: relative;
         }
 
         .section-title {
             text-align: center;
-            font-size: 2.2rem;
-            margin-bottom: 40px;
+            font-size: 2.5rem;
+            margin-bottom: 60px;
             text-transform: uppercase;
-            letter-spacing: 3px;
+            letter-spacing: 4px;
             font-weight: 900;
+            text-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
         }
 
         .product-grid {
             display: grid;
             grid-template-columns: 1fr;
-            gap: 40px;
+            gap: 50px;
         }
 
         .product-card {
             background-color: var(--surface-color);
-            border-radius: 12px;
+            border-radius: 4px;
             overflow: hidden;
-            transition: transform 0.4s ease, box-shadow 0.4s ease;
-            border: 1px solid rgba(255,255,255,0.05);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border: 1px solid rgba(255,255,255,0.03);
             display: flex;
             flex-direction: column;
+            position: relative;
+        }
+
+        .product-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            box-shadow: inset 0 0 0 1px transparent;
+            transition: all 0.4s ease;
+            z-index: 10;
+            pointer-events: none;
         }
 
         .product-card:hover {
             transform: translateY(-10px);
-            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.5), 0 0 20px rgba(157, 0, 255, 0.15);
-            border-color: rgba(157, 0, 255, 0.3);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.8), 0 0 30px rgba(157, 0, 255, 0.1);
         }
 
-        /* Image Hover Animation */
+        .product-card:hover::before {
+            box-shadow: inset 0 0 0 1px var(--accent-purple);
+        }
+
         .img-wrapper {
             width: 100%;
-            height: 350px;
+            height: 400px;
             overflow: hidden;
-            background-color: #1a1a1a;
+            background-color: #000;
+            position: relative;
         }
 
         .product-image {
             width: 100%;
             height: 100%;
             object-fit: cover;
-            transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            transition: transform 0.8s ease, filter 0.4s ease;
+            filter: contrast(1.1) saturate(1.1);
         }
 
         .product-card:hover .product-image {
-            transform: scale(1.08); /* Slow cinematic zoom */
+            transform: scale(1.05);
+            filter: contrast(1.2) saturate(1.2) brightness(1.1);
         }
 
         .product-info {
-            padding: 25px;
+            padding: 30px;
             display: flex;
             flex-direction: column;
             flex-grow: 1;
+            background: linear-gradient(to top, rgba(0,0,0,1), var(--surface-color));
         }
 
         .product-title {
-            font-size: 1.1rem;
-            margin-bottom: 8px;
-            font-weight: 700;
-            letter-spacing: 0.5px;
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+            font-weight: 800;
+            letter-spacing: 1px;
+            text-transform: uppercase;
         }
 
         .product-price {
             color: var(--accent-purple);
             font-weight: 900;
-            font-size: 1.2rem;
-            margin-bottom: 20px;
+            font-size: 1.4rem;
+            margin-bottom: 25px;
+            text-shadow: 0 0 10px var(--accent-glow);
+        }
+
+        /* Checkbox hack for "Added to Cart" state */
+        .cart-logic {
+            display: none;
         }
 
         .add-to-cart {
+            display: block;
+            text-align: center;
             width: 100%;
-            padding: 14px;
+            padding: 15px;
             background: transparent;
             color: var(--text-main);
             border: 1px solid rgba(255,255,255,0.2);
-            border-radius: 6px;
             cursor: pointer;
             text-transform: uppercase;
-            font-weight: 700;
-            font-size: 0.85rem;
-            letter-spacing: 1px;
+            font-weight: 800;
+            font-size: 0.9rem;
+            letter-spacing: 2px;
             transition: all 0.3s ease;
             margin-top: auto;
+            position: relative;
+            overflow: hidden;
         }
 
         .add-to-cart:hover {
@@ -299,233 +386,185 @@
             border-color: var(--text-main);
         }
 
-        /* Upgraded Accordion Details */
-        details {
-            margin-top: 20px;
-            text-align: left;
-            background: rgba(255,255,255,0.03);
-            border-radius: 6px;
-            border: 1px solid rgba(255,255,255,0.05);
-            font-size: 0.85rem;
-            color: var(--text-muted);
-            transition: background 0.3s;
+        .cart-logic:checked + .add-to-cart {
+            background: var(--accent-purple);
+            color: white;
+            border-color: var(--accent-purple);
+            box-shadow: 0 0 15px var(--accent-glow);
         }
         
-        details:hover {
-            background: rgba(255,255,255,0.05);
+        .cart-logic:checked + .add-to-cart::after {
+            content: "ADDED ✓";
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--accent-purple);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        details {
+            margin-top: 25px;
+            text-align: left;
+            background: transparent;
+            border-top: 1px solid rgba(255,255,255,0.05);
+            font-size: 0.85rem;
+            color: var(--text-muted);
         }
 
         summary {
             cursor: pointer;
-            font-weight: 600;
-            color: var(--text-main);
+            font-weight: 700;
+            color: #ccc;
             outline: none;
             text-transform: uppercase;
-            font-size: 0.75rem;
-            letter-spacing: 1px;
-            padding: 12px;
-            list-style: none; /* Hide default arrow */
+            font-size: 0.8rem;
+            letter-spacing: 2px;
+            padding: 15px 0;
+            list-style: none; 
             display: flex;
             justify-content: space-between;
             align-items: center;
+            transition: color 0.3s;
         }
 
-        summary::-webkit-details-marker {
-            display: none;
-        }
-
-        summary::after {
-            content: '+';
-            font-size: 1.2rem;
+        summary:hover {
             color: var(--accent-purple);
-            transition: transform 0.3s;
         }
 
-        details[open] summary::after {
-            content: '-';
-            transform: rotate(180deg);
-        }
+        summary::-webkit-details-marker { display: none; }
+        summary::after { content: '+'; font-size: 1.4rem; transition: transform 0.3s; }
+        details[open] summary::after { content: '×'; transform: rotate(90deg); }
 
-        details ul {
-            padding: 0 15px 15px 30px;
-            line-height: 1.8;
-        }
+        details ul { padding: 0 0 15px 15px; line-height: 2; }
+        details li { margin-bottom: 8px; }
+        details strong { color: #fff; letter-spacing: 0.5px; }
 
-        details li {
-            margin-bottom: 6px;
-        }
-        
-        details strong {
-            color: #ddd;
-        }
-
-        /* Footer */
+        /* =========================================
+           FOOTER & PAYMENT INTEGRATION
+           ========================================= */
         footer {
-            background-color: #030303;
-            padding: 60px 5% 40px;
+            background-color: #010101;
+            padding: 80px 5% 40px;
             text-align: center;
-            border-top: 1px solid rgba(255,255,255,0.05);
-            margin-top: 50px;
+            border-top: 1px solid rgba(157, 0, 255, 0.1);
         }
 
-        /* Payment Methods Styling */
         .payment-methods {
-            margin-top: 30px;
+            margin-top: 40px;
             display: flex;
             justify-content: center;
             align-items: center;
-            gap: 15px;
+            gap: 20px;
             flex-wrap: wrap;
         }
 
-        .cash-app-badge {
-            background-color: var(--success);
-            color: white;
+        .secure-text {
+            width: 100%;
+            color: #555;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            margin-bottom: 10px;
             font-weight: 700;
-            padding: 8px 18px;
-            border-radius: 30px;
+        }
+
+        .badge {
+            color: white;
+            font-weight: 800;
+            padding: 10px 22px;
+            border-radius: 4px;
             display: inline-flex;
             align-items: center;
             font-size: 0.9rem;
-            letter-spacing: 0.5px;
-            box-shadow: 0 4px 15px rgba(0, 214, 50, 0.2);
-            transition: transform 0.2s, box-shadow 0.2s;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
         }
 
+        .cash-app-badge {
+            background-color: rgba(0, 214, 50, 0.1);
+            border: 1px solid var(--success);
+            color: var(--success);
+        }
         .cash-app-badge:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(0, 214, 50, 0.4);
+            background-color: var(--success);
+            color: #000;
+            box-shadow: 0 0 20px rgba(0, 214, 50, 0.4);
         }
 
-        .cash-app-badge svg {
-            width: 18px;
-            height: 18px;
-            margin-right: 6px;
-            fill: white;
+        .monero-badge {
+            background-color: rgba(255, 102, 0, 0.1);
+            border: 1px solid var(--monero-orange);
+            color: var(--monero-orange);
         }
-
-        /* Custom Toast Notification System */
-        #toast-container {
-            position: fixed;
-            top: 80px;
-            right: 20px;
-            z-index: 9999;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .toast {
-            background: rgba(20, 20, 20, 0.95);
-            backdrop-filter: blur(10px);
-            border-left: 4px solid var(--accent-purple);
+        .monero-badge:hover {
+            background-color: var(--monero-orange);
             color: #fff;
-            padding: 15px 20px;
-            border-radius: 4px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            font-size: 0.9rem;
-            font-weight: 500;
-            transform: translateX(120%);
-            animation: slideIn 0.3s forwards, fadeOut 0.3s forwards 2.7s;
-            display: flex;
-            align-items: center;
-            gap: 10px;
+            box-shadow: 0 0 20px rgba(255, 102, 0, 0.4);
         }
 
-        @keyframes slideIn {
-            to { transform: translateX(0); }
-        }
-        @keyframes fadeOut {
-            to { opacity: 0; transform: translateY(-10px); }
+        .badge svg {
+            width: 20px;
+            height: 20px;
+            margin-right: 8px;
+            fill: currentColor;
         }
 
         /* =========================================
-           TABLET & DESKTOP STYLES (min-width: 768px) 
+           DESKTOP STYLES
            ========================================= */
         @media (min-width: 768px) {
-            
-            nav {
-                padding: 20px 5%;
-                flex-wrap: nowrap;
-            }
-
-            .logo {
-                font-size: 2rem;
-            }
-
-            .menu-toggle {
-                display: none; 
-            }
-
-            .cart-btn {
-                order: 4; 
-                margin-left: 40px;
-                margin-right: 0;
-                padding: 10px 24px;
-                font-size: 0.9rem;
-            }
+            nav { padding: 20px 5%; }
+            .logo { font-size: 2.2rem; }
+            .menu-icon, .menu-btn { display: none; }
 
             .nav-links {
-                display: flex;
-                flex-direction: row;
+                position: static;
+                height: auto;
                 width: auto;
+                background: transparent;
+                flex-direction: row;
+                opacity: 1;
+                visibility: visible;
                 padding: 0;
-                order: 3;
             }
 
             .nav-links a {
-                margin: 0 0 0 40px;
+                margin: 0 20px;
                 font-size: 0.9rem;
             }
 
-            .hero-content h1 {
-                font-size: 5rem;
-                letter-spacing: 6px;
+            .cart-btn {
+                margin-left: 20px;
+                padding: 10px 28px;
             }
 
-            .hero-content p {
-                font-size: 1.2rem;
-            }
-
-            .shop-section {
-                padding: 100px 5%;
-            }
-
-            .section-title {
-                font-size: 3rem;
-                margin-bottom: 60px;
-            }
+            .hero-content h1 { font-size: 6rem; letter-spacing: 10px; }
+            .hero-content p { font-size: 1.3rem; }
 
             .product-grid {
-                grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-                gap: 50px;
+                grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+                gap: 60px;
             }
 
-            .img-wrapper {
-                height: 420px; 
-            }
-            
-            .product-title {
-                font-size: 1.3rem;
-            }
+            .img-wrapper { height: 480px; }
         }
     </style>
 </head>
 <body>
 
-    <div id="toast-container"></div>
-
-    <nav id="navbar">
+    <nav>
         <a href="#" class="logo">KOV<span>ARA</span></a>
         
-        <button class="cart-btn" onclick="viewCart()">Cart (<span id="cart-count">0</span>)</button>
+        <input class="menu-btn" type="checkbox" id="menu-btn" />
+        <label class="menu-icon" for="menu-btn"><span class="navicon"></span></label>
         
-        <button class="menu-toggle" onclick="toggleMenu()">☰</button>
-        
-        <div class="nav-links" id="nav-links">
-            <a href="#home" onclick="closeMenu()">Home</a>
-            <a href="#shop" onclick="closeMenu()">Shop</a>
-            <a href="#about" onclick="closeMenu()">About</a>
+        <div class="nav-links">
+            <a href="#home">Home</a>
+            <a href="#shop">Shop</a>
+            <a href="#about">About</a>
+            <a href="#shop" class="cart-btn">Cart [0]</a>
         </div>
     </nav>
 
@@ -549,7 +588,9 @@
                 <div class="product-info">
                     <h3 class="product-title">KOVARA Limited Edition "Drip" Tee</h3>
                     <p class="product-price">$25.00</p>
-                    <button class="add-to-cart" onclick="addToCart('Limited Edition Drip Tee', 25)">Add to Cart</button>
+                    
+                    <input type="checkbox" id="cart1" class="cart-logic">
+                    <label for="cart1" class="add-to-cart">Add to Cart</label>
                     
                     <details>
                         <summary>View Details</summary>
@@ -557,7 +598,7 @@
                             <li><strong>Material:</strong> 100% Cotton</li>
                             <li><strong>Color:</strong> Black / Purple</li>
                             <li><strong>Collection:</strong> Limited Edition</li>
-                            <li><strong>Description:</strong> Official KOVARA premium heavyweight graphic t-shirt featuring the signature purple drip logo across the chest.</li>
+                            <li><strong>Details:</strong> Official KOVARA premium heavyweight graphic t-shirt featuring the signature purple drip logo across the chest.</li>
                         </ul>
                     </details>
                 </div>
@@ -571,14 +612,15 @@
                     <h3 class="product-title">"Time Is Money" Printed T-Shirt</h3>
                     <p class="product-price">$11.00</p>
                     
-                    <button class="add-to-cart" onclick="addToCart('Time Is Money Tee', 11)">Add to Cart</button>
+                    <input type="checkbox" id="cart2" class="cart-logic">
+                    <label for="cart2" class="add-to-cart">Add to Cart</label>
 
                     <details>
                         <summary>View Details</summary>
                         <ul>
                             <li><strong>Material:</strong> Polyester</li>
                             <li><strong>Color:</strong> Black</li>
-                            <li><strong>Description:</strong> Exquisite And Comfortable-Time Is Money Men And Women 2026 Summer Short-Sleeved Printed T-Shirt.</li>
+                            <li><strong>Details:</strong> Exquisite And Comfortable-Time Is Money Men And Women 2026 Summer Short-Sleeved Printed T-Shirt.</li>
                         </ul>
                     </details>
                 </div>
@@ -591,7 +633,9 @@
                 <div class="product-info">
                     <h3 class="product-title">Standard Cuban Link Chain</h3>
                     <p class="product-price">$1100.00</p>
-                    <button class="add-to-cart" onclick="addToCart('Standard Cuban Link', 1100)">Add to Cart</button>
+                    
+                    <input type="checkbox" id="cart3" class="cart-logic">
+                    <label for="cart3" class="add-to-cart">Add to Cart</label>
                     
                     <details>
                         <summary>View Details</summary>
@@ -614,84 +658,31 @@
 
     <footer id="about">
         <div class="footer-content">
-            <a href="#" class="logo" style="font-size: 1.5rem; display: block; margin-bottom: 15px;">KOV<span>ARA</span></a>
-            <p style="color: var(--text-muted);">Designed in Atlanta, GA. Worldwide Shipping.</p>
+            <a href="#" class="logo" style="font-size: 2rem; display: block; margin-bottom: 10px;">KOV<span>ARA</span></a>
+            <p style="color: #666; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; font-size: 0.8rem;">Designed in New Rochelle, NY. Worldwide Shipping.</p>
             
             <div class="payment-methods">
-                <span style="color: #666; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px;">Secure Checkout</span>
-                <div class="cash-app-badge" title="Pay with Cash App">
+                <div class="secure-text">Encrypted & Secure Checkout</div>
+                
+                <div class="badge cash-app-badge" title="Pay with Cash App">
                     <svg viewBox="0 0 24 24">
                         <path d="M11.8 10.9c-2.27-.59-3-1.2-3-2.15 0-1.09 1.01-1.85 2.7-1.85 1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-1.94.42-3.5 1.68-3.5 3.61 0 2.31 1.91 3.46 4.7 4.13 2.5.6 3 1.48 3 2.41 0 .69-.49 1.79-2.7 1.79-2.06 0-2.87-.92-2.98-2.1h-2.2c.12 2.19 1.76 3.42 3.68 3.83V21h3v-2.15c1.95-.37 3.5-1.5 3.5-3.55 0-2.84-2.43-3.81-4.7-4.4z"/>
                     </svg>
                     Cash App
                 </div>
+
+                <div class="badge monero-badge" title="Pay with Monero (XMR)">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M12 24C5.373 24 0 18.627 0 12S5.373 0 12 0s12 5.373 12 12-5.373 12-12 12zm0-22.154C6.392 1.846 1.846 6.392 1.846 12S6.392 22.154 12 22.154 22.154 17.608 22.154 12 17.608 1.846 12 1.846z"/>
+                        <path d="M5.42 16.483l3.238-10.428h2.646L12 10.662l.696-4.607h2.645l3.24 10.428h-2.298l-2.046-6.61-1.82 10.41H11.58l-1.82-10.41-2.047 6.61H5.42z"/>
+                    </svg>
+                    XMR
+                </div>
             </div>
 
-            <p style="margin-top: 40px; font-size: 0.8rem; color: #555;">&copy; 2026 KOVARA Worldwide. All rights reserved.</p>
+            <p style="margin-top: 50px; font-size: 0.7rem; color: #444; letter-spacing: 1px; text-transform: uppercase;">&copy; 2026 KOVARA Worldwide.</p>
         </div>
     </footer>
 
-    <script>
-        let cartTotalItems = 0;
-        let cartTotalPrice = 0;
-
-        // Mobile Menu Functions
-        function toggleMenu() {
-            document.getElementById('nav-links').classList.toggle('active');
-        }
-
-        function closeMenu() {
-            document.getElementById('nav-links').classList.remove('active');
-        }
-
-        // Custom Toast Notification
-        function showToast(message) {
-            const container = document.getElementById('toast-container');
-            const toast = document.createElement('div');
-            toast.className = 'toast';
-            toast.innerHTML = `
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--accent-purple)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <polyline points="20 6 9 17 4 12"></polyline>
-                </svg>
-                ${message}
-            `;
-            
-            container.appendChild(toast);
-
-            // Remove toast from DOM after animation completes (3s)
-            setTimeout(() => {
-                toast.remove();
-            }, 3000);
-        }
-
-        // Cart Functions
-        function addToCart(itemName, price) {
-            cartTotalItems++;
-            cartTotalPrice += price;
-            
-            document.getElementById('cart-count').innerText = cartTotalItems;
-            
-            // Trigger new smooth notification
-            showToast(`Added <strong>${itemName}</strong> to cart.`);
-        }
-
-        function viewCart() {
-            if(cartTotalItems === 0) {
-                alert("Your cart is currently empty.");
-            } else {
-                alert(`CART SUMMARY\n-------------------\nItems: ${cartTotalItems}\nEstimated Total: $${cartTotalPrice.toFixed(2)}\n\n(Secure Checkout via Cash App coming soon!)`);
-            }
-        }
-        
-        // Smooth scrolling for anchor links
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
-                e.preventDefault();
-                document.querySelector(this.getAttribute('href')).scrollIntoView({
-                    behavior: 'smooth'
-                });
-            });
-        });
-    </script>
 </body>
 </html>
