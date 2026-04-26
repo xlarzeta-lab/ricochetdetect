@@ -2,537 +2,407 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    
-    <title>New Ro Dash</title>
-    
-    <link rel="manifest" href='data:application/manifest+json,{"name":"New Ro Scooter Dasher","short_name":"NewRo Dash","display":"standalone","background_color":"#000000","theme_color":"#ff3366"}'>
-    
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="NewRo Dash">
-
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KOVARA | Premium Streetwear & Jewelry</title>
     <style>
+        /* CSS Variables for Brand Colors */
         :root {
-            --bg-deep: #000000;
-            --glass-bg: rgba(18, 18, 18, 0.75);
-            --glass-border: rgba(255, 255, 255, 0.08);
-            
-            --accent-start: #ff2a6d;
-            --accent-end: #ff5f6d;
-            --xmr-orange: #F26822; /* Monero Brand Orange */
-            
-            --dye-warn: #ffd700;
-            --dye-rain: #3399ff;
-            --dye-physics: #00e5ff; 
-            
+            --bg-color: #0a0a0a;
+            --surface-color: #1a1a1a;
             --text-main: #ffffff;
-            --text-muted: #888888;
-            
-            --bento-gap: 12px;
-            --panel-padding: 24px;
+            --text-muted: #a0a0a0;
+            --accent-purple: #9d00ff;
+            --accent-hover: #b84dff;
         }
 
-        body, html {
-            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", sans-serif;
+        /* Base Reset */
+        * {
             margin: 0;
             padding: 0;
-            height: 100vh;
-            width: 100vw;
-            background-color: var(--bg-deep);
-            overflow: hidden;
-            padding-bottom: env(safe-area-inset-bottom);
             box-sizing: border-box;
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
             color: var(--text-main);
+            line-height: 1.6;
         }
 
-        #map {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 1;
-        }
-
-        .top-bar {
-            position: absolute;
-            top: calc(10px + env(safe-area-inset-top));
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 10;
-            background: var(--glass-bg);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid var(--glass-border);
-            padding: 8px 18px;
-            border-radius: 40px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
-            pointer-events: none;
-        }
-
-        .top-bar h2 {
-            margin: 0;
-            font-size: 16px;
-            font-weight: 800;
-            background: linear-gradient(135deg, var(--accent-start), var(--accent-end));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            letter-spacing: 1px;
-            text-transform: uppercase;
-        }
-
-        .dashboard {
-            position: absolute;
-            bottom: calc(15px + env(safe-area-inset-bottom));
-            left: 15px;
-            right: 15px;
-            z-index: 10;
-            background: var(--glass-bg);
-            backdrop-filter: blur(25px) saturate(180%);
-            -webkit-backdrop-filter: blur(25px) saturate(180%);
-            border: 1px solid var(--glass-border);
-            padding: var(--panel-padding);
-            border-radius: 32px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.4);
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: var(--bento-gap);
-        }
-
-        .status-grid {
+        /* Navigation */
+        nav {
             display: flex;
-            flex-wrap: wrap;
-            gap: var(--bento-gap);
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 5%;
+            background-color: rgba(10, 10, 10, 0.95);
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            border-bottom: 1px solid #333;
         }
 
-        .status-cell {
-            display: none; 
-            flex: 1 1 calc(50% - var(--bento-gap)); 
-            background: rgba(0,0,0,0.4);
-            border: 1px solid transparent;
-            border-radius: 16px;
-            padding: 12px;
-            font-size: 12px;
-            font-weight: 700;
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 900;
+            letter-spacing: 2px;
+            color: var(--text-main);
+            text-decoration: none;
+            text-transform: uppercase;
+            text-shadow: 0 0 10px rgba(157, 0, 255, 0.5);
+        }
+
+        .logo span {
+            color: var(--accent-purple);
+        }
+
+        .nav-links a {
+            color: var(--text-main);
+            text-decoration: none;
+            margin-left: 30px;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        .nav-links a:hover {
+            color: var(--accent-purple);
+        }
+
+        .cart-btn {
+            background: transparent;
+            color: var(--text-main);
+            border: 1px solid var(--accent-purple);
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .cart-btn:hover {
+            background: var(--accent-purple);
+        }
+
+        /* Hero Section */
+        .hero {
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             text-align: center;
-            backdrop-filter: blur(5px);
-            -webkit-backdrop-filter: blur(5px);
-            transition: all 0.3s ease;
+            background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.8)), url('https://images.unsplash.com/photo-1574686001095-21d1d9ec34df?q=80&w=2000&auto=format&fit=crop') center/cover;
+            padding: 0 20px;
+            margin-top: 60px;
         }
 
-        #weather-banner {
-            display: block; 
-            color: var(--text-muted); 
-            border-color: rgba(255, 255, 255, 0.05);
+        .hero-content h1 {
+            font-size: 4rem;
+            text-transform: uppercase;
+            font-weight: 900;
+            margin-bottom: 10px;
+            letter-spacing: 3px;
         }
 
-        #weather-banner.active {
-            border-color: rgba(51, 153, 255, 0.3);
-            color: var(--dye-rain);
-            background: rgba(51, 153, 255, 0.1);
-            box-shadow: 0 0 12px rgba(51, 153, 255, 0.1);
+        .hero-content p {
+            font-size: 1.2rem;
+            color: var(--text-muted);
+            margin-bottom: 30px;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
         }
 
-        #warning-banner.active {
-            display: block;
-            border-color: rgba(255, 171, 0, 0.3);
-            color: var(--dye-warn);
-            background: rgba(255, 171, 0, 0.1);
-            box-shadow: 0 0 12px rgba(255, 171, 0, 0.1);
+        .btn-primary {
+            display: inline-block;
+            background-color: var(--accent-purple);
+            color: #fff;
+            padding: 15px 40px;
+            text-decoration: none;
+            font-weight: bold;
+            text-transform: uppercase;
+            border-radius: 4px;
+            letter-spacing: 1px;
+            transition: background-color 0.3s, transform 0.2s;
         }
 
-        #physics-banner.active {
-            display: block;
-            border-color: rgba(0, 229, 255, 0.3);
-            color: var(--dye-physics);
-            background: rgba(0, 229, 255, 0.1);
-            box-shadow: 0 0 12px rgba(0, 229, 255, 0.1);
-            flex-basis: 100%; 
+        .btn-primary:hover {
+            background-color: var(--accent-hover);
+            transform: translateY(-2px);
         }
 
-        /* Earnings Banner Dynamic Styles */
-        #earnings-banner.active.good {
-            display: block;
-            border-color: rgba(50, 205, 50, 0.3);
-            color: #32cd32;
-            background: rgba(50, 205, 50, 0.1);
-            box-shadow: 0 0 12px rgba(50, 205, 50, 0.1);
-            flex-basis: 100%; 
+        /* Shop Section */
+        .shop-section {
+            padding: 80px 5%;
         }
 
-        #earnings-banner.active.bad {
-            display: block;
-            border-color: rgba(255, 77, 77, 0.3);
-            color: #ff4d4d;
-            background: rgba(255, 77, 77, 0.1);
-            box-shadow: 0 0 12px rgba(255, 77, 77, 0.1);
-            flex-basis: 100%; 
+        .section-title {
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 50px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
         }
 
-        .input-grid {
+        .product-grid {
             display: grid;
-            grid-template-columns: 1fr;
-            gap: var(--bento-gap);
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 40px;
         }
 
-        .input-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: var(--bento-gap);
-        }
-
-        .input-group {
+        .product-card {
+            background-color: var(--surface-color);
+            border-radius: 8px;
+            overflow: hidden;
+            transition: transform 0.3s;
+            border: 1px solid #333;
             display: flex;
             flex-direction: column;
         }
 
-        label {
-            font-size: 10px;
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
-            color: var(--text-muted);
-            margin-bottom: 6px;
-            font-weight: 800;
-            padding-left: 2px;
+        .product-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 10px 20px rgba(157, 0, 255, 0.1);
         }
 
-        input {
+        .product-image {
             width: 100%;
-            padding: 16px;
-            background-color: rgba(0,0,0,0.5);
-            border: 1px solid transparent;
+            height: 400px;
+            object-fit: cover;
+            background-color: #222;
+        }
+
+        .product-info {
+            padding: 20px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+        }
+
+        .product-title {
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .product-price {
+            color: var(--accent-purple);
+            font-weight: bold;
+            font-size: 1.1rem;
+            margin-bottom: 15px;
+        }
+
+        .add-to-cart {
+            width: 100%;
+            padding: 12px;
+            background: transparent;
             color: var(--text-main);
-            border-radius: 14px;
-            box-sizing: border-box;
-            font-size: 16px;
-            font-weight: 700;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        input:focus {
-            outline: none;
-            border-color: rgba(255, 42, 109, 0.3);
-            box-shadow: 0 0 15px rgba(255, 42, 109, 0.15);
-            background-color: rgba(0,0,0,0.7);
-        }
-
-        /* GPS Button */
-        button {
-            width: 100%;
-            padding: 18px;
-            background: linear-gradient(135deg, var(--accent-start), var(--accent-end));
-            color: white;
-            border: none;
-            border-radius: 18px;
-            font-size: 16px;
-            font-weight: 800;
+            border: 1px solid var(--text-muted);
+            border-radius: 4px;
             cursor: pointer;
-            transition: all 0.2s ease;
-            box-shadow: 0 6px 20px rgba(255, 42, 109, 0.3);
             text-transform: uppercase;
-            letter-spacing: 1px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
+            font-weight: bold;
+            transition: all 0.3s;
+            margin-top: auto;
         }
 
-        button:active {
-            transform: scale(0.96) translateY(2px);
-            box-shadow: 0 3px 10px rgba(255, 42, 109, 0.2);
+        .add-to-cart:hover {
+            background: var(--text-main);
+            color: var(--bg-color);
+            border-color: var(--text-main);
         }
 
-        /* Monero Donation Footer */
-        .xmr-footer {
-            display: flex;
-            align-items: center;
-            background: rgba(0,0,0,0.4);
-            border-radius: 12px;
-            padding: 10px 14px;
-            border: 1px solid rgba(242, 104, 34, 0.15);
-        }
-
-        .xmr-label {
-            color: var(--xmr-orange);
-            font-size: 11px;
-            font-weight: 800;
-            margin-right: 12px;
-            letter-spacing: 1px;
-        }
-
-        .xmr-input {
-            background: transparent;
-            border: none;
+        /* Product Details Dropdown */
+        details {
+            margin-top: 15px;
+            text-align: left;
+            background: #111;
+            padding: 10px;
+            border-radius: 4px;
+            border: 1px solid #333;
+            font-size: 0.85rem;
             color: var(--text-muted);
-            font-size: 11px;
-            width: 100%;
-            padding: 0;
-            outline: none;
+        }
+
+        summary {
             cursor: pointer;
-            text-overflow: ellipsis;
+            font-weight: bold;
+            color: var(--text-main);
+            outline: none;
+            text-transform: uppercase;
+            font-size: 0.8rem;
+            letter-spacing: 1px;
+        }
+        
+        summary:hover {
+            color: var(--accent-purple);
         }
 
-        .xmr-input:focus {
-            box-shadow: none;
-            background: transparent;
+        details ul {
+            margin-top: 10px;
+            padding-left: 20px;
         }
 
-        .leaflet-container {
-            background-color: var(--bg-deep) !important;
+        details li {
+            margin-bottom: 5px;
+        }
+
+        /* Footer */
+        footer {
+            background-color: #050505;
+            padding: 40px 5%;
+            text-align: center;
+            border-top: 1px solid #222;
+            margin-top: 50px;
+        }
+
+        .footer-content p {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .nav-links { display: none; }
+            .hero-content h1 { font-size: 2.5rem; }
         }
     </style>
 </head>
 <body>
 
-    <div id="map"></div>
+    <nav>
+        <a href="#" class="logo">KOV<span>ARA</span></a>
+        <div class="nav-links">
+            <a href="#home">Home</a>
+            <a href="#shop">Shop</a>
+            <a href="#about">About</a>
+        </div>
+        <button class="cart-btn" onclick="viewCart()">Cart (<span id="cart-count">0</span>)</button>
+    </nav>
 
-    <div class="top-bar">
-        <h2>NewRo Dash</h2>
-    </div>
+    <header class="hero" id="home">
+        <div class="hero-content">
+            <h1>Own The Night</h1>
+            <p>Premium streetwear and luxury chains for those who command the room. Crafted for the city, built for the lifestyle.</p>
+            <a href="#shop" class="btn-primary">Shop The Collection</a>
+        </div>
+    </header>
 
-    <div class="dashboard">
+    <section class="shop-section" id="shop">
+        <h2 class="section-title">Latest Drops</h2>
         
-        <div class="status-grid">
-            <div id="weather-banner" class="status-cell">🌥️ Loading Weather...</div>
-            <div id="warning-banner" class="status-cell"></div>
-            <div id="physics-banner" class="status-cell"></div>
-            <div id="earnings-banner" class="status-cell"></div>
-        </div>
-        
-        <div class="input-grid">
-            <div class="input-row">
-                <div class="input-group">
-                    <label for="orderPay">Order Pay ($)</label>
-                    <input type="number" id="orderPay" placeholder="0.00" step="0.50" oninput="calculateAndDraw()">
-                </div>
-
-                <div class="input-group">
-                    <label for="orderDist">Distance (mi)</label>
-                    <input type="number" id="orderDist" placeholder="0.0" step="0.1" oninput="calculateAndDraw()">
-                </div>
-            </div>
-
-            <div class="input-row">
-                <div class="input-group">
-                    <label for="maxRange">Max Range (mi)</label>
-                    <input type="number" id="maxRange" value="30" oninput="calculateAndDraw()">
-                </div>
-
-                <div class="input-group">
-                    <label for="batteryPct">Battery (%)</label>
-                    <input type="number" id="batteryPct" value="50" oninput="calculateAndDraw()">
+        <div class="product-grid">
+            
+            <div class="product-card">
+                <img src="shirt.png" alt="KOVARA Limited Edition Drip Tee" class="product-image">
+                <div class="product-info">
+                    <h3 class="product-title">KOVARA Limited Edition "Drip" Tee</h3>
+                    <p class="product-price">$25.00</p>
+                    <button class="add-to-cart" onclick="addToCart('Limited Edition Drip Tee', 25)">Add to Cart</button>
+                    
+                    <details>
+                        <summary>View Item Details</summary>
+                        <ul>
+                            <li><strong>Material:</strong> 100% Cotton</li>
+                            <li><strong>Color:</strong> Black / Purple</li>
+                            <li><strong>Collection:</strong> Limited Edition</li>
+                            <li><strong>Description:</strong> Official KOVARA premium heavyweight graphic t-shirt featuring the signature purple drip logo across the chest.</li>
+                        </ul>
+                    </details>
                 </div>
             </div>
 
-            <div class="input-group" style="display: none;">
-                <input type="number" id="routeElevation" value="80" oninput="calculateAndDraw()">
+            <div class="product-card">
+                <img src="aaaa.jpg" alt="Time Is Money Graphic Tee" class="product-image">
+                <div class="product-info">
+                    <h3 class="product-title">"Time Is Money" Printed T-Shirt</h3>
+                    <p class="product-price">$11.00</p>
+                    
+                    <button class="add-to-cart" onclick="addToCart('Time Is Money Tee', 11)">Add to Cart</button>
+
+                    <details>
+                        <summary>View Item Details</summary>
+                        <ul>
+                            <li><strong>Material:</strong> Polyester</li>
+                            <li><strong>Color:</strong> Black</li>
+                            <li><strong>Description:</strong> Exquisite And Comfortable-Time Is Money Men And Women 2026 Summer Short-Sleeved Printed T-Shirt.</li>
+                        </ul>
+                    </details>
+                </div>
             </div>
+
+            <div class="product-card">
+                <img src="Capture2.png" alt="Cuban Chain" class="product-image">
+                <div class="product-info">
+                    <h3 class="product-title">Standard Cuban Link Chain</h3>
+                    <p class="product-price">$1100.00</p>
+                    <button class="add-to-cart" onclick="addToCart('Standard Cuban Link', 1100)">Add to Cart</button>
+                    
+                    <details>
+                        <summary>View Item Details</summary>
+                        <ul>
+                            <li><strong>Brand:</strong> ASAVA</li>
+                            <li><strong>Condition:</strong> New</li>
+                            <li><strong>Type:</strong> Choker Necklace / Cuban Chain</li>
+                            <li><strong>Material:</strong> Silver (925 Silver Pendant)</li>
+                            <li><strong>Plating:</strong> 18K Gold Plated</li>
+                            <li><strong>Stone:</strong> Synthetic VVS Moissanite</li>
+                            <li><strong>Clasp Type:</strong> Box</li>
+                            <li><strong>Magnetic:</strong> No</li>
+                            <li><strong>Power Mode:</strong> Uncharged</li>
+                            <li><strong>Age Group:</strong> All Ages</li>
+                            <li><strong>Season:</strong> All fit</li>
+                            <li><strong>Occasion:</strong> Daily Occasion, Gift-giving Occasion, Party Occasion</li>
+                            <li><strong>Holiday:</strong> Valentine's Day, Father's Day, Halloween</li>
+                            <li><strong>Theme:</strong> Holiday, Script-and-numeric-symbols, Religious-symbols</li>
+                        </ul>
+                    </details>
+                </div>
+            </div>
+    
         </div>
+    </section>
 
-        <button id="gps-btn" onclick="startGPS()">📍 Enable Live Tracking</button>
-
-        <div class="xmr-footer">
-            <span class="xmr-label">DONATE</span>
-            <input type="text" class="xmr-input" value="Your_XMR_Address_Here" readonly onclick="this.select();" title="Click to copy">
+    <footer id="about">
+        <div class="footer-content">
+            <a href="#" class="logo" style="font-size: 1.2rem; display: block; margin-bottom: 10px;">KOV<span>ARA</span></a>
+            <p>Designed in Atlanta, GA. Worldwide Shipping.</p>
+            <p style="margin-top: 20px;">&copy; 2026 KOVARA Worldwide. All rights reserved.</p>
         </div>
-    </div>
-
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    </footer>
 
     <script>
-        // Start at New Ro Station by default, but this will update with GPS
-        let activeLocation = [40.9115, -73.7824]; 
+        let cartTotalItems = 0;
+        let cartTotalPrice = 0;
+
+        function addToCart(itemName, price) {
+            cartTotalItems++;
+            cartTotalPrice += price;
+            
+            // Update the cart number in the navigation bar
+            document.getElementById('cart-count').innerText = cartTotalItems;
+            
+            // Optional: Give the user visual feedback
+            alert(`Added ${itemName} to your cart!`);
+        }
+
+        function viewCart() {
+            if(cartTotalItems === 0) {
+                alert("Your cart is currently empty.");
+            } else {
+                alert(`You have ${cartTotalItems} items in your cart.\nEstimated Total: $${cartTotalPrice.toFixed(2)}\n\n(Checkout functionality coming soon!)`);
+            }
+        }
         
-        let liveTemp = null;
-        let liveWind = null;
-        let weatherLoaded = false;
-
-        window.addEventListener('DOMContentLoaded', (event) => {
-            const savedRange = localStorage.getItem('scooterMaxRange');
-            if (savedRange) {
-                document.getElementById('maxRange').value = savedRange;
-            }
-            checkWeather();
-        });
-
-        const map = L.map('map', { 
-            zoomControl: false,
-            attributionControl: false 
-        }).setView(activeLocation, 13);
-
-        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-            maxZoom: 19
-        }).addTo(map);
-
-        const customMarker = L.circleMarker(activeLocation, {
-            radius: 8,
-            fillColor: "#ffffff",
-            color: "#ff2a6d",
-            weight: 3,
-            opacity: 1,
-            fillOpacity: 1
-        }).addTo(map);
-
-        let currentCircle = null;
-
-        // GPS Tracking Logic
-        function startGPS() {
-            const btn = document.getElementById('gps-btn');
-            
-            if ("geolocation" in navigator) {
-                btn.innerHTML = "Locating...";
-                navigator.geolocation.watchPosition((position) => {
-                    activeLocation = [position.coords.latitude, position.coords.longitude];
-                    
-                    // Update Marker & Map View
-                    customMarker.setLatLng(activeLocation);
-                    map.setView(activeLocation, 14);
-                    
-                    // Visually update button state
-                    btn.innerHTML = "🟢 GPS Active";
-                    btn.style.background = "linear-gradient(135deg, #32cd32, #28a745)";
-                    btn.style.boxShadow = "0 6px 20px rgba(50, 205, 50, 0.3)";
-                    
-                    // Recalculate radius from new live location
-                    calculateAndDraw();
-                    
-                }, (error) => {
-                    btn.innerHTML = "⚠️ GPS Denied";
-                    console.log("GPS Error:", error);
-                }, {
-                    enableHighAccuracy: true,
-                    maximumAge: 10000,
-                    timeout: 5000
+        // Smooth scrolling for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
                 });
-            } else {
-                btn.innerHTML = "GPS Not Supported";
-            }
-        }
-
-        async function checkWeather() {
-            const weatherBanner = document.getElementById('weather-banner');
-            try {
-                const url = 'https://api.open-meteo.com/v1/forecast?latitude=40.9115&longitude=-73.7824&current=temperature_2m,wind_speed_10m&hourly=precipitation_probability&temperature_unit=fahrenheit&wind_speed_unit=mph&forecast_hours=5';
-                const response = await fetch(url);
-                const data = await response.json();
-                
-                liveTemp = data.current.temperature_2m;
-                liveWind = data.current.wind_speed_10m;
-                weatherLoaded = true;
-
-                const rainProbabilities = data.hourly.precipitation_probability;
-                const maxRainChance = Math.max(...rainProbabilities);
-
-                if (maxRainChance > 30) {
-                    weatherBanner.innerHTML = `🌧️ ${maxRainChance}% Rain Alert`;
-                    weatherBanner.classList.add('active');
-                } else {
-                    weatherBanner.innerHTML = `🌥️ ${maxRainChance}% Rain Chance`;
-                    weatherBanner.classList.remove('active');
-                }
-
-                calculateAndDraw();
-            } catch (error) {
-                weatherBanner.innerHTML = `⚠️ Weather Offline`;
-                weatherBanner.classList.remove('active');
-            }
-        }
-
-        // Master Calculation Function (Runs automatically on any input)
-        function calculateAndDraw() {
-            // 1. Get Values
-            const maxRangeInput = document.getElementById('maxRange').value;
-            const maxRange = parseFloat(maxRangeInput) || 0;
-            const batteryPct = parseFloat(document.getElementById('batteryPct').value) || 0;
-            const elevationGain = parseFloat(document.getElementById('routeElevation').value) || 0;
-            
-            const orderPay = parseFloat(document.getElementById('orderPay').value);
-            const orderDist = parseFloat(document.getElementById('orderDist').value);
-
-            localStorage.setItem('scooterMaxRange', maxRangeInput);
-
-            // 2. Profitability Engine
-            const earningsBanner = document.getElementById('earnings-banner');
-            if (orderPay > 0 && orderDist > 0) {
-                const perMile = (orderPay / orderDist).toFixed(2);
-                if (perMile >= 2.00) {
-                    earningsBanner.innerHTML = `💸 $${perMile}/mi (Profitable)`;
-                    earningsBanner.className = 'status-cell active good';
-                } else {
-                    earningsBanner.innerHTML = `⚠️ $${perMile}/mi (Low Pay)`;
-                    earningsBanner.className = 'status-cell active bad';
-                }
-            } else {
-                earningsBanner.className = 'status-cell';
-            }
-
-            // 3. Topography Warning
-            const warningBanner = document.getElementById('warning-banner');
-            if (elevationGain > 150) {
-                warningBanner.innerHTML = "⚠️ Steep Inclines!";
-                warningBanner.classList.add('active');
-            } else {
-                warningBanner.classList.remove('active');
-            }
-
-            // 4. Advanced Physics Penalty
-            let tempPenalty = 1.0;
-            let windPenalty = 1.0;
-            let penaltyReasons = [];
-
-            if (weatherLoaded) {
-                if (liveTemp <= 32) {
-                    tempPenalty = 0.75; 
-                    penaltyReasons.push(`Cold (${Math.round(liveTemp)}°F)`);
-                } else if (liveTemp <= 45) {
-                    tempPenalty = 0.85; 
-                    penaltyReasons.push(`Chilly (${Math.round(liveTemp)}°F)`);
-                }
-
-                if (liveWind >= 20) {
-                    windPenalty = 0.80; 
-                    penaltyReasons.push(`Wind (${Math.round(liveWind)}mph)`);
-                } else if (liveWind >= 12) {
-                    windPenalty = 0.90; 
-                    penaltyReasons.push(`Breezy (${Math.round(liveWind)}mph)`);
-                }
-            }
-
-            const physicsBanner = document.getElementById('physics-banner');
-            if (penaltyReasons.length > 0) {
-                const totalPercentLost = Math.round((1 - (tempPenalty * windPenalty)) * 100);
-                physicsBanner.innerHTML = `❄️ -${totalPercentLost}% Range: ${penaltyReasons.join(' & ')}`;
-                physicsBanner.classList.add('active');
-            } else {
-                physicsBanner.classList.remove('active');
-            }
-
-            // 5. Draw Radius Mapping
-            const baseRemainingMiles = maxRange * (batteryPct / 100);
-            const actualRemainingMiles = baseRemainingMiles * tempPenalty * windPenalty;
-            
-            const safeRadiusMiles = actualRemainingMiles / 2;
-            const safeRadiusMeters = safeRadiusMiles * 1609.34;
-
-            if (currentCircle) {
-                map.removeLayer(currentCircle);
-            }
-
-            // Circle drawn around the live activeLocation, not just New Ro Station
-            currentCircle = L.circle(activeLocation, {
-                color: '#ff2a6d', 
-                weight: 3,
-                fillColor: '#ff2a6d', 
-                fillOpacity: 0.08,
-                radius: safeRadiusMeters
-            }).addTo(map);
-        }
-
-        // Run once on load
-        window.onload = calculateAndDraw;
+            });
+        });
     </script>
 </body>
 </html>
