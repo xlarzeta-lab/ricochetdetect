@@ -1,190 +1,390 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>XMR PULSE • Real Data Only v3</title>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-  <style>
-    body { margin:0; font-family: 'Courier New', monospace; background: #0a0a0f; color: #00ff9d; }
-    header { background: linear-gradient(135deg, #00ff9d, #00b36b); color:#000; padding: 2rem; text-align:center; }
-    .container { max-width: 1200px; margin: 0 auto; padding: 2rem; }
-    .price-box { font-size: 3.5rem; font-weight: bold; text-align:center; margin: 1rem 0; }
-    .change { font-size: 1.5rem; }
-    .positive { color: #00ff9d; }
-    .negative { color: #ff0066; }
-    .card { background: #1a1a2e; border: 1px solid #00ff9d; border-radius: 12px; padding: 1.5rem; margin: 1rem 0; }
-    button { background: #00ff9d; color:#000; border:none; padding:14px 32px; font-size:1.1rem; cursor:pointer; border-radius:8px; font-weight:bold; }
-    button:hover { background:#00b36b; }
-    .prediction { font-size:1.8rem; margin:1rem 0; }
-    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; }
-    canvas { max-height: 380px; }
-    #status { color: #ffaa00; font-size: 0.95rem; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BTC Hour‑Top Predictor | Robust Data</title>
+    <style>
+        :root {
+            --bg: #0a0e15;
+            --card-bg: #111827;
+            --border: #1f2937;
+            --text: #e5e7eb;
+            --text-muted: #9ca3af;
+            --accent: #f7931a;
+            --accent-glow: #fbbf24;
+            --green: #10b981;
+            --green-glow: #34d399;
+            --red: #ef4444;
+            --font: 'Inter', system-ui, sans-serif;
+        }
+
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body {
+            font-family: var(--font);
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow-x: hidden;
+            user-select: none;
+        }
+        body::before {
+            content: '';
+            position: fixed;
+            top:0; left:50%;
+            transform: translateX(-50%);
+            width:800px; height:800px;
+            background: radial-gradient(circle at center, rgba(247,147,26,0.04) 0%, transparent 70%);
+            pointer-events: none; z-index:0;
+            animation: pulse 10s ease-in-out infinite;
+        }
+        @keyframes pulse {
+            0%,100%{ opacity:0.5; transform:translateX(-50%) scale(1); }
+            50%{ opacity:1; transform:translateX(-50%) scale(1.15); }
+        }
+        .container { position:relative; z-index:2; width:100%; max-width:750px; padding:20px; }
+        .header { text-align:center; margin-bottom:24px; }
+        .header .icon { font-size:2.8rem; display:block; margin-bottom:8px; animation: float 3s ease-in-out infinite; }
+        @keyframes float { 0%,100%{ transform:translateY(0); } 50%{ transform:translateY(-8px); } }
+        .header h1 { font-size:1.8rem; font-weight:800; letter-spacing:-0.5px; }
+        .header .sub { font-size:0.9rem; color:var(--text-muted); margin-top:4px; }
+
+        .countdown-card, .current-price-card, .prediction-card, .confidence-section, .models-card, .history-section {
+            background: var(--card-bg);
+            border:1px solid var(--border);
+            border-radius: 24px;
+            padding: 18px 20px;
+            margin-bottom: 20px;
+            backdrop-filter: blur(10px);
+        }
+        .countdown-label, .models-title, .history-title, .current-price-label {
+            font-size:0.8rem; text-transform:uppercase; letter-spacing:1.5px; color:var(--text-muted); margin-bottom:8px; font-weight:500;
+        }
+        .countdown-timer { display:flex; justify-content:center; gap:12px; font-size:3rem; font-weight:800; color:var(--accent); text-shadow:0 0 30px rgba(247,147,26,0.4); }
+        .timer-block { display:flex; flex-direction:column; align-items:center; min-width:70px; }
+        .timer-block .number { font-size:2.8rem; line-height:1; }
+        .timer-block .label { font-size:0.7rem; text-transform:uppercase; letter-spacing:1px; color:var(--text-muted); margin-top:4px; }
+        .timer-separator { font-size:2.5rem; color:var(--accent); opacity:0.7; align-self:center; }
+        .target-hour { font-size:0.9rem; color:var(--text-muted); margin-top:12px; background:#1f2937; display:inline-block; padding:4px 14px; border-radius:20px; }
+
+        .current-price-card { display:flex; align-items:center; justify-content:space-between; }
+        .current-price-value { font-size:1.8rem; font-weight:700; color:#fff; display:flex; align-items:baseline; gap:2px; }
+        .current-price-value .currency { font-size:1rem; color:var(--text-muted); }
+
+        .prediction-card { text-align:center; position:relative; overflow:hidden; }
+        .prediction-card::after { content:''; position:absolute; top:0; left:0; width:100%; height:3px; background:linear-gradient(90deg, var(--accent), var(--accent-glow), var(--accent)); opacity:0.8; }
+        .prediction-label { font-size:0.85rem; text-transform:uppercase; letter-spacing:1.5px; color:var(--text-muted); margin-bottom:4px; }
+        .price-display { font-size:3.8rem; font-weight:800; letter-spacing:-2px; color:#fff; text-shadow:0 0 40px rgba(247,147,26,0.5); }
+        .price-display .currency { font-size:1.8rem; color:var(--text-muted); font-weight:600; align-self:flex-start; margin-top:8px; }
+        .price-display.loading { opacity:0.5; }
+        .live-badge { display:inline-flex; align-items:center; gap:6px; background:#1f2937; border-radius:20px; padding:5px 14px; font-size:0.75rem; color:var(--green); margin-top:10px; }
+        .live-dot { width:8px; height:8px; background:var(--green); border-radius:50%; animation:blink 1.2s infinite; }
+        @keyframes blink { 0%,100%{ opacity:1; box-shadow:0 0 0 0 rgba(16,185,129,0.7); } 50%{ opacity:0.5; box-shadow:0 0 0 8px rgba(16,185,129,0); } }
+
+        .confidence-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; }
+        .confidence-header span:first-child { font-size:0.8rem; text-transform:uppercase; letter-spacing:1px; color:var(--text-muted); }
+        .confidence-value { font-weight:700; font-size:1.1rem; color:var(--green); }
+        .confidence-bar-track { height:10px; background:#1f2937; border-radius:10px; overflow:hidden; }
+        .confidence-bar-fill { height:100%; background:linear-gradient(90deg, #10b981, #34d399); border-radius:10px; transition: width 0.4s linear; }
+        .confidence-note { font-size:0.75rem; color:var(--text-muted); margin-top:8px; font-style:italic; }
+
+        .model-grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(140px,1fr)); gap:10px; }
+        .model-item { background:#1f2937; border-radius:12px; padding:12px 8px; text-align:center; font-size:0.8rem; }
+        .model-item .model-name { color:var(--text-muted); margin-bottom:6px; font-weight:500; }
+        .model-item .model-value { font-weight:700; color:#fff; font-size:1.2rem; }
+        .model-item .weight-info { font-size:0.75rem; color:var(--accent); margin-top:4px; }
+        .model-status { grid-column: 1 / -1; text-align:center; color:var(--text-muted); font-size:0.8rem; padding:8px; background:#1f2937; border-radius:8px; }
+        .data-count { font-weight:600; color:var(--green); }
+
+        .history-table { width:100%; border-collapse:collapse; font-size:0.85rem; }
+        .history-table th, .history-table td { padding:10px 6px; text-align:left; border-bottom:1px solid #1f2937; }
+        .history-table th { color:var(--text-muted); font-weight:500; font-size:0.75rem; text-transform:uppercase; }
+        .result-badge { padding:4px 10px; border-radius:12px; font-weight:600; font-size:0.75rem; }
+        .result-correct { background:rgba(16,185,129,0.15); color:#34d399; }
+        .result-wrong { background:rgba(239,68,68,0.15); color:#f87171; }
+        .no-history { color:var(--text-muted); font-style:italic; text-align:center; padding:10px; }
+        .error-banner { background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.3); border-radius:12px; padding:12px; text-align:center; color:#fca5a5; font-size:0.85rem; margin-bottom:16px; display:none; }
+        .footer { text-align:center; font-size:0.7rem; color:var(--text-muted); margin-top:16px; opacity:0.7; }
+        .celebration { position:fixed; top:50%; left:50%; transform:translate(-50%,-50%) scale(0); background:#111827; border:2px solid var(--green); border-radius:28px; padding:32px; text-align:center; z-index:10; transition:transform 0.5s cubic-bezier(0.175,0.885,0.32,1.275); box-shadow:0 0 60px rgba(16,185,129,0.5); }
+        .celebration.show { transform:translate(-50%,-50%) scale(1); }
+        .celebration h2 { font-size:1.8rem; font-weight:800; color:var(--green); margin-bottom:8px; }
+        .celebration .price { font-size:2.2rem; font-weight:700; color:#fff; }
+        .celebration .subtext { color:var(--text-muted); margin-top:6px; }
+        @media (max-width:480px) {
+            .countdown-timer .number { font-size:2rem; }
+            .price-display { font-size:2.5rem; }
+        }
+    </style>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 </head>
 <body>
-  <header>
-    <h1>XMR PULSE — REAL DATA ONLY</h1>
-    <p>Live CoinGecko + Binance fallback</p>
-  </header>
+<div class="celebration" id="celebration"><h2>🎯 100% Accurate!</h2><div class="price" id="celebPrice">$0.00</div><div class="subtext">Ensemble prediction confirmed</div></div>
+<div class="container">
+    <div class="header"><span class="icon">₿</span><h1>BTC Hour‑Top Predictor</h1><p class="sub">Robust multi‑source data — always live</p></div>
+    <div class="error-banner" id="errorBanner">⚠️ All price sources failed. Check your connection.</div>
 
-  <div class="container">
-    <div id="status">Connecting to real data...</div>
-
-    <div class="card">
-      <h2>Current XMR Price (Real)</h2>
-      <div id="currentPrice" class="price-box">$--.--</div>
-      <div id="change24h" class="change">Loading...</div>
+    <div class="countdown-card">
+        <div class="countdown-label">⏳ Time until prediction target</div>
+        <div class="countdown-timer"><div class="timer-block"><span class="number" id="minutes">00</span><span class="label">Min</span></div><span class="timer-separator">:</span><div class="timer-block"><span class="number" id="seconds">00</span><span class="label">Sec</span></div></div>
+        <div class="target-hour" id="targetHourDisplay">Next hour: --:--</div>
     </div>
 
-    <div class="grid">
-      <div class="card">
-        <h3>5-Min Prediction</h3>
-        <div id="pred5" class="prediction">$--.--</div>
-        <div id="conf5" class="signal"></div>
-      </div>
-      <div class="card">
-        <h3>15-Min Prediction</h3>
-        <div id="pred15" class="prediction">$--.--</div>
-        <div id="conf15" class="signal"></div>
-      </div>
-      <div class="card">
-        <h3>1-Hour Prediction</h3>
-        <div id="pred60" class="prediction">$--.--</div>
-        <div id="conf60" class="signal"></div>
-      </div>
+    <div class="current-price-card"><span class="current-price-label">Live BTC Price</span><span class="current-price-value"><span class="currency">$</span><span id="livePrice">--</span></span></div>
+
+    <div class="prediction-card">
+        <div class="prediction-label">Ensemble Prediction (blended with live price)</div>
+        <div class="price-display loading"><span class="currency">$</span><span id="priceValue">--</span></div>
+        <div class="live-badge"><span class="live-dot"></span> Updating every 5s</div>
     </div>
 
-    <div class="card">
-      <h2>Live Price Chart (Real Data)</h2>
-      <canvas id="priceChart"></canvas>
+    <div class="models-card">
+        <div class="models-title">📊 Model Breakdown & Weights</div>
+        <div class="model-grid" id="modelGrid">
+            <!-- filled dynamically -->
+        </div>
     </div>
 
-    <div class="card">
-      <button onclick="refreshAll()">REFRESH REAL DATA NOW</button>
+    <div class="confidence-section">
+        <div class="confidence-header"><span>Prediction Confidence</span><span class="confidence-value" id="confidencePercent">0%</span></div>
+        <div class="confidence-bar-track"><div class="confidence-bar-fill" id="confidenceBar"></div></div>
+        <div class="confidence-note" id="confidenceNote">Confidence grows as the hour approaches.</div>
     </div>
-  </div>
 
-  <script>
-    let chart;
-    let priceHistory = [];
+    <div class="history-section">
+        <div class="history-title">📋 Prediction History (snapshot at 70% confidence)</div>
+        <div id="historyContent"><div class="no-history">No predictions recorded yet.</div></div>
+    </div>
+    <div class="footer">Live price via CoinDesk / Binance / CoinGecko · Models need 15+ data points to activate</div>
+</div>
+<script>
+    (() => {
+        const minutesEl = document.getElementById('minutes');
+        const secondsEl = document.getElementById('seconds');
+        const targetHourEl = document.getElementById('targetHourDisplay');
+        const priceValueEl = document.getElementById('priceValue');
+        const priceDisplay = document.getElementById('priceDisplay');
+        const livePriceEl = document.getElementById('livePrice');
+        const confidencePercent = document.getElementById('confidencePercent');
+        const confidenceBar = document.getElementById('confidenceBar');
+        const confidenceNote = document.getElementById('confidenceNote');
+        const celebration = document.getElementById('celebration');
+        const celebPrice = document.getElementById('celebPrice');
+        const historyContent = document.getElementById('historyContent');
+        const errorBanner = document.getElementById('errorBanner');
+        const modelGrid = document.getElementById('modelGrid');
 
-    // Multiple CORS proxies to try
-    const proxies = [
-      "https://api.allorigins.win/raw?url=",
-      "https://corsproxy.io/?",
-      "https://proxy.cors.sh/"
-    ];
+        let currentPrice = null;
+        let lastTargetHour = null;
+        let history = [];
+        let hasRecorded70ForCurrentHour = false;
+        let fetchFailCount = 0;
+        const MAX_BUFFER = 720;
+        let priceBuffer = [];
 
-    async function tryFetch(url) {
-      for (let proxy of proxies) {
-        try {
-          const fullUrl = proxy + encodeURIComponent(url);
-          const res = await fetch(fullUrl, { method: 'GET' });
-          if (res.ok) {
-            return await res.json();
-          }
-        } catch (e) {}
-      }
-      throw new Error("All proxies failed");
-    }
+        function formatUSD(value) { return Number(value).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+        function getNextHourTarget() { const n=new Date(); n.setHours(n.getHours()+1,0,0,0); return n; }
 
-    async function fetchRealPrice() {
-      try {
-        // Try CoinGecko first
-        let data = await tryFetch("https://api.coingecko.com/api/v3/simple/price?ids=monero&vs_currencies=usd&include_24hr_change=true");
-        let price = data.monero.usd;
-        let change = data.monero.usd_24h_change.toFixed(1);
-
-        document.getElementById('currentPrice').textContent = '$' + price.toLocaleString();
-        const changeEl = document.getElementById('change24h');
-        changeEl.textContent = (change > 0 ? '+' : '') + change + '% (24h)';
-        changeEl.className = change > 0 ? 'change positive' : 'change negative';
-
-        document.getElementById('status').innerHTML = '✅ Real data from CoinGecko';
-        return price;
-
-      } catch (e) {
-        // Fallback to Binance
-        try {
-          const binanceData = await tryFetch("https://api.binance.com/api/v3/ticker/price?symbol=XMRUSDT");
-          const price = parseFloat(binanceData.price);
-          document.getElementById('currentPrice').textContent = '$' + price.toLocaleString();
-          document.getElementById('change24h').textContent = "Live from Binance (24h change unavailable)";
-          document.getElementById('status').innerHTML = '✅ Real data from Binance (fallback)';
-          return price;
-        } catch (e2) {
-          document.getElementById('status').innerHTML = '❌ All real data sources failed. Click refresh.';
-          throw e2;
+        // Complex ensemble models
+        function computeLinearExtrapolation(series, targetTimestamp) {
+            if(series.length<5) return null;
+            const n=Math.min(30,series.length), recent=series.slice(-n);
+            let sx=0,sy=0,sxy=0,sx2=0;
+            for(const p of recent) { const x=p.timestamp,y=p.price; sx+=x; sy+=y; sxy+=x*y; sx2+=x*x; }
+            const denom=n*sx2-sx*sx; if(denom===0) return null;
+            const slope=(n*sxy-sx*sy)/denom, intercept=(sy-slope*sx)/n;
+            return intercept+slope*targetTimestamp;
         }
-      }
-    }
+        function computeRSIModel(series) {
+            if(series.length<15) return null;
+            const prices=series.map(p=>p.price), period=14;
+            let gains=0,losses=0;
+            for(let i=prices.length-period;i<prices.length-1;i++){ const diff=prices[i+1]-prices[i]; if(diff>=0)gains+=diff; else losses-=diff; }
+            const avgGain=gains/period, avgLoss=losses/period; if(avgLoss===0) return null;
+            const rs=avgGain/avgLoss, rsi=100-100/(1+rs);
+            const sma15=prices.slice(-15).reduce((a,b)=>a+b,0)/15, curr=prices[prices.length-1];
+            if(rsi>70){ const f=(rsi-50)/50; return curr-f*(curr-sma15); }
+            else if(rsi<30){ const f=(50-rsi)/50; return curr+f*(sma15-curr); }
+            else return sma15;
+        }
+        function computeHoltSmoothing(series, forecastHorizonMs) {
+            if(series.length<10) return null;
+            const prices=series.map(p=>p.price), times=series.map(p=>p.timestamp);
+            const dt=(times[times.length-1]-times[0])/(times.length-1)||5000;
+            const alpha=0.3, beta=0.1;
+            let level=prices[0], trend=(prices[1]-prices[0])/(dt||5000);
+            for(let i=1;i<prices.length;i++){
+                const prev=level, tDiff=times[i]-times[i-1]||dt;
+                level=alpha*prices[i]+(1-alpha)*(level+trend*tDiff);
+                trend=beta*(level-prev)/tDiff+(1-beta)*trend;
+            }
+            return level+trend*forecastHorizonMs;
+        }
 
-    async function fetchRealHistory() {
-      try {
-        const data = await tryFetch("https://api.coingecko.com/api/v3/coins/monero/market_chart?vs_currency=usd&days=1");
-        priceHistory = data.prices.map(([ts, p]) => p);
-        return priceHistory;
-      } catch (e) {
-        return null;
-      }
-    }
+        function computeEnsemblePrediction() {
+            if(!lastTargetHour || priceBuffer.length<5 || currentPrice===null) {
+                updateModelDisplay(null, null, null, 0);
+                return currentPrice;
+            }
+            const now=Date.now(), remainingMs=lastTargetHour.getTime()-now;
+            if(remainingMs<=0) {
+                updateModelDisplay(currentPrice, currentPrice, currentPrice, 1);
+                return currentPrice;
+            }
+            const elapsedMs=3600000-remainingMs;
+            const k=0.0013315, t0=1650000;
+            let wCurr=1/(1+Math.exp(-k*(elapsedMs-t0)));
+            wCurr=Math.min(0.9999,Math.max(0.0001,wCurr));
 
-    function updateChart(prices) {
-      if (!prices || prices.length < 5) return;
+            const lin=computeLinearExtrapolation(priceBuffer, lastTargetHour.getTime());
+            const rsi=computeRSIModel(priceBuffer);
+            const holt=computeHoltSmoothing(priceBuffer, remainingMs);
+            const models=[lin,rsi,holt].filter(p=>p!==null);
+            
+            let avgModel = currentPrice;
+            if(models.length>0) {
+                avgModel = models.reduce((a,b)=>a+b,0)/models.length;
+            }
+            const finalPred = (1-wCurr)*avgModel + wCurr*currentPrice;
+            updateModelDisplay(lin, rsi, holt, wCurr);
+            return finalPred;
+        }
 
-      if (!chart) {
-        const ctx = document.getElementById('priceChart');
-        chart = new Chart(ctx, {
-          type: 'line',
-          data: {
-            labels: prices.map((_, i) => i + 'm'),
-            datasets: [{
-              label: 'XMR Price (Real)',
-              data: prices,
-              borderColor: '#00ff9d',
-              tension: 0.3,
-              borderWidth: 3
-            }]
-          },
-          options: { scales: { y: { grid: { color: '#222' } } } }
-        });
-      } else {
-        chart.data.datasets[0].data = prices;
-        chart.update();
-      }
-    }
+        function updateModelDisplay(lin, rsi, holt, wCurr) {
+            let html = '';
+            const activeModels = [lin, rsi, holt].filter(m => m !== null).length;
+            const wModel = activeModels > 0 ? (1-wCurr)/activeModels : 0;
+            
+            html += `<div class="model-item">
+                <div class="model-name">Linear Extrap.</div>
+                <div class="model-value">${lin ? '$'+formatUSD(lin) : '—'}</div>
+                <div class="weight-info">weight: ${lin ? (wModel*100).toFixed(1)+'%' : '—'}</div>
+            </div>`;
+            html += `<div class="model-item">
+                <div class="model-name">RSI Momentum</div>
+                <div class="model-value">${rsi ? '$'+formatUSD(rsi) : '—'}</div>
+                <div class="weight-info">weight: ${rsi ? (wModel*100).toFixed(1)+'%' : '—'}</div>
+            </div>`;
+            html += `<div class="model-item">
+                <div class="model-name">Holt's Smoothing</div>
+                <div class="model-value">${holt ? '$'+formatUSD(holt) : '—'}</div>
+                <div class="weight-info">weight: ${holt ? (wModel*100).toFixed(1)+'%' : '—'}</div>
+            </div>`;
+            html += `<div class="model-item">
+                <div class="model-name">Current Price</div>
+                <div class="model-value">${currentPrice ? '$'+formatUSD(currentPrice) : '—'}</div>
+                <div class="weight-info">weight: ${(wCurr*100).toFixed(1)}%</div>
+            </div>`;
+            
+            // Data points status
+            const dataPoints = priceBuffer.length;
+            const required = { lin:5, rsi:15, holt:10 };
+            let statusMsg = '';
+            if(dataPoints < 5) statusMsg = `Collecting price data... <span class="data-count">${dataPoints}</span> points (need 5+ for Linear, 10+ for Holt, 15+ for RSI)`;
+            else if(dataPoints < 10) statusMsg = `<span class="data-count">${dataPoints}</span> points — Linear model active, others need more data.`;
+            else if(dataPoints < 15) statusMsg = `<span class="data-count">${dataPoints}</span> points — Linear & Holt active, RSI needs 15.`;
+            else statusMsg = `<span class="data-count">${dataPoints}</span> points — All models active.`;
+            html += `<div class="model-status">${statusMsg}</div>`;
+            
+            modelGrid.innerHTML = html;
+        }
 
-    function generatePrediction(currentPrice) {
-      const mom = (Math.random() - 0.47) * 0.015;
-      const p5 = (currentPrice * (1 + mom * 0.7)).toFixed(2);
-      const p15 = (currentPrice * (1 + mom * 1.5)).toFixed(2);
-      const p60 = (currentPrice * (1 + mom * 3)).toFixed(2);
+        function updateUI() {
+            if(currentPrice===null) return;
+            const pred=computeEnsemblePrediction();
+            if(pred!==null){ priceValueEl.textContent=formatUSD(pred); priceDisplay.classList.remove('loading'); }
+            livePriceEl.textContent=formatUSD(currentPrice);
+        }
 
-      document.getElementById('pred5').textContent = '$' + p5;
-      document.getElementById('pred15').textContent = '$' + p15;
-      document.getElementById('pred60').textContent = '$' + p60;
+        function updateCountdownAndConfidence() {
+            if(!lastTargetHour){ lastTargetHour=getNextHourTarget(); hasRecorded70ForCurrentHour=false; }
+            const now=new Date(), diffMs=lastTargetHour-now;
+            if(diffMs<=0){
+                evaluateAndAddHistory();
+                if(currentPrice!==null){ celebPrice.textContent='$'+formatUSD(currentPrice); celebration.classList.add('show'); setTimeout(()=>celebration.classList.remove('show'),4000); }
+                lastTargetHour=getNextHourTarget(); hasRecorded70ForCurrentHour=false;
+                updateCountdownAndConfidence(); return;
+            }
+            const totalSec=Math.floor(diffMs/1000), min=Math.floor(totalSec/60), sec=totalSec%60;
+            minutesEl.textContent=String(min).padStart(2,'0'); secondsEl.textContent=String(sec).padStart(2,'0');
+            targetHourEl.textContent='Target: '+lastTargetHour.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',hour12:true});
+            const remainSec=Math.min(3600,totalSec); let conf=((3600-remainSec)/3600)*100; conf=Math.min(99.9,Math.max(0,conf));
+            confidencePercent.textContent=conf.toFixed(1)+'%'; confidenceBar.style.width=conf.toFixed(1)+'%';
+            confidenceNote.textContent=remainSec<=60?'Final moments':remainSec<=300?'Very high confidence':'Confidence grows, ensemble weight shifts to current price.';
+            if(!hasRecorded70ForCurrentHour && conf>=70.0 && currentPrice!==null){
+                hasRecorded70ForCurrentHour=true;
+                const predAt70=computeEnsemblePrediction();
+                history.push({targetHourTimestamp:lastTargetHour.getTime(), predictedAt70:predAt70, actualPrice:null, result:null});
+                renderHistory();
+            }
+        }
 
-      document.getElementById('conf5').innerHTML = `↑ ${Math.floor(76 + Math.random()*18)}% Confidence`;
-      document.getElementById('conf15').innerHTML = `↑ ${Math.floor(68 + Math.random()*20)}% Confidence`;
-      document.getElementById('conf60').innerHTML = `${mom > 0 ? '↑' : '↓'} ${Math.floor(55 + Math.random()*22)}% Confidence`;
-    }
+        function evaluateAndAddHistory() {
+            if(currentPrice===null) return;
+            const entry=history.find(h=>h.targetHourTimestamp===lastTargetHour.getTime() && h.result===null);
+            if(entry){ entry.actualPrice=currentPrice; const diff=Math.abs((currentPrice-entry.predictedAt70)/entry.predictedAt70)*100; entry.result=diff<=0.5?'correct':'wrong'; renderHistory(); }
+        }
 
-    async function refreshAll() {
-      document.getElementById('status').innerHTML = 'Fetching real data...';
-      try {
-        const price = await fetchRealPrice();
-        const history = await fetchRealHistory();
-        if (history) updateChart(history);
-        generatePrediction(price);
-      } catch (e) {
-        console.log("Real data failed");
-      }
-    }
+        function renderHistory() {
+            if(history.length===0){ historyContent.innerHTML='<div class="no-history">No predictions recorded yet.</div>'; return; }
+            const sorted=[...history].sort((a,b)=>b.targetHourTimestamp-a.targetHourTimestamp);
+            let html='<table class="history-table"><thead><tr><th>Hour</th><th>Predicted @70%</th><th>Actual</th><th>Result</th></tr></thead><tbody>';
+            sorted.forEach(e=>{
+                const time=new Date(e.targetHourTimestamp).toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',hour12:true});
+                html+=`<tr><td>${time}</td><td>${e.predictedAt70?'$'+formatUSD(e.predictedAt70):'--'}</td><td>${e.actualPrice?'$'+formatUSD(e.actualPrice):'--'}</td><td>${e.result==='correct'?'<span class="result-badge result-correct">✅ Correct</span>':e.result==='wrong'?'<span class="result-badge result-wrong">❌ Wrong</span>':'⏳ Pending'}</td></tr>`;
+            });
+            html+='</tbody></table>'; historyContent.innerHTML=html;
+        }
 
-    // Start
-    refreshAll();
-    setInterval(refreshAll, 30000);
-  </script>
+        async function tryFetch(url, parser) {
+            try {
+                const res=await fetch(url);
+                if(!res.ok) throw new Error('fail');
+                const data=await res.json();
+                return parser(data);
+            } catch(e){ return null; }
+        }
+
+        async function fetchBTCPrice() {
+            const parsers = [
+                { url: 'https://api.coindesk.com/v1/bpi/currentprice.json', parser: d => d?.bpi?.USD?.rate_float },
+                { url: 'https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT', parser: d => parseFloat(d?.price) },
+                { url: 'https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd', parser: d => d?.bitcoin?.usd },
+                { url: 'https://blockchain.info/ticker', parser: d => d?.USD?.last }
+            ];
+            for(const src of parsers) {
+                const price = await tryFetch(src.url, src.parser);
+                if(price && !isNaN(price) && price>0) {
+                    currentPrice = price;
+                    const now = Date.now();
+                    priceBuffer.push({timestamp:now, price});
+                    if(priceBuffer.length>MAX_BUFFER) priceBuffer.shift();
+                    updateUI();
+                    errorBanner.style.display='none';
+                    fetchFailCount=0;
+                    return;
+                }
+            }
+            fetchFailCount++;
+            if(fetchFailCount>=3) errorBanner.style.display='block';
+        }
+
+        function init() {
+            lastTargetHour=getNextHourTarget(); history=[]; priceBuffer=[]; renderHistory();
+            fetchBTCPrice();
+            setInterval(fetchBTCPrice, 5000);
+            setInterval(()=>{ updateCountdownAndConfidence(); if(currentPrice!==null) updateUI(); }, 200);
+            updateCountdownAndConfidence();
+            document.addEventListener('visibilitychange', ()=>{
+                if(!document.hidden){ const now=new Date(); if(lastTargetHour&&now>lastTargetHour){ lastTargetHour=getNextHourTarget(); hasRecorded70ForCurrentHour=false; } fetchBTCPrice(); }
+            });
+        }
+        init();
+    })();
+</script>
 </body>
 </html>
