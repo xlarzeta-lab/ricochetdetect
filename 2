@@ -1,0 +1,1309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BTC Hourly Movement Predictor</title>
+    <style>
+        :root {
+            --bg: #0a0d14;
+            --surface: #131820;
+            --surface2: #1a1f2e;
+            --border: #252b3a;
+            --text: #e2e6ef;
+            --text2: #9ca3b8;
+            --green: #00d492;
+            --red: #ff4757;
+            --amber: #f5a623;
+            --blue: #4d9dff;
+            --purple: #8b5cf6;
+            --gold: #f0b90b;
+            --radius: 14px;
+            --radius-sm: 10px;
+            --shadow: 0 4px 32px rgba(0, 0, 0, 0.4);
+            --font: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+            --mono: 'JetBrains Mono', 'SF Mono', 'Cascadia Code', monospace;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: var(--font);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            padding: 16px;
+            background-image: radial-gradient(ellipse at 50% 0%, #1a2540 0%, transparent 55%),
+                radial-gradient(ellipse at 85% 30%, #0f1a2e 0%, transparent 45%);
+            background-attachment: fixed;
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 700px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        /* Header */
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .btc-icon {
+            width: 42px;
+            height: 42px;
+            background: var(--gold);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            font-weight: 900;
+            color: #1a1a1a;
+            flex-shrink: 0;
+        }
+        .app-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            letter-spacing: -0.3px;
+            line-height: 1.2;
+        }
+        .app-subtitle {
+            font-size: 0.75rem;
+            color: var(--text2);
+            font-weight: 500;
+        }
+        .live-price-badge {
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 30px;
+            padding: 10px 18px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-family: var(--mono);
+            font-size: 1.1rem;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+        .price-dot {
+            width: 9px;
+            height: 9px;
+            border-radius: 50%;
+            background: var(--green);
+            animation: pulse-dot 1.5s ease-in-out infinite;
+        }
+        @keyframes pulse-dot {
+            0%,
+            100% {
+                box-shadow: 0 0 0 0 rgba(0, 212, 146, 0.6);
+            }
+            50% {
+                box-shadow: 0 0 0 10px rgba(0, 212, 146, 0);
+            }
+        }
+        .price-change {
+            font-size: 0.8rem;
+            font-weight: 600;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-family: var(--font);
+        }
+        .price-change.up {
+            background: rgba(0, 212, 146, 0.15);
+            color: var(--green);
+        }
+        .price-change.down {
+            background: rgba(255, 71, 87, 0.15);
+            color: var(--red);
+        }
+
+        /* Countdown */
+        .countdown-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 18px 22px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            flex-wrap: wrap;
+            box-shadow: var(--shadow);
+        }
+        .countdown-info {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .countdown-label {
+            font-size: 0.78rem;
+            color: var(--text2);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+        }
+        .countdown-timer {
+            font-family: var(--mono);
+            font-size: 2rem;
+            font-weight: 700;
+            letter-spacing: -1px;
+            color: #fff;
+        }
+        .countdown-detail {
+            font-size: 0.75rem;
+            color: var(--text2);
+        }
+        .countdown-visual {
+            position: relative;
+            width: 64px;
+            height: 64px;
+            flex-shrink: 0;
+        }
+        .countdown-ring {
+            transform: rotate(-90deg);
+            width: 64px;
+            height: 64px;
+        }
+        .countdown-ring .bg {
+            fill: none;
+            stroke: var(--border);
+            stroke-width: 5;
+        }
+        .countdown-ring .progress {
+            fill: none;
+            stroke: var(--blue);
+            stroke-width: 5;
+            stroke-linecap: round;
+            transition: stroke-dashoffset 0.9s linear;
+        }
+        .countdown-num {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1rem;
+            font-family: var(--mono);
+            color: #fff;
+        }
+
+        /* Prediction Card */
+        .prediction-card {
+            background: var(--surface);
+            border: 2px solid var(--border);
+            border-radius: var(--radius);
+            padding: 20px 22px;
+            box-shadow: var(--shadow);
+            transition: border-color 0.4s;
+        }
+        .prediction-card.active-significant {
+            border-color: var(--amber);
+            box-shadow: 0 0 30px rgba(245, 166, 35, 0.15);
+        }
+        .prediction-card.active-quiet {
+            border-color: var(--blue);
+            box-shadow: 0 0 30px rgba(77, 157, 255, 0.12);
+        }
+        .prediction-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .prediction-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            font-weight: 700;
+            font-size: 0.85rem;
+            padding: 8px 16px;
+            border-radius: 22px;
+            letter-spacing: 0.2px;
+        }
+        .prediction-badge.significant {
+            background: rgba(245, 166, 35, 0.18);
+            color: var(--amber);
+            border: 1px solid rgba(245, 166, 35, 0.35);
+        }
+        .prediction-badge.quiet {
+            background: rgba(77, 157, 255, 0.18);
+            color: var(--blue);
+            border: 1px solid rgba(77, 157, 255, 0.35);
+        }
+        .prediction-badge.waiting {
+            background: rgba(156, 163, 184, 0.12);
+            color: var(--text2);
+            border: 1px solid var(--border);
+        }
+        .confidence-bar-wrap {
+            margin-top: 14px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .confidence-bar {
+            flex: 1;
+            height: 8px;
+            background: var(--border);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        .confidence-fill {
+            height: 100%;
+            border-radius: 10px;
+            transition: width 0.5s ease, background 0.4s;
+        }
+        .confidence-fill.significant {
+            background: linear-gradient(90deg, #f5a623, #ff7b25);
+        }
+        .confidence-fill.quiet {
+            background: linear-gradient(90deg, #4d9dff, #6c5ce7);
+        }
+        .confidence-text {
+            font-weight: 700;
+            font-size: 0.9rem;
+            font-family: var(--mono);
+            min-width: 40px;
+            text-align: right;
+        }
+        .live-movement {
+            margin-top: 12px;
+            font-size: 0.82rem;
+            color: var(--text2);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .live-movement .move-value {
+            font-weight: 700;
+            font-family: var(--mono);
+        }
+        .live-movement .move-value.up {
+            color: var(--green);
+        }
+        .live-movement .move-value.down {
+            color: var(--red);
+        }
+
+        /* Indicators row */
+        .indicators-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+            gap: 10px;
+            margin-top: 14px;
+        }
+        .indicator-pill {
+            background: var(--surface2);
+            border-radius: var(--radius-sm);
+            padding: 10px 14px;
+            text-align: center;
+            font-size: 0.75rem;
+        }
+        .indicator-pill .ind-val {
+            font-weight: 700;
+            font-size: 0.9rem;
+            display: block;
+            margin-top: 3px;
+        }
+        .ind-val.high {
+            color: var(--amber);
+        }
+        .ind-val.medium {
+            color: var(--blue);
+        }
+        .ind-val.low {
+            color: var(--text2);
+        }
+
+        /* Sparkline */
+        .sparkline-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 14px 18px;
+            box-shadow: var(--shadow);
+        }
+        .sparkline-label {
+            font-size: 0.72rem;
+            color: var(--text2);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+        canvas#sparkline {
+            width: 100%;
+            height: 100px;
+            display: block;
+            border-radius: 6px;
+        }
+
+        /* Stats */
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 10px;
+        }
+        .stat-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 14px 16px;
+            text-align: center;
+            box-shadow: var(--shadow);
+        }
+        .stat-value {
+            font-size: 1.6rem;
+            font-weight: 800;
+            font-family: var(--mono);
+            letter-spacing: -0.5px;
+        }
+        .stat-label {
+            font-size: 0.7rem;
+            color: var(--text2);
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            margin-top: 2px;
+        }
+        .stat-value.green {
+            color: var(--green);
+        }
+        .stat-value.amber {
+            color: var(--amber);
+        }
+        .stat-value.blue {
+            color: var(--blue);
+        }
+
+        /* History */
+        .history-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 16px 18px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+        }
+        .history-title {
+            font-weight: 700;
+            font-size: 0.95rem;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+        }
+        .clear-btn {
+            font-size: 0.7rem;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            color: var(--text2);
+            padding: 6px 12px;
+            border-radius: 16px;
+            cursor: pointer;
+            font-family: var(--font);
+            transition: all 0.2s;
+        }
+        .clear-btn:hover {
+            background: var(--red);
+            color: #fff;
+            border-color: var(--red);
+        }
+        .history-table-wrap {
+            max-height: 420px;
+            overflow-y: auto;
+            border-radius: 8px;
+        }
+        .history-table-wrap::-webkit-scrollbar {
+            width: 4px;
+        }
+        .history-table-wrap::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .history-table-wrap::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 10px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.78rem;
+        }
+        thead th {
+            position: sticky;
+            top: 0;
+            background: var(--surface);
+            padding: 10px 8px;
+            text-align: left;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            color: var(--text2);
+            border-bottom: 2px solid var(--border);
+            z-index: 2;
+        }
+        tbody td {
+            padding: 10px 8px;
+            border-bottom: 1px solid rgba(37, 43, 58, 0.5);
+            font-family: var(--mono);
+            font-size: 0.73rem;
+        }
+        .row-correct {
+            background: rgba(0, 212, 146, 0.04);
+        }
+        .row-incorrect {
+            background: rgba(255, 71, 87, 0.04);
+        }
+        .status-icon {
+            font-size: 1.1rem;
+        }
+        .tag {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 0.68rem;
+            font-weight: 700;
+            letter-spacing: 0.3px;
+            font-family: var(--font);
+        }
+        .tag.big {
+            background: rgba(255, 71, 87, 0.2);
+            color: #ff6b7a;
+        }
+        .tag.medium {
+            background: rgba(245, 166, 35, 0.2);
+            color: #f7b84c;
+        }
+        .tag.small {
+            background: rgba(156, 163, 184, 0.15);
+            color: #b0b8c8;
+        }
+        .tag.pred-sig {
+            background: rgba(245, 166, 35, 0.2);
+            color: #f7b84c;
+        }
+        .tag.pred-quiet {
+            background: rgba(77, 157, 255, 0.2);
+            color: #6db5ff;
+        }
+        .empty-history {
+            text-align: center;
+            padding: 30px;
+            color: var(--text2);
+            font-size: 0.85rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 500px) {
+            .countdown-timer {
+                font-size: 1.5rem;
+            }
+            .countdown-visual {
+                width: 48px;
+                height: 48px;
+            }
+            .countdown-ring {
+                width: 48px;
+                height: 48px;
+            }
+            .live-price-badge {
+                font-size: 0.9rem;
+                padding: 8px 14px;
+            }
+            .btc-icon {
+                width: 34px;
+                height: 34px;
+                font-size: 18px;
+            }
+            .prediction-card {
+                padding: 14px 16px;
+            }
+            table {
+                font-size: 0.68rem;
+            }
+        }
+    </style>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <div class="header">
+            <div class="logo-section">
+                <div class="btc-icon">₿</div>
+                <div>
+                    <div class="app-title">BTC Hourly Predictor</div>
+                    <div class="app-subtitle">Movement forecast at the top of each hour</div>
+                </div>
+            </div>
+            <div class="live-price-badge" id="livePriceBadge">
+                <div class="price-dot"></div>
+                <span id="livePrice">--</span>
+                <span class="price-change" id="priceChange">--</span>
+            </div>
+        </div>
+
+        <!-- Countdown -->
+        <div class="countdown-card">
+            <div class="countdown-info">
+                <div class="countdown-label">Next Prediction In</div>
+                <div class="countdown-timer" id="countdownTimer">--:--:--</div>
+                <div class="countdown-detail" id="countdownDetail">at the top of the hour</div>
+            </div>
+            <div class="countdown-visual">
+                <svg class="countdown-ring" viewBox="0 0 64 64">
+                    <circle class="bg" cx="32" cy="32" r="28"/>
+                    <circle class="progress" id="countdownCircle" cx="32" cy="32" r="28" stroke-dasharray="175.93" stroke-dashoffset="0"/>
+                </svg>
+                <div class="countdown-num" id="countdownNum">60</div>
+            </div>
+        </div>
+
+        <!-- Prediction -->
+        <div class="prediction-card" id="predictionCard">
+            <div class="prediction-header">
+                <span style="font-weight:700;font-size:0.9rem;">🎯 Current Prediction</span>
+                <span class="prediction-badge waiting" id="predictionBadge">⏳ Waiting for hour top</span>
+            </div>
+            <div class="confidence-bar-wrap">
+                <span style="font-size:0.7rem;color:var(--text2);">Confidence</span>
+                <div class="confidence-bar">
+                    <div class="confidence-fill" id="confidenceFill" style="width:0%;background:#555;"></div>
+                </div>
+                <span class="confidence-text" id="confidenceText">--%</span>
+            </div>
+            <div class="live-movement" id="liveMovement">
+                Movement this hour: <span class="move-value" id="moveValue">--</span>
+            </div>
+            <div class="indicators-row" id="indicatorsRow">
+                <div class="indicator-pill">Volatility <span class="ind-val" id="indVol">--</span></div>
+                <div class="indicator-pill">Momentum <span class="ind-val" id="indMom">--</span></div>
+                <div class="indicator-pill">Volume <span class="ind-val" id="indVol2">--</span></div>
+                <div class="indicator-pill">Range <span class="ind-val" id="indRange">--</span></div>
+            </div>
+        </div>
+
+        <!-- Sparkline -->
+        <div class="sparkline-card">
+            <div class="sparkline-label">📈 Price Sparkline (last ~90 min)</div>
+            <canvas id="sparkline"></canvas>
+        </div>
+
+        <!-- Stats -->
+        <div class="stats-row">
+            <div class="stat-card">
+                <div class="stat-value blue" id="statTotal">0</div>
+                <div class="stat-label">Total Predictions</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value green" id="statCorrect">0</div>
+                <div class="stat-label">Correct</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value amber" id="statAccuracy">--%</div>
+                <div class="stat-label">Accuracy</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="statStreak" style="color:#fff;">0</div>
+                <div class="stat-label">Current Streak</div>
+            </div>
+        </div>
+
+        <!-- History -->
+        <div class="history-card">
+            <div class="history-title">
+                📋 Prediction History
+                <button class="clear-btn" id="clearHistoryBtn" title="Clear all history">Clear</button>
+            </div>
+            <div class="history-table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Hour (Local)</th>
+                            <th>Prediction</th>
+                            <th>Conf.</th>
+                            <th>Actual</th>
+                            <th>Result</th>
+                        </tr>
+                    </thead>
+                    <tbody id="historyBody">
+                        <tr class="empty-history">
+                            <td colspan="5">No predictions yet. First prediction at the next hour boundary.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            // ============ CONFIGURATION ============
+            const BINANCE_TICKER_URL = 'https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT';
+            const BINANCE_KLINES_URL = 'https://api.binance.com/api/v3/klines?symbol=BTCUSDT&interval=1m&limit=90';
+            const PRICE_REFRESH_MS = 12000; // Fetch price every 12 seconds
+            const KLINES_REFRESH_MS = 55000; // Fetch klines every 55 seconds
+            const TIMER_CHECK_MS = 800; // Check time every 800ms
+            const CIRCUMFERENCE = 2 * Math.PI * 28; // ~175.93
+
+            // ============ STATE ============
+            const state = {
+                currentPrice: null,
+                priceHistory: [], // {time, price} for sparkline (last ~90 items)
+                startPriceThisHour: null, // Price at the start of the current hour
+                activePrediction: null, // {prediction:'significant'|'quiet', confidence:number, hourStart:Date, scores:{}}
+                lastProcessedHour: null, // timestamp of the hour we last processed
+                predictions: [], // historical predictions array
+                currentStreak: 0,
+                klineData: [], // raw kline data
+                priceChange24h: null,
+                prevDayPrice: null,
+            };
+
+            // Load history from localStorage
+            function loadHistory() {
+                try {
+                    const saved = localStorage.getItem('btc_predictor_history');
+                    if (saved) {
+                        const parsed = JSON.parse(saved);
+                        if (Array.isArray(parsed)) {
+                            state.predictions = parsed;
+                            // Recalculate streak
+                            let streak = 0;
+                            for (let i = state.predictions.length - 1; i >= 0; i--) {
+                                if (state.predictions[i].wasCorrect) streak++;
+                                else break;
+                            }
+                            state.currentStreak = streak;
+                        }
+                    }
+                } catch (e) {
+                    console.warn('Could not load history from localStorage');
+                }
+            }
+
+            function saveHistory() {
+                try {
+                    // Keep only last 200 entries
+                    const toSave = state.predictions.slice(-200);
+                    localStorage.setItem('btc_predictor_history', JSON.stringify(toSave));
+                } catch (e) {
+                    console.warn('Could not save history to localStorage');
+                }
+            }
+
+            // ============ API FUNCTIONS ============
+            async function fetchCurrentPrice() {
+                try {
+                    const resp = await fetch(BINANCE_TICKER_URL, { cache: 'no-store' });
+                    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+                    const data = await resp.json();
+                    const price = parseFloat(data.price);
+                    if (isNaN(price) || price <= 0) throw new Error('Invalid price');
+                    return price;
+                } catch (e) {
+                    console.warn('Binance ticker failed, trying fallback...', e.message);
+                    // Fallback to CoinGecko
+                    try {
+                        const resp2 = await fetch(
+                            'https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd&include_24hr_change=true', { cache: 'no-store' }
+                        );
+                        if (!resp2.ok) throw new Error(`HTTP ${resp2.status}`);
+                        const data2 = await resp2.json();
+                        const price = data2?.bitcoin?.usd;
+                        if (!price || price <= 0) throw new Error('Invalid fallback price');
+                        if (data2?.bitcoin?.usd_24h_change) {
+                            state.priceChange24h = data2.bitcoin.usd_24h_change;
+                        }
+                        return price;
+                    } catch (e2) {
+                        console.error('All price APIs failed:', e2.message);
+                        return null;
+                    }
+                }
+            }
+
+            async function fetchKlines() {
+                try {
+                    const resp = await fetch(BINANCE_KLINES_URL, { cache: 'no-store' });
+                    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+                    const data = await resp.json();
+                    if (!Array.isArray(data) || data.length < 10) throw new Error('Insufficient kline data');
+                    // Parse: [openTime, open, high, low, close, volume, ...]
+                    const parsed = data.map(k => ({
+                        openTime: k[0],
+                        open: parseFloat(k[1]),
+                        high: parseFloat(k[2]),
+                        low: parseFloat(k[3]),
+                        close: parseFloat(k[4]),
+                        volume: parseFloat(k[5]),
+                    }));
+                    return parsed;
+                } catch (e) {
+                    console.warn('Failed to fetch klines:', e.message);
+                    return null;
+                }
+            }
+
+            // ============ PREDICTION ENGINE ============
+            function computePrediction(klines) {
+                if (!klines || klines.length < 30) {
+                    return { prediction: 'quiet', confidence: 50, scores: { volatility: 0, momentum: 0, volume: 0,
+                            range: 0 }, totalScore: 30 };
+                }
+
+                const recent = klines.slice(-60); // last 60 minutes
+                const halfPoint = Math.floor(recent.length / 2);
+                const firstHalf = recent.slice(0, halfPoint);
+                const secondHalf = recent.slice(halfPoint);
+
+                // 1. Volatility: std dev of 1-min returns
+                const returns = [];
+                for (let i = 1; i < recent.length; i++) {
+                    const r = (recent[i].close - recent[i - 1].close) / recent[i - 1].close;
+                    returns.push(r);
+                }
+                const meanRet = returns.reduce((a, b) => a + b, 0) / returns.length;
+                const variance = returns.reduce((a, b) => a + (b - meanRet) ** 2, 0) / returns.length;
+                const volatility = Math.sqrt(variance);
+                const volatilityScore = Math.min(100, (volatility / 0.004) * 100);
+
+                // 2. Momentum: absolute change over last 30 min
+                const price30m = recent[Math.max(0, recent.length - 31)].close;
+                const priceNow = recent[recent.length - 1].close;
+                const momentumAbs = Math.abs((priceNow - price30m) / price30m);
+                const momentumScore = Math.min(100, momentumAbs * 250);
+
+                // 3. Volume: recent vs older
+                const recentVol = secondHalf.reduce((a, b) => a + b.volume, 0) / Math.max(1, secondHalf.length);
+                const olderVol = firstHalf.reduce((a, b) => a + b.volume, 0) / Math.max(1, firstHalf.length);
+                const volRatio = olderVol > 0 ? recentVol / olderVol : 1;
+                const volumeScore = Math.min(100, Math.max(0, (volRatio - 0.4) * 80));
+
+                // 4. Range score
+                const avgRangePct = recent.reduce((a, b) => a + (b.high - b.low) / b.low, 0) / recent.length;
+                const rangeScore = Math.min(100, avgRangePct * 600);
+
+                // Weighted total
+                const totalScore =
+                    volatilityScore * 0.35 +
+                    momentumScore * 0.25 +
+                    volumeScore * 0.22 +
+                    rangeScore * 0.18;
+
+                const prediction = totalScore >= 44 ? 'significant' : 'quiet';
+                const confidence = Math.round(
+                    prediction === 'significant' ?
+                    Math.min(94, totalScore) :
+                    Math.min(94, 100 - totalScore)
+                );
+
+                return {
+                    prediction,
+                    confidence,
+                    scores: {
+                        volatility: Math.round(volatilityScore),
+                        momentum: Math.round(momentumScore),
+                        volume: Math.round(volumeScore),
+                        range: Math.round(rangeScore),
+                    },
+                    totalScore: Math.round(totalScore),
+                };
+            }
+
+            function categorizeMovement(pctChange) {
+                const abs = Math.abs(pctChange);
+                if (abs >= 1.5) return 'big';
+                if (abs >= 0.5) return 'medium';
+                return 'small';
+            }
+
+            function wasPredictionCorrect(prediction, actualCategory) {
+                if (prediction === 'significant') {
+                    return actualCategory === 'big' || actualCategory === 'medium';
+                } else {
+                    return actualCategory === 'small';
+                }
+            }
+
+            // ============ CORE LOGIC ============
+            function processHourBoundary() {
+                const now = new Date();
+                const currentHourTimestamp = new Date(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours(),
+                    0, 0, 0).getTime();
+
+                // Evaluate previous prediction if exists
+                if (state.activePrediction && state.startPriceThisHour !== null && state.currentPrice !== null) {
+                    const endPrice = state.currentPrice;
+                    const pctChange = ((endPrice - state.startPriceThisHour) / state.startPriceThisHour) * 100;
+                    const actualCategory = categorizeMovement(pctChange);
+                    const wasCorrect = wasPredictionCorrect(state.activePrediction.prediction, actualCategory);
+
+                    const record = {
+                        id: state.activePrediction.hourStart,
+                        hourStartISO: new Date(state.activePrediction.hourStart).toISOString(),
+                        hourEndISO: now.toISOString(),
+                        startPrice: state.startPriceThisHour,
+                        endPrice: endPrice,
+                        predictedMove: state.activePrediction.prediction,
+                        confidence: state.activePrediction.confidence,
+                        actualMovePct: parseFloat(pctChange.toFixed(4)),
+                        actualCategory: actualCategory,
+                        wasCorrect: wasCorrect,
+                        scores: state.activePrediction.scores,
+                    };
+
+                    state.predictions.push(record);
+                    if (wasCorrect) {
+                        state.currentStreak++;
+                    } else {
+                        state.currentStreak = 0;
+                    }
+                    saveHistory();
+                    state.activePrediction = null;
+                }
+
+                // Set new start price for this hour
+                if (state.currentPrice !== null) {
+                    state.startPriceThisHour = state.currentPrice;
+                }
+
+                // Make new prediction
+                if (state.klineData && state.klineData.length >= 30 && state.currentPrice !== null) {
+                    const result = computePrediction(state.klineData);
+                    state.activePrediction = {
+                        prediction: result.prediction,
+                        confidence: result.confidence,
+                        hourStart: currentHourTimestamp,
+                        scores: result.scores,
+                        totalScore: result.totalScore,
+                    };
+                }
+
+                state.lastProcessedHour = currentHourTimestamp;
+                updateAllUI();
+            }
+
+            function checkAndProcessHour() {
+                const now = new Date();
+                const currentHourTimestamp = new Date(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours(),
+                    0, 0, 0).getTime();
+
+                if (state.lastProcessedHour !== currentHourTimestamp && now.getMinutes() === 0) {
+                    // We're at the top of the hour
+                    processHourBoundary();
+                } else if (state.lastProcessedHour === null && state.currentPrice !== null && state.klineData.length >=
+                    30) {
+                    // First load - set up initial state without making a retroactive prediction
+                    state.lastProcessedHour = currentHourTimestamp;
+                    state.startPriceThisHour = state.currentPrice;
+                    // Make an initial prediction for the current partial hour
+                    const result = computePrediction(state.klineData);
+                    state.activePrediction = {
+                        prediction: result.prediction,
+                        confidence: result.confidence,
+                        hourStart: currentHourTimestamp,
+                        scores: result.scores,
+                        totalScore: result.totalScore,
+                    };
+                    updateAllUI();
+                }
+            }
+
+            // ============ UI UPDATES ============
+            function updateCountdown() {
+                const now = new Date();
+                const nextHour = new Date(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours() + 1, 0, 0, 0);
+                const diffMs = nextHour - now;
+                const totalSec = Math.max(0, Math.floor(diffMs / 1000));
+                const hours = Math.floor(totalSec / 3600);
+                const minutes = Math.floor((totalSec % 3600) / 60);
+                const seconds = totalSec % 60;
+
+                const timerEl = document.getElementById('countdownTimer');
+                timerEl.textContent =
+                    String(hours).padStart(2, '0') + ':' +
+                    String(minutes).padStart(2, '0') + ':' +
+                    String(seconds).padStart(2, '0');
+
+                const detailEl = document.getElementById('countdownDetail');
+                const nextHourTime = nextHour.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                detailEl.textContent = `Prediction at ${nextHourTime}`;
+
+                // Ring progress
+                const totalSecInHour = 3600;
+                const elapsedSec = totalSecInHour - (minutes * 60 + seconds);
+                const fraction = Math.max(0, Math.min(1, elapsedSec / totalSecInHour));
+                const offset = CIRCUMFERENCE * (1 - fraction);
+                const circle = document.getElementById('countdownCircle');
+                circle.setAttribute('stroke-dashoffset', offset);
+
+                const numEl = document.getElementById('countdownNum');
+                numEl.textContent = String(minutes).padStart(2, '0');
+            }
+
+            function updatePredictionCard() {
+                const card = document.getElementById('predictionCard');
+                const badge = document.getElementById('predictionBadge');
+                const confFill = document.getElementById('confidenceFill');
+                const confText = document.getElementById('confidenceText');
+                const moveValue = document.getElementById('moveValue');
+                const indVol = document.getElementById('indVol');
+                const indMom = document.getElementById('indMom');
+                const indVol2 = document.getElementById('indVol2');
+                const indRange = document.getElementById('indRange');
+
+                card.classList.remove('active-significant', 'active-quiet');
+
+                if (state.activePrediction) {
+                    const pred = state.activePrediction;
+                    if (pred.prediction === 'significant') {
+                        badge.className = 'prediction-badge significant';
+                        badge.textContent = '🔥 Significant Move Expected';
+                        card.classList.add('active-significant');
+                        confFill.className = 'confidence-fill significant';
+                    } else {
+                        badge.className = 'prediction-badge quiet';
+                        badge.textContent = '💤 Quiet Hour Expected';
+                        card.classList.add('active-quiet');
+                        confFill.className = 'confidence-fill quiet';
+                    }
+                    confFill.style.width = pred.confidence + '%';
+                    confText.textContent = pred.confidence + '%';
+
+                    // Scores
+                    const s = pred.scores;
+                    indVol.textContent = s.volatility;
+                    indVol.className = 'ind-val ' + (s.volatility >= 55 ? 'high' : s.volatility >= 30 ? 'medium' : 'low');
+                    indMom.textContent = s.momentum;
+                    indMom.className = 'ind-val ' + (s.momentum >= 55 ? 'high' : s.momentum >= 30 ? 'medium' : 'low');
+                    indVol2.textContent = s.volume;
+                    indVol2.className = 'ind-val ' + (s.volume >= 55 ? 'high' : s.volume >= 30 ? 'medium' : 'low');
+                    indRange.textContent = s.range;
+                    indRange.className = 'ind-val ' + (s.range >= 55 ? 'high' : s.range >= 30 ? 'medium' : 'low');
+                } else {
+                    badge.className = 'prediction-badge waiting';
+                    badge.textContent = '⏳ Waiting for hour top';
+                    confFill.style.width = '0%';
+                    confFill.className = 'confidence-fill';
+                    confText.textContent = '--%';
+                    indVol.textContent = '--';
+                    indVol.className = 'ind-val';
+                    indMom.textContent = '--';
+                    indMom.className = 'ind-val';
+                    indVol2.textContent = '--';
+                    indVol2.className = 'ind-val';
+                    indRange.textContent = '--';
+                    indRange.className = 'ind-val';
+                }
+
+                // Live movement
+                if (state.startPriceThisHour !== null && state.currentPrice !== null) {
+                    const move = ((state.currentPrice - state.startPriceThisHour) / state.startPriceThisHour) * 100;
+                    const absMove = Math.abs(move);
+                    moveValue.textContent = (move >= 0 ? '+' : '') + move.toFixed(4) + '%';
+                    moveValue.className = 'move-value ' + (move >= 0 ? 'up' : 'down');
+                } else {
+                    moveValue.textContent = '--';
+                    moveValue.className = 'move-value';
+                }
+            }
+
+            function updateSparkline() {
+                const canvas = document.getElementById('sparkline');
+                if (!canvas) return;
+                const ctx = canvas.getContext('2d');
+                const dpr = window.devicePixelRatio || 1;
+                const rect = canvas.getBoundingClientRect();
+                const width = rect.width;
+                const height = 100;
+                canvas.width = width * dpr;
+                canvas.height = height * dpr;
+                canvas.style.height = height + 'px';
+                ctx.scale(dpr, dpr);
+
+                ctx.clearRect(0, 0, width, height);
+
+                const data = state.priceHistory;
+                if (data.length < 2) {
+                    ctx.fillStyle = '#9ca3b8';
+                    ctx.font = '13px Inter, sans-serif';
+                    ctx.textAlign = 'center';
+                    ctx.fillText('Collecting price data...', width / 2, height / 2);
+                    return;
+                }
+
+                const prices = data.map(d => d.price);
+                const minP = Math.min(...prices);
+                const maxP = Math.max(...prices);
+                const range = maxP - minP || 1;
+                const pad = range * 0.08;
+                const plotMin = minP - pad;
+                const plotMax = maxP + pad;
+                const plotRange = plotMax - plotMin;
+
+                const points = prices.map((p, i) => ({
+                    x: (i / (prices.length - 1)) * (width - 20) + 10,
+                    y: height - 18 - ((p - plotMin) / plotRange) * (height - 36),
+                }));
+
+                // Gradient fill
+                const gradient = ctx.createLinearGradient(0, 0, 0, height);
+                const isUp = prices[prices.length - 1] >= prices[0];
+                if (isUp) {
+                    gradient.addColorStop(0, 'rgba(0,212,146,0.25)');
+                    gradient.addColorStop(1, 'rgba(0,212,146,0.01)');
+                } else {
+                    gradient.addColorStop(0, 'rgba(255,71,87,0.25)');
+                    gradient.addColorStop(1, 'rgba(255,71,87,0.01)');
+                }
+
+                // Draw fill
+                ctx.beginPath();
+                ctx.moveTo(points[0].x, height - 18);
+                points.forEach(p => ctx.lineTo(p.x, p.y));
+                ctx.lineTo(points[points.length - 1].x, height - 18);
+                ctx.closePath();
+                ctx.fillStyle = gradient;
+                ctx.fill();
+
+                // Draw line
+                ctx.beginPath();
+                ctx.moveTo(points[0].x, points[0].y);
+                for (let i = 1; i < points.length; i++) {
+                    const cp1x = (points[i - 1].x + points[i].x) / 2;
+                    const cp1y = points[i - 1].y;
+                    const cp2x = (points[i - 1].x + points[i].x) / 2;
+                    const cp2y = points[i].y;
+                    ctx.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, points[i].x, points[i].y);
+                }
+                ctx.strokeStyle = isUp ? '#00d492' : '#ff4757';
+                ctx.lineWidth = 2;
+                ctx.shadowColor = isUp ? 'rgba(0,212,146,0.5)' : 'rgba(255,71,87,0.5)';
+                ctx.shadowBlur = 6;
+                ctx.stroke();
+                ctx.shadowBlur = 0;
+
+                // Min/max labels
+                ctx.fillStyle = '#9ca3b8';
+                ctx.font = '10px Inter, sans-serif';
+                ctx.textAlign = 'left';
+                ctx.fillText('$' + formatPrice(maxP), 10, 16);
+                ctx.fillText('$' + formatPrice(minP), 10, height - 6);
+            }
+
+            function formatPrice(p) {
+                if (p >= 100000) return p.toFixed(0);
+                if (p >= 10000) return p.toFixed(1);
+                if (p >= 1000) return p.toFixed(2);
+                return p.toFixed(2);
+            }
+
+            function updateStats() {
+                const total = state.predictions.length;
+                const correct = state.predictions.filter(p => p.wasCorrect).length;
+                const accuracy = total > 0 ? Math.round((correct / total) * 100) : null;
+
+                document.getElementById('statTotal').textContent = total;
+                document.getElementById('statCorrect').textContent = correct;
+                document.getElementById('statAccuracy').textContent = accuracy !== null ? accuracy + '%' : '--%';
+                document.getElementById('statStreak').textContent = state.currentStreak;
+            }
+
+            function updateHistoryTable() {
+                const tbody = document.getElementById('historyBody');
+                if (state.predictions.length === 0) {
+                    tbody.innerHTML =
+                        '<tr class="empty-history"><td colspan="5">No predictions yet. First prediction at the next hour boundary.</td></tr>';
+                    return;
+                }
+
+                // Show most recent first (last 30)
+                const recent = state.predictions.slice(-30).reverse();
+                tbody.innerHTML = recent.map(p => {
+                    const hourLocal = new Date(p.hourStartISO).toLocaleTimeString([], { hour: '2-digit',
+                        minute: '2-digit' });
+                    const rowClass = p.wasCorrect ? 'row-correct' : 'row-incorrect';
+                    const statusIcon = p.wasCorrect ? '✅' : '❌';
+                    const predTag = p.predictedMove === 'significant' ?
+                        '<span class="tag pred-sig">Significant</span>' :
+                        '<span class="tag pred-quiet">Quiet</span>';
+                    const actualTag = '<span class="tag ' + p.actualCategory + '">' +
+                        p.actualCategory.charAt(0).toUpperCase() + p.actualCategory.slice(1) +
+                        ' (' + (p.actualMovePct >= 0 ? '+' : '') + p.actualMovePct.toFixed(2) + '%)</span>';
+                    return `
+                        <tr class="${rowClass}">
+                            <td>${hourLocal}</td>
+                            <td>${predTag}</td>
+                            <td>${p.confidence}%</td>
+                            <td>${actualTag}</td>
+                            <td><span class="status-icon">${statusIcon}</span> ${p.wasCorrect ? 'Correct' : 'Wrong'}</td>
+                        </tr>
+                    `;
+                }).join('');
+            }
+
+            function updatePriceDisplay() {
+                const priceEl = document.getElementById('livePrice');
+                const changeEl = document.getElementById('priceChange');
+                if (state.currentPrice !== null) {
+                    priceEl.textContent = '$' + state.currentPrice.toLocaleString('en-US', { minimumFractionDigits: 2,
+                        maximumFractionDigits: 2 });
+                    // 24h change
+                    if (state.priceChange24h !== null) {
+                        const ch = state.priceChange24h;
+                        changeEl.textContent = (ch >= 0 ? '+' : '') + ch.toFixed(2) + '%';
+                        changeEl.className = 'price-change ' + (ch >= 0 ? 'up' : 'down');
+                    } else if (state.prevDayPrice !== null && state.currentPrice !== null) {
+                        const ch = ((state.currentPrice - state.prevDayPrice) / state.prevDayPrice) * 100;
+                        changeEl.textContent = (ch >= 0 ? '+' : '') + ch.toFixed(2) + '%';
+                        changeEl.className = 'price-change ' + (ch >= 0 ? 'up' : 'down');
+                    }
+                } else {
+                    priceEl.textContent = 'Loading...';
+                    changeEl.textContent = '--';
+                    changeEl.className = 'price-change';
+                }
+            }
+
+            function updateAllUI() {
+                updateCountdown();
+                updatePredictionCard();
+                updateSparkline();
+                updateStats();
+                updateHistoryTable();
+                updatePriceDisplay();
+            }
+
+            // ============ MAIN LOOPS ============
+            async function refreshPrice() {
+                const price = await fetchCurrentPrice();
+                if (price !== null) {
+                    state.currentPrice = price;
+                    state.priceHistory.push({ time: Date.now(), price: price });
+                    // Keep last 120 points
+                    if (state.priceHistory.length > 120) {
+                        state.priceHistory = state.priceHistory.slice(-120);
+                    }
+                    // If no start price yet, set it
+                    if (state.startPriceThisHour === null) {
+                        state.startPriceThisHour = price;
+                    }
+                    updateAllUI();
+                }
+            }
+
+            async function refreshKlines() {
+                const klines = await fetchKlines();
+                if (klines && klines.length >= 30) {
+                    state.klineData = klines;
+                    // Also add kline closes to price history for sparkline density
+                    // Merge kline data into price history if sparse
+                    if (state.priceHistory.length < klines.length) {
+                        const now = Date.now();
+                        const merged = klines.map((k, i) => ({
+                            time: now - (klines.length - i) * 60000,
+                            price: k.close,
+                        }));
+                        // Keep existing live points and merge
+                        const existingTimes = new Set(state.priceHistory.map(p => Math.round(p.time / 1000)));
+                        for (const m of merged) {
+                            const tSec = Math.round(m.time / 1000);
+                            if (!existingTimes.has(tSec)) {
+                                state.priceHistory.push(m);
+                                existingTimes.add(tSec);
+                            }
+                        }
+                        state.priceHistory.sort((a, b) => a.time - b.time);
+                        if (state.priceHistory.length > 150) {
+                            state.priceHistory = state.priceHistory.slice(-150);
+                        }
+                    }
+                    // Set prev day price from older klines
+                    if (klines.length >= 60 && state.prevDayPrice === null) {
+                        state.prevDayPrice = klines[Math.max(0, klines.length - 61)].close;
+                    }
+                }
+                // Trigger hour check after klines load
+                checkAndProcessHour();
+                updateAllUI();
+            }
+
+            function timerLoop() {
+                updateCountdown();
+                checkAndProcessHour();
+            }
+
+            // ============ EVENT HANDLERS ============
+            document.getElementById('clearHistoryBtn').addEventListener('click', () => {
+                if (confirm('Clear all prediction history? This cannot be undone.')) {
+                    state.predictions = [];
+                    state.currentStreak = 0;
+                    state.activePrediction = null;
+                    state.lastProcessedHour = null;
+                    saveHistory();
+                    updateAllUI();
+                }
+            });
+
+            // Handle window resize for sparkline
+            let resizeTimeout;
+            window.addEventListener('resize', () => {
+                clearTimeout(resizeTimeout);
+                resizeTimeout = setTimeout(() => updateSparkline(), 200);
+            });
+
+            // Handle visibility change - refresh data when tab becomes visible
+            document.addEventListener('visibilitychange', () => {
+                if (document.visibilityState === 'visible') {
+                    refreshPrice();
+                    refreshKlines();
+                }
+            });
+
+            // ============ INITIALIZATION ============
+            async function init() {
+                loadHistory();
+                updateAllUI();
+
+                // Initial data fetch
+                await Promise.all([refreshPrice(), refreshKlines()]);
+
+                // Set up intervals
+                setInterval(refreshPrice, PRICE_REFRESH_MS);
+                setInterval(refreshKlines, KLINES_REFRESH_MS);
+                setInterval(timerLoop, TIMER_CHECK_MS);
+
+                // Run timer immediately
+                timerLoop();
+
+                console.log('🚀 BTC Hourly Predictor initialized');
+                console.log('📊 First prediction will be made at the top of the next hour');
+                console.log('💾 History saved to localStorage');
+            }
+
+            init();
+        })();
+    </script>
+</body>
+</html>
