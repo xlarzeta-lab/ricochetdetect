@@ -18,12 +18,7 @@
             --red: #ef4444;
             --font: 'Inter', system-ui, sans-serif;
         }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin:0; padding:0; box-sizing:border-box; }
         body {
             font-family: var(--font);
             background: var(--bg);
@@ -39,399 +34,90 @@
         body::before {
             content: '';
             position: fixed;
-            top: 0;
-            left: 50%;
+            top:0; left:50%;
             transform: translateX(-50%);
-            width: 800px;
-            height: 800px;
-            background: radial-gradient(circle at center, rgba(247, 147, 26, 0.04) 0%, transparent 70%);
-            pointer-events: none;
-            z-index: 0;
+            width:800px; height:800px;
+            background: radial-gradient(circle at center, rgba(247,147,26,0.04) 0%, transparent 70%);
+            pointer-events: none; z-index:0;
             animation: pulse 10s ease-in-out infinite;
         }
         @keyframes pulse {
-            0%,
-            100% {
-                opacity: 0.5;
-                transform: translateX(-50%) scale(1);
-            }
-            50% {
-                opacity: 1;
-                transform: translateX(-50%) scale(1.15);
-            }
+            0%,100%{ opacity:0.5; transform:translateX(-50%) scale(1); }
+            50%{ opacity:1; transform:translateX(-50%) scale(1.15); }
         }
-        .container {
-            position: relative;
-            z-index: 2;
-            width: 100%;
-            max-width: 750px;
-            padding: 20px;
-        }
-        .header {
-            text-align: center;
-            margin-bottom: 24px;
-        }
-        .header .icon {
-            font-size: 2.8rem;
-            display: block;
-            margin-bottom: 8px;
-            animation: float 3s ease-in-out infinite;
-        }
-        @keyframes float {
-            0%,
-            100% {
-                transform: translateY(0);
-            }
-            50% {
-                transform: translateY(-8px);
-            }
-        }
-        .header h1 {
-            font-size: 1.8rem;
-            font-weight: 800;
-            letter-spacing: -0.5px;
-        }
-        .header .sub {
-            font-size: 0.9rem;
-            color: var(--text-muted);
-            margin-top: 4px;
-        }
+        .container { position:relative; z-index:2; width:100%; max-width:750px; padding:20px; }
+        .header { text-align:center; margin-bottom:24px; }
+        .header .icon { font-size:2.8rem; display:block; margin-bottom:8px; animation: float 3s ease-in-out infinite; }
+        @keyframes float { 0%,100%{ transform:translateY(0); } 50%{ transform:translateY(-8px); } }
+        .header h1 { font-size:1.8rem; font-weight:800; letter-spacing:-0.5px; }
+        .header .sub { font-size:0.9rem; color:var(--text-muted); margin-top:4px; }
 
-        .countdown-card,
-        .current-price-card,
-        .prediction-card,
-        .confidence-section,
-        .models-card,
-        .history-section {
+        .countdown-card, .current-price-card, .prediction-card, .confidence-section, .models-card, .history-section {
             background: var(--card-bg);
-            border: 1px solid var(--border);
+            border:1px solid var(--border);
             border-radius: 24px;
             padding: 18px 20px;
             margin-bottom: 20px;
             backdrop-filter: blur(10px);
         }
-        .countdown-label,
-        .models-title,
-        .history-title,
-        .current-price-label {
-            font-size: 0.8rem;
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
-            color: var(--text-muted);
-            margin-bottom: 8px;
-            font-weight: 500;
+        .countdown-label, .models-title, .history-title, .current-price-label {
+            font-size:0.8rem; text-transform:uppercase; letter-spacing:1.5px; color:var(--text-muted); margin-bottom:8px; font-weight:500;
         }
-        .countdown-timer {
-            display: flex;
-            justify-content: center;
-            gap: 12px;
-            font-size: 3rem;
-            font-weight: 800;
-            color: var(--accent);
-            text-shadow: 0 0 30px rgba(247, 147, 26, 0.4);
-        }
-        .timer-block {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            min-width: 70px;
-        }
-        .timer-block .number {
-            font-size: 2.8rem;
-            line-height: 1;
-        }
-        .timer-block .label {
-            font-size: 0.7rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            color: var(--text-muted);
-            margin-top: 4px;
-        }
-        .timer-separator {
-            font-size: 2.5rem;
-            color: var(--accent);
-            opacity: 0.7;
-            align-self: center;
-        }
-        .target-hour {
-            font-size: 0.9rem;
-            color: var(--text-muted);
-            margin-top: 12px;
-            background: #1f2937;
-            display: inline-block;
-            padding: 4px 14px;
-            border-radius: 20px;
-        }
+        .countdown-timer { display:flex; justify-content:center; gap:12px; font-size:3rem; font-weight:800; color:var(--accent); text-shadow:0 0 30px rgba(247,147,26,0.4); }
+        .timer-block { display:flex; flex-direction:column; align-items:center; min-width:70px; }
+        .timer-block .number { font-size:2.8rem; line-height:1; }
+        .timer-block .label { font-size:0.7rem; text-transform:uppercase; letter-spacing:1px; color:var(--text-muted); margin-top:4px; }
+        .timer-separator { font-size:2.5rem; color:var(--accent); opacity:0.7; align-self:center; }
+        .target-hour { font-size:0.9rem; color:var(--text-muted); margin-top:12px; background:#1f2937; display:inline-block; padding:4px 14px; border-radius:20px; }
 
-        .current-price-card {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-        .current-price-value {
-            font-size: 1.8rem;
-            font-weight: 700;
-            color: #fff;
-            display: flex;
-            align-items: baseline;
-            gap: 2px;
-        }
-        .current-price-value .currency {
-            font-size: 1rem;
-            color: var(--text-muted);
-        }
+        .current-price-card { display:flex; align-items:center; justify-content:space-between; }
+        .current-price-value { font-size:1.8rem; font-weight:700; color:#fff; display:flex; align-items:baseline; gap:2px; }
+        .current-price-value .currency { font-size:1rem; color:var(--text-muted); }
 
-        .prediction-card {
-            text-align: center;
-            position: relative;
-            overflow: hidden;
-        }
-        .prediction-card::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 3px;
-            background: linear-gradient(90deg, var(--accent), var(--accent-glow), var(--accent));
-            opacity: 0.8;
-        }
-        .prediction-label {
-            font-size: 0.85rem;
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
-            color: var(--text-muted);
-            margin-bottom: 4px;
-        }
-        .price-display {
-            font-size: 3.8rem;
-            font-weight: 800;
-            letter-spacing: -2px;
-            color: #fff;
-            text-shadow: 0 0 40px rgba(247, 147, 26, 0.5);
-        }
-        .price-display .currency {
-            font-size: 1.8rem;
-            color: var(--text-muted);
-            font-weight: 600;
-            align-self: flex-start;
-            margin-top: 8px;
-        }
-        .price-display.loading {
-            opacity: 0.5;
-        }
-        .live-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            background: #1f2937;
-            border-radius: 20px;
-            padding: 5px 14px;
-            font-size: 0.75rem;
-            color: var(--green);
-            margin-top: 10px;
-        }
-        .live-dot {
-            width: 8px;
-            height: 8px;
-            background: var(--green);
-            border-radius: 50%;
-            animation: blink 1.2s infinite;
-        }
-        @keyframes blink {
-            0%,
-            100% {
-                opacity: 1;
-                box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
-            }
-            50% {
-                opacity: 0.5;
-                box-shadow: 0 0 0 8px rgba(16, 185, 129, 0);
-            }
-        }
-        .confidence-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 8px;
-        }
-        .confidence-header span:first-child {
-            font-size: 0.8rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            color: var(--text-muted);
-        }
-        .confidence-value {
-            font-weight: 700;
-            font-size: 1.1rem;
-            color: var(--green);
-        }
-        .confidence-bar-track {
-            height: 10px;
-            background: #1f2937;
-            border-radius: 10px;
-            overflow: hidden;
-        }
-        .confidence-bar-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #10b981, #34d399);
-            border-radius: 10px;
-            transition: width 0.4s linear;
-        }
-        .confidence-note {
-            font-size: 0.75rem;
-            color: var(--text-muted);
-            margin-top: 8px;
-            font-style: italic;
-        }
-        .range-display {
-            display: inline-flex;
-            gap: 6px;
-            font-size: 0.85rem;
-            color: var(--text-muted);
-            margin-top: 8px;
-        }
-        .range-display span {
-            color: #fff;
-            font-weight: 600;
-        }
+        .prediction-card { text-align:center; position:relative; overflow:hidden; }
+        .prediction-card::after { content:''; position:absolute; top:0; left:0; width:100%; height:3px; background:linear-gradient(90deg, var(--accent), var(--accent-glow), var(--accent)); opacity:0.8; }
+        .prediction-label { font-size:0.85rem; text-transform:uppercase; letter-spacing:1.5px; color:var(--text-muted); margin-bottom:4px; }
+        .price-display { font-size:3.8rem; font-weight:800; letter-spacing:-2px; color:#fff; text-shadow:0 0 40px rgba(247,147,26,0.5); }
+        .price-display .currency { font-size:1.8rem; color:var(--text-muted); font-weight:600; align-self:flex-start; margin-top:8px; }
+        .price-display.loading { opacity:0.5; }
+        .live-badge { display:inline-flex; align-items:center; gap:6px; background:#1f2937; border-radius:20px; padding:5px 14px; font-size:0.75rem; color:var(--green); margin-top:10px; }
+        .live-dot { width:8px; height:8px; background:var(--green); border-radius:50%; animation:blink 1.2s infinite; }
+        @keyframes blink { 0%,100%{ opacity:1; box-shadow:0 0 0 0 rgba(16,185,129,0.7); } 50%{ opacity:0.5; box-shadow:0 0 0 8px rgba(16,185,129,0); } }
 
-        .model-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-            gap: 10px;
-        }
-        .model-item {
-            background: #1f2937;
-            border-radius: 12px;
-            padding: 12px 8px;
-            text-align: center;
-            font-size: 0.8rem;
-        }
-        .model-item .model-name {
-            color: var(--text-muted);
-            margin-bottom: 6px;
-            font-weight: 500;
-        }
-        .model-item .model-value {
-            font-weight: 700;
-            color: #fff;
-            font-size: 1.2rem;
-        }
-        .model-item .weight-info {
-            font-size: 0.75rem;
-            color: var(--accent);
-            margin-top: 4px;
-        }
-        .model-status {
-            grid-column: 1 / -1;
-            text-align: center;
-            color: var(--text-muted);
-            font-size: 0.8rem;
-            padding: 8px;
-            background: #1f2937;
-            border-radius: 8px;
-        }
-        .data-count {
-            font-weight: 600;
-            color: var(--green);
-        }
+        .confidence-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; }
+        .confidence-header span:first-child { font-size:0.8rem; text-transform:uppercase; letter-spacing:1px; color:var(--text-muted); }
+        .confidence-value { font-weight:700; font-size:1.1rem; color:var(--green); }
+        .confidence-bar-track { height:10px; background:#1f2937; border-radius:10px; overflow:hidden; }
+        .confidence-bar-fill { height:100%; background:linear-gradient(90deg, #10b981, #34d399); border-radius:10px; transition: width 0.4s linear; }
+        .confidence-note { font-size:0.75rem; color:var(--text-muted); margin-top:8px; font-style:italic; }
+        .range-display { display:inline-flex; gap:6px; font-size:0.85rem; color:var(--text-muted); margin-top:8px; }
+        .range-display span { color:#fff; font-weight:600; }
 
-        .history-table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 0.85rem;
-        }
-        .history-table th,
-        .history-table td {
-            padding: 10px 6px;
-            text-align: left;
-            border-bottom: 1px solid #1f2937;
-        }
-        .history-table th {
-            color: var(--text-muted);
-            font-weight: 500;
-            font-size: 0.75rem;
-            text-transform: uppercase;
-        }
-        .result-badge {
-            padding: 4px 10px;
-            border-radius: 12px;
-            font-weight: 600;
-            font-size: 0.75rem;
-        }
-        .result-correct {
-            background: rgba(16, 185, 129, 0.15);
-            color: #34d399;
-        }
-        .result-wrong {
-            background: rgba(239, 68, 68, 0.15);
-            color: #f87171;
-        }
-        .no-history {
-            color: var(--text-muted);
-            font-style: italic;
-            text-align: center;
-            padding: 10px;
-        }
-        .error-banner {
-            background: rgba(239, 68, 68, 0.1);
-            border: 1px solid rgba(239, 68, 68, 0.3);
-            border-radius: 12px;
-            padding: 12px;
-            text-align: center;
-            color: #fca5a5;
-            font-size: 0.85rem;
-            margin-bottom: 16px;
-            display: none;
-        }
-        .footer {
-            text-align: center;
-            font-size: 0.7rem;
-            color: var(--text-muted);
-            margin-top: 16px;
-            opacity: 0.7;
-        }
-        .celebration {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%) scale(0);
-            background: #111827;
-            border: 2px solid var(--green);
-            border-radius: 28px;
-            padding: 32px;
-            text-align: center;
-            z-index: 10;
-            transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            box-shadow: 0 0 60px rgba(16, 185, 129, 0.5);
-            backdrop-filter: blur(20px);
-        }
-        .celebration.show {
-            transform: translate(-50%, -50%) scale(1);
-        }
-        .celebration h2 {
-            font-size: 1.8rem;
-            font-weight: 800;
-            color: var(--green);
-            margin-bottom: 8px;
-        }
-        .celebration .price {
-            font-size: 2.2rem;
-            font-weight: 700;
-            color: #fff;
-        }
-        .celebration .subtext {
-            color: var(--text-muted);
-            margin-top: 6px;
-        }
-        @media (max-width: 480px) {
-            .countdown-timer .number {
-                font-size: 2rem;
-            }
-            .price-display {
-                font-size: 2.5rem;
-            }
+        .model-grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(140px,1fr)); gap:10px; }
+        .model-item { background:#1f2937; border-radius:12px; padding:12px 8px; text-align:center; font-size:0.8rem; }
+        .model-item .model-name { color:var(--text-muted); margin-bottom:6px; font-weight:500; }
+        .model-item .model-value { font-weight:700; color:#fff; font-size:1.2rem; }
+        .model-item .weight-info { font-size:0.75rem; color:var(--accent); margin-top:4px; }
+        .model-status { grid-column:1/-1; text-align:center; color:var(--text-muted); font-size:0.8rem; padding:8px; background:#1f2937; border-radius:8px; }
+        .data-count { font-weight:600; color:var(--green); }
+
+        .history-table { width:100%; border-collapse:collapse; font-size:0.85rem; }
+        .history-table th, .history-table td { padding:10px 6px; text-align:left; border-bottom:1px solid #1f2937; }
+        .history-table th { color:var(--text-muted); font-weight:500; font-size:0.75rem; text-transform:uppercase; }
+        .result-badge { padding:4px 10px; border-radius:12px; font-weight:600; font-size:0.75rem; }
+        .result-correct { background:rgba(16,185,129,0.15); color:#34d399; }
+        .result-wrong { background:rgba(239,68,68,0.15); color:#f87171; }
+        .no-history { color:var(--text-muted); font-style:italic; text-align:center; padding:10px; }
+        .error-banner { background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.3); border-radius:12px; padding:12px; text-align:center; color:#fca5a5; font-size:0.85rem; margin-bottom:16px; display:none; }
+        .footer { text-align:center; font-size:0.7rem; color:var(--text-muted); margin-top:16px; opacity:0.7; }
+        .celebration { position:fixed; top:50%; left:50%; transform:translate(-50%,-50%) scale(0); background:#111827; border:2px solid var(--green); border-radius:28px; padding:32px; text-align:center; z-index:10; transition:transform 0.5s cubic-bezier(0.175,0.885,0.32,1.275); box-shadow:0 0 60px rgba(16,185,129,0.5); backdrop-filter:blur(20px); }
+        .celebration.show { transform:translate(-50%,-50%) scale(1); }
+        .celebration h2 { font-size:1.8rem; font-weight:800; color:var(--green); margin-bottom:8px; }
+        .celebration .price { font-size:2.2rem; font-weight:700; color:#fff; }
+        .celebration .subtext { color:var(--text-muted); margin-top:6px; }
+        @media (max-width:480px) {
+            .countdown-timer .number { font-size:2rem; }
+            .price-display { font-size:2.5rem; }
         }
     </style>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -515,19 +201,17 @@
 
         // ========== ADVANCED MODELS ==========
 
-        // Weighted Linear Extrapolation using exponential decay weights
         function weightedLinearExtrapolation(series, targetTimestamp) {
             if (series.length < 5) return null;
-            const recent = series.slice(-30); // up to 30 points
+            const recent = series.slice(-30);
             const refTimestamp = recent[0].timestamp;
-            const halfLife = 10 * 60 * 1000; // 10 minutes half-life for weight decay
+            const halfLife = 10 * 60 * 1000;
             const decay = Math.log(2) / halfLife;
-
             let sumW = 0, sumWX = 0, sumWY = 0, sumWXY = 0, sumWX2 = 0;
             const now = Date.now();
             for (const p of recent) {
                 const age = now - p.timestamp;
-                const w = Math.exp(-decay * age); // weight decays with age
+                const w = Math.exp(-decay * age);
                 const x = p.timestamp - refTimestamp;
                 const y = p.price;
                 sumW += w;
@@ -541,17 +225,15 @@
             const slope = (sumW * sumWXY - sumWX * sumWY) / denom;
             const intercept = (sumWY - slope * sumWX) / sumW;
             const normalizedTarget = targetTimestamp - refTimestamp;
-            const prediction = intercept + slope * normalizedTarget;
-            // Clip to realistic range based on last price and recent volatility
+            let prediction = intercept + slope * normalizedTarget;
             const lastPrice = recent[recent.length-1].price;
             const atr = computeATR(series, 14);
-            const maxChange = atr * 3; // allow up to 3 ATR movement
-            if (prediction < lastPrice - maxChange) return lastPrice - maxChange;
-            if (prediction > lastPrice + maxChange) return lastPrice + maxChange;
+            const maxChange = atr * 3;
+            if (prediction < lastPrice - maxChange) prediction = lastPrice - maxChange;
+            if (prediction > lastPrice + maxChange) prediction = lastPrice + maxChange;
             return prediction;
         }
 
-        // Improved RSI-velocity model (directional forecast)
         function rsiVelocityModel(series) {
             if (series.length < 15) return null;
             const prices = series.map(p => p.price);
@@ -568,26 +250,22 @@
             const rs = avgGain / avgLoss;
             const rsi = 100 - 100 / (1 + rs);
             const curr = prices[prices.length - 1];
-            // Compute short-term velocity (avg of last 5 deltas)
             const deltas = [];
             for (let i = prices.length - 5; i < prices.length; i++) {
                 deltas.push(prices[i] - prices[i-1]);
             }
             const avgDelta = deltas.reduce((a,b) => a+b, 0) / deltas.length;
-            // Directional forecast: combine RSI signal with momentum
-            if (rsi > 70 && avgDelta < 0) return curr - Math.abs(avgDelta) * 2; // strong pullback
-            if (rsi < 30 && avgDelta > 0) return curr + Math.abs(avgDelta) * 2; // bounce
-            // Otherwise trend continuation
+            if (rsi > 70 && avgDelta < 0) return curr - Math.abs(avgDelta) * 2;
+            if (rsi < 30 && avgDelta > 0) return curr + Math.abs(avgDelta) * 2;
             return curr + avgDelta * 3;
         }
 
-        // Damped Holt (Holt-Winters without seasonality) for more conservative trend
         function dampedHoltSmoothing(series, forecastHorizonMs) {
             if (series.length < 10) return null;
             const prices = series.map(p => p.price);
             const times = series.map(p => p.timestamp);
             const dt = (times[times.length-1] - times[0]) / (times.length-1) || 5000;
-            const alpha = 0.3, beta = 0.1, phi = 0.98; // damping factor
+            const alpha = 0.3, beta = 0.1, phi = 0.98;
             let level = prices[0];
             let trend = (prices[1] - prices[0]) / (dt || 5000);
             for (let i = 1; i < prices.length; i++) {
@@ -596,73 +274,31 @@
                 level = alpha * prices[i] + (1 - alpha) * (level + phi * trend * tDiff);
                 trend = beta * (level - prev) / tDiff + (1 - beta) * phi * trend;
             }
-            // Damped trend forecast
             let dampedTrend = trend;
-            const steps = forecastHorizonMs / dt;
+            let forecastLevel = level;
+            const steps = Math.floor(forecastHorizonMs / dt);
             for (let s = 0; s < steps; s++) {
-                level = level + phi * dampedTrend * dt;
+                forecastLevel = forecastLevel + phi * dampedTrend * dt;
                 dampedTrend = phi * dampedTrend;
             }
-            return level;
+            return forecastLevel;
         }
 
-        // ATR (Average True Range) for volatility estimation
         function computeATR(series, period = 14) {
             if (series.length < period + 1) return 0;
             const prices = series.map(p => p.price);
             let trueRanges = [];
             for (let i = 1; i < prices.length; i++) {
-                const diff = Math.abs(prices[i] - prices[i-1]);
-                trueRanges.push(diff);
+                trueRanges.push(Math.abs(prices[i] - prices[i-1]));
             }
             const recent = trueRanges.slice(-period);
             return recent.reduce((a, b) => a + b, 0) / period;
         }
 
-        // ========== ENSEMBLE WITH DYNAMIC WEIGHTING ==========
-        function computeEnsemblePrediction() {
-            if (!lastTargetHour || priceBuffer.length < 5 || currentPrice === null) {
-                updateModelDisplay(null, null, null, 0, 0);
-                return { prediction: currentPrice, atr: 0 };
-            }
-            const now = Date.now();
-            const remainingMs = lastTargetHour.getTime() - now;
-            if (remainingMs <= 0) {
-                updateModelDisplay(currentPrice, currentPrice, currentPrice, 1, computeATR(priceBuffer));
-                return { prediction: currentPrice, atr: computeATR(priceBuffer) };
-            }
-            const elapsedMs = 3600000 - remainingMs;
-            // Sigmoid weight for current price (increased if volatility is high to converge faster)
-            const atr = computeATR(priceBuffer);
-            const volatilityFactor = Math.min(1 + atr / currentPrice * 5, 2.5); // up to 2.5x faster convergence in high vol
-            const k = 0.0013315 * volatilityFactor;
-            const t0 = 1650000 / volatilityFactor;
-            let wCurr = 1 / (1 + Math.exp(-k * (elapsedMs - t0)));
-            wCurr = Math.min(0.9999, Math.max(0.0001, wCurr));
-
-            // Generate raw model predictions
-            const linPred = weightedLinearExtrapolation(priceBuffer, lastTargetHour.getTime());
-            const rsiPred = rsiVelocityModel(priceBuffer);
-            const holtPred = dampedHoltSmoothing(priceBuffer, remainingMs);
-
-            // Dynamic model weighting based on recent backtesting (last 10 points)
-            const weights = computeModelWeights(priceBuffer, 10, linPred, rsiPred, holtPred);
-            // Blend models using dynamic weights
-            let modelBlend = 0;
-            let totalW = 0;
-            if (linPred !== null && weights.linW > 0) { modelBlend += linPred * weights.linW; totalW += weights.linW; }
-            if (rsiPred !== null && weights.rsiW > 0) { modelBlend += rsiPred * weights.rsiW; totalW += weights.rsiW; }
-            if (holtPred !== null && weights.holtW > 0) { modelBlend += holtPred * weights.holtW; totalW += weights.holtW; }
-            const avgModel = totalW > 0 ? modelBlend / totalW : currentPrice;
-            const finalPred = (1 - wCurr) * avgModel + wCurr * currentPrice;
-            updateModelDisplay(linPred, rsiPred, holtPred, wCurr, atr, weights);
-            return { prediction: finalPred, atr };
-        }
-
         function computeModelWeights(series, backtestCount, linPred, rsiPred, holtPred) {
             const weights = { linW: 0, rsiW: 0, holtW: 0 };
-            if (series.length < backtestCount + 2) {
-                // Equal weights if not enough data
+            const L = series.length;
+            if (L < backtestCount + 5) {
                 const active = [linPred, rsiPred, holtPred].filter(p => p !== null).length;
                 if (active > 0) {
                     const eq = 1 / active;
@@ -672,18 +308,17 @@
                 }
                 return weights;
             }
-            // Backtest: for each of the last N points, compute each model's prediction error
+
             const errors = { lin: 0, rsi: 0, holt: 0 };
             const activeModels = { lin: linPred !== null, rsi: rsiPred !== null, holt: holtPred !== null };
-            const totalActive = (activeModels.lin?1:0) + (activeModels.rsi?1:0) + (activeModels.holt?1:0);
-            if (totalActive === 0) return weights;
-            // For simplicity, use a sliding window: train model on data before each test point
-            const testWindow = backtestCount;
-            const data = series.slice(-testWindow - 5); // enough for training
-            for (let i = testWindow; i > 0; i--) {
-                const trainData = data.slice(0, i+5);
-                const testTimestamp = data[i+5].timestamp;
-                const actual = data[i+5].price;
+            const startIdx = L - backtestCount;
+
+            for (let testIdx = startIdx; testIdx < L; testIdx++) {
+                const trainData = series.slice(0, testIdx);
+                const testPoint = series[testIdx];
+                const actual = testPoint.price;
+                const testTimestamp = testPoint.timestamp;
+
                 if (activeModels.lin) {
                     const pred = weightedLinearExtrapolation(trainData, testTimestamp);
                     if (pred !== null) errors.lin += Math.abs(pred - actual);
@@ -697,42 +332,75 @@
                     if (pred !== null) errors.holt += Math.abs(pred - actual);
                 }
             }
-            // Convert errors to weights (inverse RMSE)
+
             const invLin = activeModels.lin && errors.lin > 0 ? 1 / errors.lin : 0;
             const invRsi = activeModels.rsi && errors.rsi > 0 ? 1 / errors.rsi : 0;
             const invHolt = activeModels.holt && errors.holt > 0 ? 1 / errors.holt : 0;
             const sumInv = invLin + invRsi + invHolt;
-            if (sumInv === 0) return weights;
+            if (sumInv === 0) {
+                const active = [linPred, rsiPred, holtPred].filter(p => p !== null).length;
+                if (active > 0) {
+                    const eq = 1 / active;
+                    if (linPred !== null) weights.linW = eq;
+                    if (rsiPred !== null) weights.rsiW = eq;
+                    if (holtPred !== null) weights.holtW = eq;
+                }
+                return weights;
+            }
             weights.linW = invLin / sumInv;
             weights.rsiW = invRsi / sumInv;
             weights.holtW = invHolt / sumInv;
             return weights;
         }
 
+        function computeEnsemblePrediction() {
+            if (!lastTargetHour || priceBuffer.length < 5 || currentPrice === null) {
+                updateModelDisplay(null, null, null, 0, 0);
+                return { prediction: currentPrice, atr: 0 };
+            }
+            const now = Date.now();
+            const remainingMs = lastTargetHour.getTime() - now;
+            if (remainingMs <= 0) {
+                updateModelDisplay(currentPrice, currentPrice, currentPrice, 1, computeATR(priceBuffer));
+                return { prediction: currentPrice, atr: computeATR(priceBuffer) };
+            }
+            const elapsedMs = 3600000 - remainingMs;
+            const atr = computeATR(priceBuffer);
+            const volatilityFactor = Math.min(1 + atr / currentPrice * 5, 2.5);
+            const k = 0.0013315 * volatilityFactor;
+            const t0 = 1650000 / volatilityFactor;
+            let wCurr = 1 / (1 + Math.exp(-k * (elapsedMs - t0)));
+            wCurr = Math.min(0.9999, Math.max(0.0001, wCurr));
+
+            const linPred = weightedLinearExtrapolation(priceBuffer, lastTargetHour.getTime());
+            const rsiPred = rsiVelocityModel(priceBuffer);
+            const holtPred = dampedHoltSmoothing(priceBuffer, remainingMs);
+
+            const weights = computeModelWeights(priceBuffer, 10, linPred, rsiPred, holtPred);
+            let modelBlend = 0, totalW = 0;
+            if (linPred !== null && weights.linW > 0) { modelBlend += linPred * weights.linW; totalW += weights.linW; }
+            if (rsiPred !== null && weights.rsiW > 0) { modelBlend += rsiPred * weights.rsiW; totalW += weights.rsiW; }
+            if (holtPred !== null && weights.holtW > 0) { modelBlend += holtPred * weights.holtW; totalW += weights.holtW; }
+            const avgModel = totalW > 0 ? modelBlend / totalW : currentPrice;
+            const finalPred = (1 - wCurr) * avgModel + wCurr * currentPrice;
+            updateModelDisplay(linPred, rsiPred, holtPred, wCurr, atr, weights);
+            return { prediction: finalPred, atr };
+        }
+
         function updateModelDisplay(lin, rsi, holt, wCurr, atr, weights = {}) {
-            const activeModels = [lin, rsi, holt].filter(m => m !== null).length;
-            const wModel = activeModels > 0 ? (1 - wCurr) / activeModels : 0;
             let html = '';
-            html += `<div class="model-item">
-                <div class="model-name">Weighted Lin.</div>
-                <div class="model-value">${lin ? '$' + formatUSD(lin) : '—'}</div>
-                <div class="weight-info">w: ${lin ? (weights.linW ? (weights.linW*100).toFixed(1)+'%' : (wModel*100).toFixed(1)+'%') : '—'}</div>
-            </div>`;
-            html += `<div class="model-item">
-                <div class="model-name">RSI Velocity</div>
-                <div class="model-value">${rsi ? '$' + formatUSD(rsi) : '—'}</div>
-                <div class="weight-info">w: ${rsi ? (weights.rsiW ? (weights.rsiW*100).toFixed(1)+'%' : (wModel*100).toFixed(1)+'%') : '—'}</div>
-            </div>`;
-            html += `<div class="model-item">
-                <div class="model-name">Damped Holt</div>
-                <div class="model-value">${holt ? '$' + formatUSD(holt) : '—'}</div>
-                <div class="weight-info">w: ${holt ? (weights.holtW ? (weights.holtW*100).toFixed(1)+'%' : (wModel*100).toFixed(1)+'%') : '—'}</div>
-            </div>`;
-            html += `<div class="model-item">
-                <div class="model-name">Current Price</div>
-                <div class="model-value">${currentPrice ? '$' + formatUSD(currentPrice) : '—'}</div>
-                <div class="weight-info">w: ${(wCurr*100).toFixed(1)}%</div>
-            </div>`;
+            const displayWeight = (modelPred, dynWeight, defaultWeight) => {
+                if (!modelPred) return '—';
+                if (dynWeight !== undefined && dynWeight > 0) return (dynWeight*100).toFixed(1)+'%';
+                return (defaultWeight*100).toFixed(1)+'%';
+            };
+            const activeCount = [lin, rsi, holt].filter(m => m !== null).length;
+            const wModelDefault = activeCount > 0 ? (1 - wCurr) / activeCount : 0;
+
+            html += `<div class="model-item"><div class="model-name">Weighted Lin.</div><div class="model-value">${lin ? '$'+formatUSD(lin) : '—'}</div><div class="weight-info">w: ${displayWeight(lin, weights.linW, wModelDefault)}</div></div>`;
+            html += `<div class="model-item"><div class="model-name">RSI Velocity</div><div class="model-value">${rsi ? '$'+formatUSD(rsi) : '—'}</div><div class="weight-info">w: ${displayWeight(rsi, weights.rsiW, wModelDefault)}</div></div>`;
+            html += `<div class="model-item"><div class="model-name">Damped Holt</div><div class="model-value">${holt ? '$'+formatUSD(holt) : '—'}</div><div class="weight-info">w: ${displayWeight(holt, weights.holtW, wModelDefault)}</div></div>`;
+            html += `<div class="model-item"><div class="model-name">Current Price</div><div class="model-value">${currentPrice ? '$'+formatUSD(currentPrice) : '—'}</div><div class="weight-info">w: ${(wCurr*100).toFixed(1)}%</div></div>`;
             const dataPoints = priceBuffer.length;
             let statusMsg = '';
             if (dataPoints < 5) statusMsg = `Collecting data… <span class="data-count">${dataPoints}</span> pts`;
@@ -746,7 +414,7 @@
 
         function updateUI() {
             if (currentPrice === null) return;
-            const { prediction, atr } = computeEnsemblePrediction();
+            const { prediction } = computeEnsemblePrediction();
             if (prediction !== null) {
                 priceValueEl.textContent = formatUSD(prediction);
                 priceDisplay.classList.remove('loading');
@@ -754,7 +422,6 @@
             livePriceEl.textContent = formatUSD(currentPrice);
         }
 
-        // Non-recursive hour catching
         function updateCountdownAndConfidence() {
             if (!lastTargetHour) {
                 lastTargetHour = getNextHourTarget();
@@ -823,7 +490,7 @@
             let html = '<table class="history-table"><thead><tr><th>Hour</th><th>Predicted @70%</th><th>Actual</th><th>Result</th></tr></thead><tbody>';
             sorted.forEach(e => {
                 const time = new Date(e.targetHourTimestamp).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
-                html += `<tr><td>${time}</td><td>${e.predictedAt70 ? '$' + formatUSD(e.predictedAt70) : '--'}</td><td>${e.actualPrice ? '$' + formatUSD(e.actualPrice) : '--'}</td><td>${e.result === 'correct' ? '<span class="result-badge result-correct">✅ Correct</span>' : e.result === 'wrong' ? '<span class="result-badge result-wrong">❌ Wrong</span>' : '⏳ Pending'}</td></tr>`;
+                html += `<tr><td>${time}</td><td>${e.predictedAt70 ? '$'+formatUSD(e.predictedAt70) : '--'}</td><td>${e.actualPrice ? '$'+formatUSD(e.actualPrice) : '--'}</td><td>${e.result === 'correct' ? '<span class="result-badge result-correct">✅ Correct</span>' : e.result === 'wrong' ? '<span class="result-badge result-wrong">❌ Wrong</span>' : '⏳ Pending'}</td></tr>`;
             });
             html += '</tbody></table>';
             historyContent.innerHTML = html;
